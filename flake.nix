@@ -32,8 +32,8 @@
                                                                                         let
                                                                                             point = value null ;
                                                                                             in
-                                                                                                "${ pkgs.coreutils }/bin/touch ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                # ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.buildFHSUserEnv point.image } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                # ( builtins.trace "${ pkgs.buildFHSUserEnv point.image }" "${ pkgs.coreutils }/bin/touch ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }" )
+                                                                                                "${ pkgs.coreutils }/bin/echo ${ pkgs.buildFHSUserEnv point.image }/bin/${ point.image.name } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                     )
                                                                                 ] ;
                                                                     }
