@@ -39,7 +39,7 @@
                                                                                             image =
                                                                                                 {
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
-                                                                                                    # runScript = point.runScript ;
+                                                                                                    runScript = point.runScript ;
                                                                                                     targetPkgs = point.targetPkgs ;
                                                                                                 } ;
                                                                                             point = identity ( value null ) ;
@@ -133,7 +133,7 @@
                                                                                         ignore :
                                                                                             {
                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
-                                                                                                runScript = "self" ;
+                                                                                                runScript = "fib" ;
                                                                                             } ;
                                                                         } ;
                                                                 } ;
