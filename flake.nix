@@ -43,9 +43,7 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            ''
-                                                                                                ${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }
-                                                                                            ''
+                                                                                            ''${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }''
                                                                                         ]
                                                                                         ( builtins.concatLists list )
                                                                                     ] ;
@@ -54,15 +52,13 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            ''
-                                                                                                ${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }
-                                                                                            ''
+                                                                                            ''${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }''
                                                                                         ]
                                                                                         ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                     ] ;
                                                                     }
                                                                     dependencies ;
-                                                            in builtins.concatStringsSep "&&\n\t" constructors ;
+                                                            in let x = builtins.concatStringsSep "&&\n\t" constructors ; in builtins.trace x x ;
                                                     name = "shell-scripts" ;
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
@@ -107,22 +103,23 @@
                                                             lib
                                                                 {
                                                                     shell-scripts =
-                                                                        (
-                                                                            ignore :
-                                                                                {
-                                                                                    image =
-                                                                                        {
-                                                                                            name = "foobar" ;
-                                                                                            targetPkgs = pkgs : [ pkgs.coreutils ] ;
-                                                                                            runScript = "echo Hello World" ;
-                                                                                        } ;
-                                                                                }
-                                                                        ) ;
+                                                                        {
+                                                                            fib =
+                                                                                ignore :
+                                                                                    {
+                                                                                        image =
+                                                                                            {
+                                                                                                name = "foobar" ;
+                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                                runScript = "echo Hello World" ;
+                                                                                            } ;
+                                                                                    } ;
+                                                                        } ;
                                                                 } ;
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
