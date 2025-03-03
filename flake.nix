@@ -24,13 +24,12 @@
                                                         path : value :
                                                             let
                                                                 identity =
-                                                                    { environment ? x : [ ] , executable , tests ? [ ] } :
+                                                                    { image ? { } , tests ? [ ] } :
                                                                         {
-                                                                            environment = environment ;
-                                                                            executable = executable ;
+                                                                            image = image ;
                                                                             tests = tests ;
                                                                         } ;
-                                                                in ignore : identity ( value null ) ;
+                                                                in ignore : value ignore ;
                                                 }
                                                 { }
                                                 shell-scripts ;
@@ -44,7 +43,7 @@
                                                             path : value :
                                                                 let
                                                                     point = value null ;
-                                                                    in point.executable ;
+                                                                    in pkgs.buildFHSUserEnv point.image ;
                                                     }
                                                     { }
                                                     dependencies ;
@@ -61,7 +60,18 @@
                                                         candidate =
                                                             lib
                                                                 {
-                                                                    shell-scripts = ( ignore : { executable = "foobar" ; } ) ;
+                                                                    shell-scripts =
+                                                                        (
+                                                                            ignore :
+                                                                                {
+                                                                                    image =
+                                                                                        {
+                                                                                            name = "foobar" ;
+                                                                                            targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                            runScript = "echo Hello World" ;
+                                                                                        } ;
+                                                                                }
+                                                                        ) ;
                                                                 } ;
                                                         in
                                                             ''
