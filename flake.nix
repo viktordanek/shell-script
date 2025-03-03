@@ -40,7 +40,17 @@
                                                                                                 {
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
                                                                                                     runScript = point.runScript ;
-                                                                                                    targetPkgs = point.targetPkgs ;
+                                                                                                    targetPkgs =
+                                                                                                        let
+                                                                                                            recursion =
+                                                                                                                _visitor
+                                                                                                                    {
+                                                                                                                        lambda = path : value : builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                                                                    }
+                                                                                                                    {
+                                                                                                                    }
+                                                                                                                    dependencies ;
+                                                                                                        in point.targetPkgs recursion ;
                                                                                                 } ;
                                                                                             point = identity ( value null ) ;
                                                                                             in
@@ -118,7 +128,7 @@
                                                                             fib =
                                                                                 ignore :
                                                                                     {
-                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                        targetPkgs = recursion : pkgs : [ pkgs.coreutils ] ;
                                                                                         runScript = "echo Hello World" ;
                                                                                     } ;
                                                                         } ;
