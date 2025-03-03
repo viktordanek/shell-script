@@ -39,7 +39,7 @@
                                                                                             image =
                                                                                                 {
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
-                                                                                                    runScript = point.runScript ;
+                                                                                                    # runScript = point.runScript ;
                                                                                                     targetPkgs = point.targetPkgs ;
                                                                                                 } ;
                                                                                             point = identity ( value null ) ;
@@ -121,18 +121,19 @@
                                                                                         pkgs.writeShellScriptBin
                                                                                             "fib"
                                                                                             ''
-                                                                                                if [ ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } < 3 ]
+                                                                                                if [ ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } -lt 3 ]
                                                                                                 then
                                                                                                     echo ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] }
                                                                                                 else
-                                                                                                    echo $(( $( fib ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } ) - 2 ))
+                                                                                                    echo $(( $( fib $(( ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } - 2 )) ) * $( fib $(( ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } - 1 )) ) ))
                                                                                                 fi
                                                                                             '' ;
+                                                                                    self = pkgs.writeShellScriptBin "self" "fib 1" ;
                                                                                     in
                                                                                         ignore :
                                                                                             {
-                                                                                                targetPkgs = pkgs : [ pkgs.coreutils fib] ;
-                                                                                                runScript = "which fib" ;
+                                                                                                targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
+                                                                                                runScript = "self" ;
                                                                                             } ;
                                                                         } ;
                                                                 } ;
