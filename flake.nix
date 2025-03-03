@@ -58,7 +58,7 @@
                                                                                     ] ;
                                                                     }
                                                                     dependencies ;
-                                                            in let x = builtins.concatStringsSep "&&\n\t" constructors ; in builtins.trace x x ;
+                                                            in builtins.concatStringsSep "&&\n\t" constructors ;
                                                     name = "shell-scripts" ;
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
