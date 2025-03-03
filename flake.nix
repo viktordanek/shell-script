@@ -32,7 +32,8 @@
                                                                                         let
                                                                                             point = value null ;
                                                                                             in
-                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.buildFHSUserEnv point.image } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                "${ pkgs.coreutils }/bin/touch ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                # ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.buildFHSUserEnv point.image } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                     )
                                                                                 ] ;
                                                                     }
@@ -59,7 +60,8 @@
                                                                                         ]
                                                                                         ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                     ] ;
-                                                                    } ;
+                                                                    }
+                                                                    dependencies ;
                                                             in builtins.concatStringsSep "&&\n\t" constructors ;
                                                     name = "shell-scripts" ;
                                                     src = ./. ;
@@ -86,7 +88,7 @@
                                             shell-scripts =
                                                 _visitor
                                                     {
-                                                        lambda = path : value : builtins.concatStringsSep "/" ( builtins.concatLists [ [ "MOCK_DERIVATION" ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                        lambda = path : value : builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
                                                     }
                                                     { }
                                                     dependencies ;
