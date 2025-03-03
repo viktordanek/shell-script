@@ -38,15 +38,10 @@
                                                                             executable = executable ;
                                                                             tests = tests ;
                                                                         } ;
-                                                                point = identity ( value shell-script ) ;
-                                                                shell-script =
-                                                                    { environment ? x : [ ] , executable , tests ? [ ] } :
-                                                                        ''
-                                                                            ${ executable }
-                                                                        '' ;
-                                                                in point.executable ;
+                                                                in identity ( value null ) ;
                                                 }
-                                                { } ;
+                                                { }
+                                                shell-scripts ;
                                         tests = null ;
                                     in
                                         {
@@ -64,11 +59,12 @@
                                                         candidate =
                                                             lib
                                                                 {
-                                                                    shell-scripts = ( shell-script : shell-script { executable = "foobar" ; } ) ;
+                                                                    shell-scripts = ( ignore : { executable = "foobar" ; } ) ;
                                                                 } ;
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.executable } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
