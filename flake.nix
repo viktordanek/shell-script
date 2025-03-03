@@ -17,6 +17,40 @@
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
+                                        derivation =
+                                            pkgs.stdenv.mkDerivation
+                                                {
+                                                    installPhase =
+                                                        _visitor
+                                                            {
+                                                                lambda =
+                                                                    path : value :
+                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ true } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }
+                                                                list =
+                                                                    path : list :
+                                                                        builtins.concatLists
+                                                                            [
+                                                                                [
+                                                                                    ''
+                                                                                        ${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }
+                                                                                    ''
+                                                                                ]
+                                                                                ( builtins.concatLists list )
+                                                                            ] ;
+                                                                set =
+                                                                    path : set :
+                                                                        builtins.concatLists
+                                                                            [
+                                                                                [
+                                                                                    ''
+                                                                                        ${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }
+                                                                                    ''
+                                                                                ]
+                                                                            ] ;
+                                                            } ;
+                                                    name = "shell-scripts" ;
+                                                    src = ./. ;
+                                                } ;
                                         dependencies =
                                             _visitor
                                                 {
