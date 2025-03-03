@@ -40,17 +40,7 @@
                                                                                                 {
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
                                                                                                     runScript = point.runScript ;
-                                                                                                    targetPkgs =
-                                                                                                        let
-                                                                                                            recursion =
-                                                                                                                _visitor
-                                                                                                                    {
-                                                                                                                        lambda = path : value : builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) ;
-                                                                                                                    }
-                                                                                                                    {
-                                                                                                                    }
-                                                                                                                    dependencies ;
-                                                                                                        in point.targetPkgs recursion ;
+                                                                                                    targetPkgs = point.targetPkgs ;
                                                                                                 } ;
                                                                                             point = identity ( value null ) ;
                                                                                             in
@@ -126,11 +116,24 @@
                                                                     shell-scripts =
                                                                         {
                                                                             fib =
-                                                                                ignore :
-                                                                                    {
-                                                                                        targetPkgs = recursion : pkgs : [ pkgs.coreutils ] ;
-                                                                                        runScript = "echo Hello World" ;
-                                                                                    } ;
+                                                                                let
+                                                                                    fib =
+                                                                                        pkgs.writeShellScriptBin
+                                                                                            "fib"
+                                                                                            ''
+                                                                                                if [ ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } < 3 ]
+                                                                                                then
+                                                                                                    echo ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] }
+                                                                                                else
+                                                                                                    echo $(( $( fib ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } ) - 2 ))
+                                                                                                fi
+                                                                                            '' ;
+                                                                                    in
+                                                                                        ignore :
+                                                                                            {
+                                                                                                targetPkgs = pkgs : [ pkgs.coreutils fib] ;
+                                                                                                runScript = "which fib" ;
+                                                                                            } ;
                                                                         } ;
                                                                 } ;
                                                         in
