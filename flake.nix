@@ -13,7 +13,8 @@
                         let
                             lib =
                                 {
-                                    shell-scripts ? null
+                                    shell-scripts ? null ,
+                                    default-name ? "script"
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
@@ -30,10 +31,20 @@
                                                                                 [
                                                                                     (
                                                                                         let
-                                                                                            point = value null ;
+                                                                                            identity = { runScript , targetPkgs } :
+                                                                                                {
+                                                                                                    runScript = runScript ;
+                                                                                                    targetPkgs = targetPkgs ;
+                                                                                                } ;
+                                                                                            image =
+                                                                                                {
+                                                                                                    name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
+                                                                                                    runScript = point.runScript ;
+                                                                                                    targetPkgs = point.targetPkgs ;
+                                                                                                } ;
+                                                                                            point = identity ( value null ) ;
                                                                                             in
-                                                                                                # ( builtins.trace "${ pkgs.buildFHSUserEnv point.image }" "${ pkgs.coreutils }/bin/touch ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }" )
-                                                                                                "makeWrapper ${ pkgs.buildFHSUserEnv point.image }/bin/${ point.image.name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                "makeWrapper ${ pkgs.buildFHSUserEnv image }/bin/${ image.name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                     )
                                                                                 ] ;
                                                                     }
@@ -107,12 +118,8 @@
                                                                             fib =
                                                                                 ignore :
                                                                                     {
-                                                                                        image =
-                                                                                            {
-                                                                                                name = "foobar" ;
-                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ] ;
-                                                                                                runScript = "echo Hello World" ;
-                                                                                            } ;
+                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                        runScript = "echo Hello World" ;
                                                                                     } ;
                                                                         } ;
                                                                 } ;
