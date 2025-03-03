@@ -33,7 +33,7 @@
                                                                                             point = value null ;
                                                                                             in
                                                                                                 # ( builtins.trace "${ pkgs.buildFHSUserEnv point.image }" "${ pkgs.coreutils }/bin/touch ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }" )
-                                                                                                "${ pkgs.coreutils }/bin/echo ${ pkgs.buildFHSUserEnv point.image }/bin/${ point.image.name } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                "makeWrapper ${ pkgs.buildFHSUserEnv point.image }/bin/${ point.image.name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                     )
                                                                                 ] ;
                                                                     }
@@ -64,6 +64,7 @@
                                                                     dependencies ;
                                                             in builtins.concatStringsSep "&&\n\t" constructors ;
                                                     name = "shell-scripts" ;
+                                                    nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
                                                 } ;
                                         dependencies =
