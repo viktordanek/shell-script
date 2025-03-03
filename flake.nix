@@ -17,15 +17,7 @@
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
-                                        #dependencies =
-                                        #    visitor.lib
-                                        #        {
-                                        #            lambda = path : value : value ;
-                                        #            null = path : value : { ... } : { } ;
-                                        #        }
-                                        #        { }
-                                        #        shell-scripts ;
-                                        shell-scripts_ =
+                                        dependencies =
                                             _visitor
                                                 {
                                                     lambda =
@@ -38,14 +30,24 @@
                                                                             executable = executable ;
                                                                             tests = tests ;
                                                                         } ;
-                                                                in identity ( value null ) ;
+                                                                in ignore : identity ( value null ) ;
                                                 }
                                                 { }
                                                 shell-scripts ;
                                         tests = null ;
                                     in
                                         {
-                                            shell-scripts = shell-scripts_ ;
+                                            shell-scripts =
+                                                _visitor
+                                                    {
+                                                        lambda =
+                                                            path : value :
+                                                                let
+                                                                    point = value null ;
+                                                                    in point.executable ;
+                                                    }
+                                                    { }
+                                                    dependencies ;
                                             tests = tests ;
                                         } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
@@ -64,7 +66,7 @@
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.executable } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
