@@ -31,13 +31,15 @@
                                                                                 [
                                                                                     (
                                                                                         let
-                                                                                            identity = { runScript , targetPkgs } :
+                                                                                            identity = { binds ? [ ] , runScript , targetPkgs } :
                                                                                                 {
+                                                                                                    binds = binds ;
                                                                                                     runScript = runScript ;
                                                                                                     targetPkgs = targetPkgs ;
                                                                                                 } ;
                                                                                             image =
                                                                                                 {
+                                                                                                    extraBwrapArgs = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
                                                                                                     runScript = point.runScript ;
                                                                                                     targetPkgs = point.targetPkgs ;
@@ -121,12 +123,7 @@
                                                                                         pkgs.writeShellScriptBin
                                                                                             "fib"
                                                                                             ''
-                                                                                                if [ ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } -lt 3 ]
-                                                                                                then
-                                                                                                    echo ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] }
-                                                                                                else
-                                                                                                    echo $(( $( fib $(( ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } - 2 )) ) * $( fib $(( ${ builtins.concatStringsSep "" [ "$" "{" "1" "}" ] } - 1 )) ) ))
-                                                                                                fi
+                                                                                                ${ pkgs.libuuid }/bin/uuidgen > /host/uuid
                                                                                             '' ;
                                                                                     self = pkgs.writeShellScriptBin "self" "fib 1" ;
                                                                                     in
@@ -134,6 +131,7 @@
                                                                                             {
                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
                                                                                                 runScript = "fib" ;
+                                                                                                binds = [ { host = "/tmp/tmp.p0rbW8nJHH" ; sandbox = "/host" ; } ] ;
                                                                                             } ;
                                                                         } ;
                                                                 } ;
