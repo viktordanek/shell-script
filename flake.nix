@@ -158,19 +158,31 @@
                                                                                             lambda =
                                                                                                 path : value :
                                                                                                     let
-                                                                                                        point =
-                                                                                                            let
-                                                                                                                identity =
-                                                                                                                    {
-
-                                                                                                                    } :
-                                                                                                                        {
-                                                                                                                        } ;
-                                                                                                                in identity ( value null ) ;
+                                                                                                        identity =
+                                                                                                            { name ? "test" , pipe ? null , arguments ? null , file ? null , init ? null , expected-standard-output ? null , expected-standard-error ? null , expected-status ? null , expected-output ? null } :
+                                                                                                                {
+                                                                                                                    name = name ;
+                                                                                                                    pipe = pipe ;
+                                                                                                                    arguments = arguments ;
+                                                                                                                    file = file ;
+                                                                                                                    init = init ;
+                                                                                                                    expected-standard-output = expected-standard-output ;
+                                                                                                                    expected-standard-error = expected-standard-error ;
+                                                                                                                    expected-status = expected-status ;
+                                                                                                                    expected-output = expected-output ;
+                                                                                                                } ;
+                                                                                                        point = identity ( value null ) ;
+                                                                                                        root = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                                                        user-environment =
+                                                                                                            pkgs.buildFHSUserEnv
+                                                                                                                {
+                                                                                                                    extraBwrapArgs = [ "--ro-bind ${ candidate } /candidate" ] ;
+                                                                                                                    name = point.name ;
+                                                                                                                    runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/shell-scripts" ] path ] ) ;
+                                                                                                                } ;
                                                                                                         in
                                                                                                             [
                                                                                                                 "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }candidate"
                                                                                                             ] ;
                                                                                         }
                                                                                         {
