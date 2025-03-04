@@ -121,28 +121,37 @@
                                                                             {
                                                                                 lambda =
                                                                                     path : value :
-                                                                                        let
-                                                                                            identity =
-                                                                                                {
-                                                                                                    binds ? [ ] ,
-                                                                                                    runScript
-                                                                                                } :
-                                                                                                    {
-                                                                                                        binds = binds ;
-                                                                                                        runScript = runScript ;
-                                                                                                    } ;
-                                                                                            point = value null ;
-                                                                                            image =
-                                                                                                {
-                                                                                                    extraBWrapArgs = [ ] ;
-                                                                                                    name = "test" ;
-                                                                                                    runScript = point.runScript ;
-                                                                                                    targetPkgs = [ candidate ] ;
-                                                                                                } ;
+                                                                                        pkgs.stdenv.mkDerivation
+                                                                                            {
+                                                                                                installPhase =
+                                                                                                    let
+                                                                                                        identity =
+                                                                                                            {
+                                                                                                                binds ? [ ] ,
+                                                                                                                runScript
+                                                                                                            } :
+                                                                                                                {
+                                                                                                                    binds = binds ;
+                                                                                                                    runScript = runScript ;
+                                                                                                                } ;
+                                                                                                        point = value null ;
+                                                                                                        image =
+                                                                                                            {
+                                                                                                                extraBWrapArgs =
+                                                                                                                    let
+                                                                                                                        binds = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
+
+                                                                                                                        in [ ] ;
+                                                                                                                name = "test" ;
+                                                                                                                runScript = point.runScript ;
+                                                                                                                targetPkgs = [ candidate ] ;
+                                                                                                            } ;
+
+                                                                                                        
                                                                                             in
                                                                                                 ''
                                                                                                     ${ pkgs.buildFHSUserEnv image }/bin/test
-                                                                                                ''
+                                                                                                '' ;
                                                                             }
                                                                             { }
                                                                             point.tests ;
@@ -183,6 +192,7 @@
                                                                                                 temporary = [ "/tmpfs" ] ;
                                                                                                 tests =
                                                                                                     [
+                                                                                                        { }
                                                                                                     ] ;
                                                                                             } ;
                                                                         } ;
