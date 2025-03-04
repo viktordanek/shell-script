@@ -31,15 +31,20 @@
                                                                                 [
                                                                                     (
                                                                                         let
-                                                                                            identity = { binds ? [ ] , runScript , targetPkgs } :
+                                                                                            identity = { binds ? [ ] , runScript , targetPkgs , temporary ? [ ] } :
                                                                                                 {
                                                                                                     binds = binds ;
                                                                                                     runScript = runScript ;
                                                                                                     targetPkgs = targetPkgs ;
+                                                                                                    temporary = temporary ;
                                                                                                 } ;
                                                                                             image =
                                                                                                 {
-                                                                                                    extraBwrapArgs = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
+                                                                                                    extraBwrapArgs =
+                                                                                                        let
+                                                                                                            binds = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
+                                                                                                            temporary = builtins.map ( temporary : "--tmpfs ${ temporary }" ) point.temporary ;
+                                                                                                            in builtins.concatLists [ binds temporary ] ;
                                                                                                     name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
                                                                                                     runScript = point.runScript ;
                                                                                                     targetPkgs = point.targetPkgs ;
@@ -124,6 +129,7 @@
                                                                                             "fib"
                                                                                             ''
                                                                                                 ${ pkgs.libuuid }/bin/uuidgen > /host/uuid
+                                                                                                ${ pkgs.libuuid }/bin/uuidgen > /tmpfs/uuid
                                                                                             '' ;
                                                                                     self = pkgs.writeShellScriptBin "self" "fib 1" ;
                                                                                     in
@@ -132,6 +138,7 @@
                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
                                                                                                 runScript = "fib" ;
                                                                                                 binds = [ { host = "/tmp/tmp.p0rbW8nJHH" ; sandbox = "/host" ; } ] ;
+                                                                                                temporary = [ "/tmpfs" ] ;
                                                                                             } ;
                                                                         } ;
                                                                 } ;
