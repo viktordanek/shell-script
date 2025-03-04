@@ -46,6 +46,17 @@
                                                                         lambda =
                                                                             path : value :
                                                                                 let
+                                                                                    derivation =
+                                                                                        pkgs.stdenv.mkDerivation
+                                                                                            {
+                                                                                                installPhase =
+                                                                                                    ''
+                                                                                                        ${ pkgs.coreutils }/bin/cat ${ point.script } > $out &&
+                                                                                                            ${ pkgs.coreutils }/bin/chmod 0555 $out
+                                                                                                    '' ;
+                                                                                                name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
+                                                                                                src = ./. ;
+                                                                                            } ;
                                                                                     point =
                                                                                         let
                                                                                             identity =
@@ -66,9 +77,7 @@
                                                                                             in identity ( value null ) ;
                                                                                     in
                                                                                         [
-                                                                                            "${ pkgs.coreutils }/bin/cat ${ point.script } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
-                                                                                            "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
-                                                                                            "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) } ${ builtins.concatStringsSep " " point.environment }"
+                                                                                            "makeWrapper ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] path ] ) } ${ builtins.concatStringsSep " " point.environment }"
                                                                                         ] ;
                                                                     }
                                                                     {
@@ -77,8 +86,7 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
-                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) }"
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] path ] ) }"
                                                                                         ]
                                                                                         ( builtins.concatLists list )
                                                                                     ] ;
@@ -87,16 +95,14 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
-                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) }"
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out"  ] path ] ) }"
                                                                                         ]
                                                                                         ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                     ] ;
 
                                                                     }
                                                                     dependencies ;
-                                                            # in builtins.concatStringsSep " &&\n\t" constructors ;
-                                                            in "${ pkgs.coreutils }/bin/touch $out" ;
+                                                            in builtins.concatStringsSep " &&\n\t" constructors ;
                                                     name = "shell-scripts" ;
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
@@ -104,6 +110,7 @@
                                         tests = null ;
                                     in
                                         {
+                                            derivation = derivation ;
                                             shell-scripts =
                                                 _visitor
                                                     {
@@ -143,7 +150,7 @@
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ derivation } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.alpha } &&
                                                                     exit 64
                                                             '' ;
