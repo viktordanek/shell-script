@@ -197,9 +197,12 @@
                                                                                                                     runScript = test ;
                                                                                                                 } ;
                                                                                                         in
+                                                                                                            builtins.concatLists
                                                                                                             [
-                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                "${ pkgs.coreutils }/bin/echo ${ pkgs.writeShellScript "test" ( builtins.toFile "test" test ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/test.sh"
+                                                                                                                [
+                                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                    "${ pkgs.coreutils }/bin/echo ${ pkgs.writeShellScript "test" ( builtins.toFile "test" test ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/test.sh"
+                                                                                                                ]
                                                                                                             ] ;
                                                                                         }
                                                                                         {
