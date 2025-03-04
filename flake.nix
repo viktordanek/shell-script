@@ -18,35 +18,58 @@
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
+                                        dependencies =
+                                            _visitor
+                                                {
+                                                    lambda =
+                                                        path : value :
+                                                            let
+                                                                identity =
+                                                                    { environment ? { ... } : [ ] , script , tests ? [ ] } :
+                                                                        {
+                                                                            environment = environment ;
+                                                                            script = script ;
+                                                                            tests = tests ;
+                                                                        } ;
+                                                                in ignore : identity ( value null ) ;
+                                                }
+                                                { }
+                                                shell-scripts ;
                                         derivation =
                                             pkgs.stdenv.mkDerivation
                                                 {
                                                     installPhase =
                                                         let
                                                             constructors =
-                                                                _visitor
+                                                                    _visitor
                                                                     {
                                                                         lambda =
                                                                             path : value :
-                                                                                [
-                                                                                    (
+                                                                                let
+                                                                                    point =
                                                                                         let
-                                                                                            image =
+                                                                                            identity =
                                                                                                 {
-                                                                                                    extraBwrapArgs =
-                                                                                                        let
-                                                                                                            binds = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
-                                                                                                            temporary = builtins.map ( temporary : "--tmpfs ${ temporary }" ) point.temporary ;
-                                                                                                            in builtins.concatLists [ binds temporary ] ;
-                                                                                                    name = if builtins.length path == 0 then default-name else builtins.elemAt path ( ( builtins.length path ) - 1 ) ;
-                                                                                                    runScript = point.runScript ;
-                                                                                                    targetPkgs = point.targetPkgs ;
-                                                                                                } ;
-                                                                                            point = value null ;
-                                                                                            in
-                                                                                                "makeWrapper ${ pkgs.buildFHSUserEnv image }/bin/${ image.name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                    )
-                                                                                ] ;
+                                                                                                    environment ,
+                                                                                                    script ,
+                                                                                                    tests
+                                                                                                } :
+                                                                                                    {
+                                                                                                        environment =
+                                                                                                            let
+                                                                                                                injection =
+                                                                                                                    {
+                                                                                                                    } ;
+                                                                                                                in environment injection ;
+                                                                                                        script = script ;
+                                                                                                    } ;
+                                                                                            in identity ( value null ) ;
+                                                                                    in
+                                                                                        [
+                                                                                            "${ pkgs.coreutils }/bin/cat ${ point.script } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
+                                                                                            "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
+                                                                                            "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) } ${ builtins.concatStringsSep " " point.environment }"
+                                                                                        ] ;
                                                                     }
                                                                     {
                                                                         list =
@@ -54,7 +77,8 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            ''${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }''
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) }"
                                                                                         ]
                                                                                         ( builtins.concatLists list )
                                                                                     ] ;
@@ -63,102 +87,38 @@
                                                                                 builtins.concatLists
                                                                                     [
                                                                                         [
-                                                                                            ''${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }''
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "scripts" ] path ] ) }"
+                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "bin" ] path ] ) }"
                                                                                         ]
                                                                                         ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                     ] ;
+
                                                                     }
                                                                     dependencies ;
-                                                            in builtins.concatStringsSep "&&\n\t" constructors ;
+                                                            # in builtins.concatStringsSep " &&\n\t" constructors ;
+                                                            in "${ pkgs.coreutils }/bin/touch $out" ;
                                                     name = "shell-scripts" ;
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
                                                 } ;
-                                        dependencies =
-                                            _visitor
-                                                {
-                                                    lambda =
-                                                        path : value :
-                                                            let
-                                                                identity =
-                                                                    { binds ? [ ] , targetPkgs ? pkgs : [ ] , runScript , temporary ? [ "temporary" ] , tests ? [ ] } :
-                                                                        {
-                                                                            binds = binds ;
-                                                                            targetPkgs = targetPkgs ;
-                                                                            runScript = runScript ;
-                                                                            temporary = temporary ;
-                                                                            tests = tests ;
-                                                                        } ;
-                                                                in ignore : identity ( value ignore ) ;
-                                                }
-                                                { }
-                                                shell-scripts ;
-                                        tests =
-                                            _visitor
-                                                {
-                                                    lambda =
-                                                        path : value : null ;
-                                                } ;
+                                        tests = null ;
                                     in
                                         {
                                             shell-scripts =
                                                 _visitor
                                                     {
-                                                        lambda = path : value : builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
-                                                    }
-                                                    { }
-                                                    dependencies ;
-                                            tests =
-                                                _visitor
-                                                    {
                                                         lambda =
                                                             path : value :
-                                                                let
-                                                                    candidate = builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
-                                                                    point = value null ;
-                                                                    xxx =
-                                                                        _visitor
-                                                                            {
-                                                                                lambda =
-                                                                                    path : value :
-                                                                                        pkgs.stdenv.mkDerivation
-                                                                                            {
-                                                                                                installPhase =
-                                                                                                    let
-                                                                                                        identity =
-                                                                                                            {
-                                                                                                                binds ? [ ] ,
-                                                                                                                runScript
-                                                                                                            } :
-                                                                                                                {
-                                                                                                                    binds = binds ;
-                                                                                                                    runScript = runScript ;
-                                                                                                                } ;
-                                                                                                        point = value null ;
-                                                                                                        image =
-                                                                                                            {
-                                                                                                                extraBWrapArgs =
-                                                                                                                    let
-                                                                                                                        binds = builtins.map ( bind : "--bind ${ bind.host } ${ bind.sandbox }" ) point.binds ;
-
-                                                                                                                        in [ ] ;
-                                                                                                                name = "test" ;
-                                                                                                                runScript = point.runScript ;
-                                                                                                                targetPkgs = [ candidate ] ;
-                                                                                                            } ;
-
-                                                                                                        
-                                                                                            in
-                                                                                                ''
-                                                                                                    ${ pkgs.buildFHSUserEnv image }/bin/test
-                                                                                                '' ;
-                                                                            }
-                                                                            { }
-                                                                            point.tests ;
-                                                                    in
+                                                                pkgs.buildFHSUserEnv
+                                                                    {
+                                                                        # extraBwrapArgs = [ "--bind-ro ${ derivation } /shell-scripts" ] ;
+                                                                        name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
+                                                                        runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "shell-scripts" ] path ] ) ;
+                                                                    } ;
                                                     }
                                                     { }
                                                     dependencies ;
+                                            tests = null ;
                                         } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             in
@@ -173,34 +133,18 @@
                                                                 {
                                                                     shell-scripts =
                                                                         {
-                                                                            fib =
-                                                                                let
-                                                                                    fib =
-                                                                                        pkgs.writeShellScriptBin
-                                                                                            "fib"
-                                                                                            ''
-                                                                                                ${ pkgs.libuuid }/bin/uuidgen > /host/uuid
-                                                                                                ${ pkgs.libuuid }/bin/uuidgen > /tmpfs/uuid
-                                                                                            '' ;
-                                                                                    self = pkgs.writeShellScriptBin "self" "fib 1" ;
-                                                                                    in
-                                                                                        ignore :
-                                                                                            {
-                                                                                                binds = [ { host = "/tmp/tmp.p0rbW8nJHH" ; sandbox = "/host" ; } ] ;
-                                                                                                targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
-                                                                                                runScript = "fib" ;
-                                                                                                temporary = [ "/tmpfs" ] ;
-                                                                                                tests =
-                                                                                                    [
-                                                                                                        { }
-                                                                                                    ] ;
-                                                                                            } ;
+                                                                            alpha =
+                                                                                ignore :
+                                                                                    {
+                                                                                        script = self + "/scripts/alpha.sh" ;
+                                                                                    } ;
                                                                         } ;
                                                                 } ;
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ derivation } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.alpha } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
