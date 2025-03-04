@@ -196,7 +196,11 @@
                                                                                         point.tests ;
                                                                                 point = value null ;
                                                                                 # in builtins.concatStringsSep " &&\n\t" constructors ;
-                                                                                in "${ pkgs.coreutils }/bin/mkdir $out" ;
+                                                                                in
+                                                                                    ''
+                                                                                        ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } $out/candidate
+                                                                                    '' ;
                                                                         name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                         src = ./. ;
                                                                     } ;
