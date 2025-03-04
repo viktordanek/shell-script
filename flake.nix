@@ -149,7 +149,11 @@
                                                             path : value :
                                                                 pkgs.stdenv.mkDerivation
                                                                     {
-                                                                        installPhase = "${ pkgs.coreutils }/bin/mkdir $out" ;
+                                                                        installPhase =
+                                                                            ''
+                                                                                ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                    ${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) } $out/candidate
+                                                                            '' ;
                                                                         name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                         src = ./. ;
                                                                     } ;
