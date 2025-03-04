@@ -25,7 +25,7 @@
                                                         path : value :
                                                             let
                                                                 identity =
-                                                                    { environment ? { ... } : [ ] , script , tests ? [ ] } :
+                                                                    { environment ? { ... } : [ ] , script , tests ? null } :
                                                                         {
                                                                             environment = environment ;
                                                                             script = script ;
@@ -150,10 +150,53 @@
                                                                 pkgs.stdenv.mkDerivation
                                                                     {
                                                                         installPhase =
-                                                                            ''
-                                                                                ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                    ${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) } $out/candidate
-                                                                            '' ;
+                                                                            let
+                                                                                candidate = builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                                constructors =
+                                                                                    _visitor
+                                                                                        {
+                                                                                            lambda =
+                                                                                                path : value :
+                                                                                                    let
+                                                                                                        point =
+                                                                                                            let
+                                                                                                                identity =
+                                                                                                                    {
+
+                                                                                                                    } :
+                                                                                                                        {
+                                                                                                                        } ;
+                                                                                                                in identity ( value null ) ;
+                                                                                                        in
+                                                                                                            [
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
+                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }/candidate"
+                                                                                                            ] ;
+                                                                                        }
+                                                                                        {
+                                                                                            list =
+                                                                                                path : list :
+                                                                                                    builtins.concatLists
+                                                                                                        [
+                                                                                                            [
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
+                                                                                                            ]
+                                                                                                            ( builtins.concatLists list )
+                                                                                                        ] ;
+                                                                                            set =
+                                                                                                path : set :
+                                                                                                    builtins.concatLists
+                                                                                                        [
+                                                                                                            [
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
+                                                                                                            ]
+                                                                                                            ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                                        ] ;
+                                                                                        }
+                                                                                        point.tests ;
+                                                                                point = value null ;
+                                                                                # in builtins.concatStringsSep " &&\n\t" constructors ;
+                                                                                in "${ pkgs.coreutils }/bin/mkdir $out" ;
                                                                         name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                         src = ./. ;
                                                                     } ;
@@ -190,6 +233,9 @@
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
                                                                                                     ( self "FIB" ( self : self.fib ) )
                                                                                                 ] ;
+                                                                                        tests =
+                                                                                            [
+                                                                                            ] ;
                                                                                     } ;
                                                                         } ;
                                                                 } ;
