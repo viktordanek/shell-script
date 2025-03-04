@@ -73,14 +73,14 @@
                                                                                                                         self =
                                                                                                                             name : lambda :
                                                                                                                                 let
-                                                                                                                                    recursion =
+                                                                                                                                    self =
                                                                                                                                         _visitor
                                                                                                                                             {
-                                                                                                                                                lambda = path : value : builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" ] path ] ) ;
+                                                                                                                                                lambda = path : value : builtins.concatStringsSep "" ( builtins.map builtins.toJSON path ) ;
                                                                                                                                             }
                                                                                                                                             { }
                                                                                                                                             dependencies ;
-                                                                                                                                    in "--set ${ name } ${ builtins.toString ( lambda recursion ) }" ;
+                                                                                                                                    in "--set ${ name } $out/${ builtins.toString ( lambda self ) }" ;
                                                                                                                         string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
                                                                                                                 in environment injection ;
@@ -170,8 +170,9 @@
                                                                                         environment =
                                                                                             { self , string } :
                                                                                                 [
+                                                                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                                    ( self "FIB" ( shell-scripts : shell-scripts.fib ) )
+                                                                                                    ( self "FIB" ( self : self.fib ) )
                                                                                                 ] ;
                                                                                     } ;
                                                                         } ;
