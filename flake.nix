@@ -169,8 +169,7 @@
                                                                                                                 in identity ( value null ) ;
                                                                                                         in
                                                                                                             [
-                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }/candidate"
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                             ] ;
                                                                                         }
                                                                                         {
@@ -179,28 +178,28 @@
                                                                                                     builtins.concatLists
                                                                                                         [
                                                                                                             [
-                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                             ]
-                                                                                                            ( builtins.concatLists list )
+                                                                                                            # ( builtins.concatLists list )
                                                                                                         ] ;
                                                                                             set =
                                                                                                 path : set :
                                                                                                     builtins.concatLists
                                                                                                         [
                                                                                                             [
-                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] }"
+                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                             ]
-                                                                                                            ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                                            # ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                                         ] ;
                                                                                         }
                                                                                         point.tests ;
                                                                                 point = value null ;
-                                                                                # in builtins.concatStringsSep " &&\n\t" constructors ;
-                                                                                in
-                                                                                    ''
-                                                                                        ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } $out/candidate
-                                                                                    '' ;
+                                                                                in builtins.concatStringsSep " &&\n\t" constructors ;
+                                                                                # in
+                                                                                #    ''
+                                                                                #        ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                #             ${ pkgs.coreutils }/bin/ln --symbolic ${ candidate } $out/candidate
+                                                                                #    '' ;
                                                                         name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                         src = ./. ;
                                                                     } ;
