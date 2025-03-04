@@ -161,6 +161,7 @@
                                                                                                         identity =
                                                                                                             {
                                                                                                                 name ? if builtins.length path > 0 then builtins.toString ( builtins.elemAt path ( ( builtins.length path ) - 1 ) ) else "test" ,
+                                                                                                                prepare ? null ,
                                                                                                                 pipe ? null ,
                                                                                                                 arguments ? null ,
                                                                                                                 file ? null ,
@@ -172,6 +173,7 @@
                                                                                                                 } :
                                                                                                                     {
                                                                                                                         name = name ;
+                                                                                                                        prepare = prepare ;
                                                                                                                         pipe = pipe ;
                                                                                                                         arguments = arguments ;
                                                                                                                         file = file ;
