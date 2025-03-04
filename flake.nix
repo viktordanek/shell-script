@@ -119,7 +119,6 @@
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                     src = ./. ;
                                                 } ;
-                                        tests = null ;
                                     in
                                         {
                                             derivation = derivation ;
