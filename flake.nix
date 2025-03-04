@@ -70,6 +70,17 @@
                                                                                                             let
                                                                                                                 injection =
                                                                                                                     {
+                                                                                                                        self =
+                                                                                                                            name : lambda :
+                                                                                                                                let
+                                                                                                                                    recursion =
+                                                                                                                                        _visitor
+                                                                                                                                            {
+                                                                                                                                                lambda = path : value : builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" ] path ] ) ;
+                                                                                                                                            }
+                                                                                                                                            { }
+                                                                                                                                            dependencies ;
+                                                                                                                                    in "--set ${ name } ${ builtins.toString ( lambda recursion ) }" ;
                                                                                                                         string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
                                                                                                                 in environment injection ;
@@ -157,9 +168,10 @@
                                                                                     {
                                                                                         script = self + "/scripts/fib.sh" ;
                                                                                         environment =
-                                                                                            { string } :
+                                                                                            { self , string } :
                                                                                                 [
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                                    ( self "FIB" ( shell-scripts : shell-scripts.fib ) )
                                                                                                 ] ;
                                                                                     } ;
                                                                         } ;
