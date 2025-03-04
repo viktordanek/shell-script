@@ -142,7 +142,20 @@
                                                     }
                                                     { }
                                                     dependencies ;
-                                            tests = null ;
+                                            tests =
+                                                _visitor
+                                                    {
+                                                        lambda =
+                                                            path : value :
+                                                                pkgs.stdenv.mkDerivation
+                                                                    {
+                                                                        installPhase = "${ pkgs.coreutils }/bin/mkdir $out" ;
+                                                                        name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
+                                                                        src = ./. ;
+                                                                    } ;
+                                                    }
+                                                    { }
+                                                    dependencies ;
                                         } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             in
@@ -181,6 +194,7 @@
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests.fib } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
