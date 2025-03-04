@@ -31,13 +31,6 @@
                                                                                 [
                                                                                     (
                                                                                         let
-                                                                                            identity = { binds ? [ ] , runScript , targetPkgs , temporary ? [ ] } :
-                                                                                                {
-                                                                                                    binds = binds ;
-                                                                                                    runScript = runScript ;
-                                                                                                    targetPkgs = targetPkgs ;
-                                                                                                    temporary = temporary ;
-                                                                                                } ;
                                                                                             image =
                                                                                                 {
                                                                                                     extraBwrapArgs =
@@ -49,7 +42,7 @@
                                                                                                     runScript = point.runScript ;
                                                                                                     targetPkgs = point.targetPkgs ;
                                                                                                 } ;
-                                                                                            point = identity ( value null ) ;
+                                                                                            point = value null ;
                                                                                             in
                                                                                                 "makeWrapper ${ pkgs.buildFHSUserEnv image }/bin/${ image.name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                     )
@@ -88,16 +81,24 @@
                                                         path : value :
                                                             let
                                                                 identity =
-                                                                    { image ? { } , tests ? [ ] } :
+                                                                    { binds ? [ ] , targetPkgs ? pkgs : [ ] , runScript , temporary ? [ "temporary" ] , tests ? [ ] } :
                                                                         {
-                                                                            image = image ;
+                                                                            binds = binds ;
+                                                                            targetPkgs = targetPkgs ;
+                                                                            runScript = runScript ;
+                                                                            temporary = temporary ;
                                                                             tests = tests ;
                                                                         } ;
-                                                                in ignore : value ignore ;
+                                                                in ignore : identity ( value ignore ) ;
                                                 }
                                                 { }
                                                 shell-scripts ;
-                                        tests = null ;
+                                        tests =
+                                            _visitor
+                                                {
+                                                    lambda =
+                                                        path : value : null ;
+                                                } ;
                                     in
                                         {
                                             shell-scripts =
@@ -107,7 +108,48 @@
                                                     }
                                                     { }
                                                     dependencies ;
-                                            tests = tests ;
+                                            tests =
+                                                _visitor
+                                                    {
+                                                        lambda =
+                                                            path : value :
+                                                                let
+                                                                    candidate = builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                    point = value null ;
+                                                                    xxx =
+                                                                        _visitor
+                                                                            {
+                                                                                lambda =
+                                                                                    path : value :
+                                                                                        let
+                                                                                            identity =
+                                                                                                {
+                                                                                                    binds ? [ ] ,
+                                                                                                    runScript
+                                                                                                } :
+                                                                                                    {
+                                                                                                        binds = binds ;
+                                                                                                        runScript = runScript ;
+                                                                                                    } ;
+                                                                                            point = value null ;
+                                                                                            image =
+                                                                                                {
+                                                                                                    extraBWrapArgs = [ ] ;
+                                                                                                    name = "test" ;
+                                                                                                    runScript = point.runScript ;
+                                                                                                    targetPkgs = [ candidate ] ;
+                                                                                                } ;
+                                                                                            in
+                                                                                                ''
+                                                                                                    ${ pkgs.buildFHSUserEnv image }/bin/test
+                                                                                                ''
+                                                                            }
+                                                                            { }
+                                                                            point.tests ;
+                                                                    in
+                                                    }
+                                                    { }
+                                                    dependencies ;
                                         } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             in
@@ -135,10 +177,13 @@
                                                                                     in
                                                                                         ignore :
                                                                                             {
+                                                                                                binds = [ { host = "/tmp/tmp.p0rbW8nJHH" ; sandbox = "/host" ; } ] ;
                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils fib self pkgs.which ] ;
                                                                                                 runScript = "fib" ;
-                                                                                                binds = [ { host = "/tmp/tmp.p0rbW8nJHH" ; sandbox = "/host" ; } ] ;
                                                                                                 temporary = [ "/tmpfs" ] ;
+                                                                                                tests =
+                                                                                                    [
+                                                                                                    ] ;
                                                                                             } ;
                                                                         } ;
                                                                 } ;
