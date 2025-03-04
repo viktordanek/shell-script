@@ -70,6 +70,7 @@
                                                                                                             let
                                                                                                                 injection =
                                                                                                                     {
+                                                                                                                        string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
                                                                                                                 in environment injection ;
                                                                                                         script = script ;
@@ -116,12 +117,18 @@
                                                     {
                                                         lambda =
                                                             path : value :
-                                                                pkgs.buildFHSUserEnv
-                                                                    {
-                                                                        extraBwrapArgs = [ "--bind-ro ${ derivation } /shell-scripts" ] ;
-                                                                        name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
-                                                                        runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "shell-scripts" ] path ] ) ;
-                                                                    } ;
+                                                                let
+                                                                    name =
+                                                                        if builtins.length path > 0 then builtins.elemAt path ( ( builtins.length path ) - 1 )
+                                                                        else default-name ;
+                                                                    user-environment =
+                                                                        pkgs.buildFHSUserEnv
+                                                                            {
+                                                                                extraBwrapArgs = [ "--ro-bind ${ derivation } /shell-scripts" ] ;
+                                                                                name = name ;
+                                                                                runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "shell-scripts" ] path ] ) ;
+                                                                            } ;
+                                                                    in "${ user-environment }/bin/${ name }" ;
                                                     }
                                                     { }
                                                     dependencies ;
@@ -145,13 +152,23 @@
                                                                                     {
                                                                                         script = self + "/scripts/alpha.sh" ;
                                                                                     } ;
+                                                                            fib =
+                                                                                ignore :
+                                                                                    {
+                                                                                        script = self + "/scripts/fib.sh" ;
+                                                                                        environment =
+                                                                                            { string } :
+                                                                                                [
+                                                                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                                ] ;
+                                                                                    } ;
                                                                         } ;
                                                                 } ;
                                                         in
                                                             ''
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.alpha } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
