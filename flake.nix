@@ -118,7 +118,7 @@
                                                             path : value :
                                                                 pkgs.buildFHSUserEnv
                                                                     {
-                                                                        # extraBwrapArgs = [ "--bind-ro ${ derivation } /shell-scripts" ] ;
+                                                                        extraBwrapArgs = [ "--bind-ro ${ derivation } /shell-scripts" ] ;
                                                                         name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                         runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "shell-scripts" ] path ] ) ;
                                                                     } ;
