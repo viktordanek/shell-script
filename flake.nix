@@ -124,7 +124,7 @@
                                                                     user-environment =
                                                                         pkgs.buildFHSUserEnv
                                                                             {
-                                                                                extraBwrapArgs = [ ( let x = "--ro-bind ${ derivation } /shell-scripts" ; in builtins.trace x x ) ] ;
+                                                                                extraBwrapArgs = [ "--ro-bind ${ derivation } /shell-scripts" ] ;
                                                                                 name = name ;
                                                                                 runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/shell-scripts" ] path ] ) ;
                                                                             } ;
