@@ -161,7 +161,6 @@
                                                                                                         identity =
                                                                                                             {
                                                                                                                 name ? if builtins.length path > 0 then builtins.toString ( builtins.elemAt path ( ( builtins.length path ) - 1 ) ) else "test" ,
-                                                                                                                prepare ? null ,
                                                                                                                 pipe ? null ,
                                                                                                                 arguments ? null ,
                                                                                                                 file ? null ,
@@ -173,7 +172,6 @@
                                                                                                                 } :
                                                                                                                     {
                                                                                                                         name = name ;
-                                                                                                                        prepare = prepare ;
                                                                                                                         pipe = pipe ;
                                                                                                                         arguments = arguments ;
                                                                                                                         file = file ;
@@ -187,7 +185,7 @@
                                                                                                         root = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) ;
                                                                                                         test =
                                                                                                             let
-                                                                                                                with-arguments = if builtins.typeOf point.arguments == "null" then "/candidate" else "/candidate ${ point.arguments }" ;
+                                                                                                                with-arguments = if builtins.typeOf point.arguments == "null" then "/candidate" else "/candidate ${ builtins.toString point.arguments }" ;
                                                                                                                 in with-arguments ;
                                                                                                         user-environment =
                                                                                                             pkgs.buildFHSUserEnv
@@ -201,7 +199,7 @@
                                                                                                                 [
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ pkgs.writeShellScript "test" ( builtins.toFile "test" test ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/test.sh"
+                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "test" ( builtins.toFile "test" test ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/test.sh"
                                                                                                                     ]
                                                                                                                 ] ;
                                                                                         }
@@ -266,7 +264,12 @@
                                                                                                 ] ;
                                                                                         tests =
                                                                                             [
-                                                                                                ( ignore : { } )
+                                                                                                (
+                                                                                                    ignore :
+                                                                                                        {
+                                                                                                            arguments = "0" ;
+                                                                                                        }
+                                                                                                )
                                                                                             ] ;
                                                                                     } ;
                                                                         } ;
