@@ -158,48 +158,12 @@
                                                                                             lambda =
                                                                                                 path : value :
                                                                                                     let
-                                                                                                        identity =
-                                                                                                            {
-                                                                                                                name ? if builtins.length path > 0 then builtins.toString ( builtins.elemAt path ( ( builtins.length path ) - 1 ) ) else "test" ,
-                                                                                                                pipe ? null ,
-                                                                                                                arguments ? null ,
-                                                                                                                file ? null ,
-                                                                                                                init ? null ,
-                                                                                                                expected-standard-output ? null ,
-                                                                                                                expected-standard-error ? null ,
-                                                                                                                expected-status ? null ,
-                                                                                                                expected-output ? null
-                                                                                                                } :
-                                                                                                                    {
-                                                                                                                        name = name ;
-                                                                                                                        pipe = pipe ;
-                                                                                                                        arguments = arguments ;
-                                                                                                                        file = file ;
-                                                                                                                        init = init ;
-                                                                                                                        expected-standard-output = expected-standard-output ;
-                                                                                                                        expected-standard-error = expected-standard-error ;
-                                                                                                                        expected-status = expected-status ;
-                                                                                                                        expected-output = expected-output ;
-                                                                                                                    } ;
-                                                                                                        point = identity ( value null ) ;
-                                                                                                        root = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) ;
-                                                                                                        test =
-                                                                                                            let
-                                                                                                                with-arguments = if builtins.typeOf point.arguments == "null" then "/candidate" else "/candidate ${ builtins.toString point.arguments }" ;
-                                                                                                                in with-arguments ;
-                                                                                                        user-environment =
-                                                                                                            pkgs.buildFHSUserEnv
-                                                                                                                {
-                                                                                                                    extraBwrapArgs = [ "--ro-bind ${ candidate } /candidate" ] ;
-                                                                                                                    name = point.name ;
-                                                                                                                    runScript = test ;
-                                                                                                                } ;
+                                                                                                        point = value null ;
                                                                                                         in
                                                                                                             builtins.concatLists
                                                                                                                 [
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "test" ( builtins.toFile "test" test ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/test.sh"
                                                                                                                     ]
                                                                                                                 ] ;
                                                                                         }
@@ -267,7 +231,11 @@
                                                                                                 (
                                                                                                     ignore :
                                                                                                         {
-                                                                                                            arguments = "0" ;
+                                                                                                        }
+                                                                                                )
+                                                                                                (
+                                                                                                    ignore :
+                                                                                                        {
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
