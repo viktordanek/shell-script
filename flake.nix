@@ -159,12 +159,19 @@
                                                                                                 path : value :
                                                                                                     let
                                                                                                         point = value null ;
+                                                                                                        user-environment =
+                                                                                                            pkgs.buildFHSUserEnv
+                                                                                                                {
+                                                                                                                    name = "test-candidate" ;
+                                                                                                                    runScript = point.test ;
+                                                                                                                } ;
                                                                                                         in
                                                                                                             builtins.concatLists
                                                                                                                 [
                                                                                                                     ### FIND ME
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                        "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status ; fi"
                                                                                                                     ]
                                                                                                                 ] ;
                                                                                         }
@@ -232,6 +239,7 @@
                                                                                                 (
                                                                                                     ignore :
                                                                                                         {
+                                                                                                            test = "fib 0" ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
