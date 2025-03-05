@@ -13,8 +13,8 @@
                         let
                             lib =
                                 {
-                                    shell-scripts ? null ,
-                                    default-name ? "script"
+                                    default-name ? "script" ,
+                                    shell-scripts ? null
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
