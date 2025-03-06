@@ -193,12 +193,26 @@
                                                                                                                 identity =
                                                                                                                     {
                                                                                                                         error ? "" ,
+                                                                                                                        mounts ? { } ,
                                                                                                                         output ? "" ,
                                                                                                                         status ? "0" ,
                                                                                                                         test
                                                                                                                     } :
                                                                                                                         {
                                                                                                                             error = error ;
+                                                                                                                            mounts =
+                                                                                                                                if builtins.typeOf mounts == "set" then
+                                                                                                                                    if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts do not match.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
+                                                                                                                                    else
+                                                                                                                                        let
+                                                                                                                                            mapper =
+                                                                                                                                                name : { initial , expected } :
+                                                                                                                                                    {
+                                                                                                                                                        initial = initial ;
+                                                                                                                                                        expected = expected ;
+                                                                                                                                                    } ;
+                                                                                                                                            in builtins.map mapper mounts
+                                                                                                                                else builtins.throw [ "set" ] path mounts ;
                                                                                                                             output = output ;
                                                                                                                             status = status ;
                                                                                                                             test = test ;
@@ -251,6 +265,16 @@
                                                                                                                             generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.observed" ] ] ) }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
+                                                                                                                    # (
+                                                                                                                    #     let
+                                                                                                                    #         generator =
+                                                                                                                    #             index :
+                                                                                                                    #                 let
+                                                                                                                    #                     mount = builtins.getAttr tag secondary.mounts ;
+                                                                                                                    #                     tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
+                                                                                                                    #                     in "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.expected" ] ] ) }" ;
+                                                                                                                    #         in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                    # )
                                                                                                                 ] ;
                                                                                         }
                                                                                         {
@@ -344,6 +368,14 @@
                                                                                                     ignore :
                                                                                                        {
                                                                                                             error = "b2c7c67b1451b4e2b850c29eacbe2ce6f3a9a63456e30e2c43577e4be49699c6631610527464c4b54f76257a6b396893bf1b991626c6875c159861e385905820" ;
+                                                                                                            mounts =
+                                                                                                                {
+                                                                                                                    "/sandbox" =
+                                                                                                                        {
+                                                                                                                            initial = self + "/mounts/QoqNiM1R/file" ;
+                                                                                                                            expected = self + "/mounts/QoqNiM1R/file" ;
+                                                                                                                        } ;
+                                                                                                                } ;
                                                                                                             output = "e8c856e1819a2403d5b210a8abebcb6c75abdfd4e5fd0d93669d4b80fe0bfda8c70cff03ba4f47564506bd5c21c0bb9710ff6f270aa330721ee96707887e50a5" ;
                                                                                                             test = "foobar c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
                                                                                                             status = 113 ;
