@@ -265,16 +265,16 @@
                                                                                                                             generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.observed" ] ] ) }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
-                                                                                                                    # (
-                                                                                                                    #     let
-                                                                                                                    #         generator =
-                                                                                                                    #             index :
-                                                                                                                    #                 let
-                                                                                                                    #                     mount = builtins.getAttr tag secondary.mounts ;
-                                                                                                                    #                     tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
-                                                                                                                    #                     in "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.expected" ] ] ) }" ;
-                                                                                                                    #         in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
-                                                                                                                    # )
+                                                                                                                    (
+                                                                                                                        let
+                                                                                                                            generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        mount = builtins.getAttr tag secondary.mounts ;
+                                                                                                                                        tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
+                                                                                                                                        in "true " ; # "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.expected" ] ] ) }" ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                    )
                                                                                                                 ] ;
                                                                                         }
                                                                                         {
