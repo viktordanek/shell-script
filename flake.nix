@@ -173,7 +173,21 @@
                                                                     {
                                                                         installPhase =
                                                                             let
-                                                                                candidate = builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                                candidate =
+                                                                                    pkgs.stdenv.mkDerivation
+                                                                                        {
+                                                                                            installPhase =
+                                                                                                ''
+                                                                                                    ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                                        ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                                                        ${ pkgs.coreutils }/bin/ln \
+                                                                                                            --symbolic \
+                                                                                                            ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) } \
+                                                                                                            $out/bin/${ if builtins.length path > 0 then builtins.toString ( builtins.elemAt path ( ( builtins.length path ) - 1 ) ) else primary.default-name }
+                                                                                                '' ;
+                                                                                            name = "candidate" ;
+                                                                                            src = ./. ;
+                                                                                        } ;
                                                                                 constructors =
                                                                                     _visitor
                                                                                         {
@@ -195,6 +209,7 @@
                                                                                                                             in builtins.genList generator ( builtins.length primary.mounts ) ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = point.test ;
+                                                                                                                    targetPkgs = pkgs : [ candidate ] ;
                                                                                                                 } ;
                                                                                                         in
                                                                                                             builtins.concatLists
@@ -263,11 +278,11 @@
                                                                 {
                                                                     mounts =
                                                                         [
-                                                                            {
-                                                                                "host" = "/tmp" ;
-                                                                                "sandbox" = "/test-temp" ;
-                                                                                "test" = "wtf" ;
-                                                                            }
+#                                                                             {
+#                                                                                 "host" = "/tmp" ;
+#                                                                                 "sandbox" = "/test-temp" ;
+#                                                                                "test" = "wtf" ;
+#                                                                            }
                                                                         ] ;
                                                                     shell-scripts =
                                                                         {
