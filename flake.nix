@@ -18,23 +18,26 @@
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
-                                        dependencies =
-                                            _visitor
-                                                {
-                                                    lambda =
-                                                        path : value :
-                                                            let
-                                                                identity =
-                                                                    { environment ? { ... } : [ ] , script , tests ? null } :
-                                                                        {
-                                                                            environment = environment ;
-                                                                            script = script ;
-                                                                            tests = tests ;
-                                                                        } ;
-                                                                in ignore : identity ( value null ) ;
-                                                }
-                                                { }
-                                                shell-scripts ;
+                                        primary =
+                                            {
+                                                shell-scripts =
+                                                    _visitor
+                                                        {
+                                                            lambda =
+                                                                path : value :
+                                                                    let
+                                                                        identity =
+                                                                            { environment ? { ... } : [ ] , script , tests ? null } :
+                                                                                {
+                                                                                    environment = environment ;
+                                                                                    script = script ;
+                                                                                    tests = tests ;
+                                                                                } ;
+                                                                        in ignore : identity ( value null ) ;
+                                                        }
+                                                        { }
+                                                        shell-scripts ;
+                                            } ;
                                         derivation =
                                             pkgs.stdenv.mkDerivation
                                                 {
@@ -79,7 +82,7 @@
                                                                                                                                                 lambda = path : value : builtins.concatStringsSep "" ( builtins.map builtins.toJSON path ) ;
                                                                                                                                             }
                                                                                                                                             { }
-                                                                                                                                            dependencies ;
+                                                                                                                                            primary.shell-scripts ;
                                                                                                                                     in "--set ${ name } $out/${ builtins.toString ( lambda self ) }" ;
                                                                                                                         string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
@@ -113,7 +116,7 @@
                                                                                     ] ;
 
                                                                     }
-                                                                    dependencies ;
+                                                                    primary.shell-scripts ;
                                                             in builtins.concatStringsSep " &&\n\t" constructors ;
                                                     name = "shell-scripts" ;
                                                     nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -141,7 +144,7 @@
                                                                     in "${ user-environment }/bin/${ name }" ;
                                                     }
                                                     { }
-                                                    dependencies ;
+                                                    primary.shell-scripts ;
                                             tests =
                                                 _visitor
                                                     {
@@ -203,7 +206,7 @@
                                                                     } ;
                                                     }
                                                     { }
-                                                    dependencies ;
+                                                    primary.shell-scripts ;
                                         } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             in
