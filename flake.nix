@@ -194,7 +194,22 @@
                                                                                             lambda =
                                                                                                 path : value :
                                                                                                     let
-                                                                                                        point = value null ;
+                                                                                                        secondary =
+                                                                                                            let
+                                                                                                                identity =
+                                                                                                                    {
+                                                                                                                        error ? "" ,
+                                                                                                                        output ? "" ,
+                                                                                                                        status ? "" ,
+                                                                                                                        test
+                                                                                                                    } :
+                                                                                                                        {
+                                                                                                                            error = error ;
+                                                                                                                            output = output ;
+                                                                                                                            status = status ;
+                                                                                                                            test = status ;
+                                                                                                                        } ;
+                                                                                                                in identity ( value null ) ;
                                                                                                         user-environment =
                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                 {
@@ -205,10 +220,9 @@
                                                                                                                                     let
                                                                                                                                         p = builtins.elemAt primary.mounts index ;
                                                                                                                                         in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ p.sandbox }" ;
-                                                                                                                                        # in "" ;
                                                                                                                             in builtins.genList generator ( builtins.length primary.mounts ) ;
                                                                                                                     name = "test-candidate" ;
-                                                                                                                    runScript = point.test ;
+                                                                                                                    runScript = secondary.test ;
                                                                                                                     targetPkgs = pkgs : [ candidate ] ;
                                                                                                                 } ;
                                                                                                         in
@@ -221,15 +235,10 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.observed 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error.observed ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status.observed ; fi"
                                                                                                                     ]
-                                                                                                                    (
-                                                                                                                        if builtins.typeOf point.output == "null" then [ ]
-                                                                                                                        else if builtins.typeOf point.output == "string" then
-                                                                                                                            [
-                                                                                                                                "${ pkgs.coreutils }/bin/echo ${ point.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
-                                                                                                                                "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
-                                                                                                                            ]
-                                                                                                                        else builtins.throw "WTF"
-                                                                                                                    )
+                                                                                                                    [
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
+                                                                                                                    ]
                                                                                                                     (
                                                                                                                         if builtins.length primary.mounts == 0 then [ ]
                                                                                                                         else
@@ -287,11 +296,11 @@
                                                                 {
                                                                     mounts =
                                                                         [
-#                                                                             {
-#                                                                                 "host" = "/tmp" ;
-#                                                                                 "sandbox" = "/test-temp" ;
-#                                                                                "test" = "wtf" ;
-#                                                                            }
+                                                                            {
+                                                                                "host" = "/tmp" ;
+                                                                                "sandbox" = "/test-temp" ;
+                                                                                "test" = "wtf" ;
+                                                                            }
                                                                         ] ;
                                                                     shell-scripts =
                                                                         {
