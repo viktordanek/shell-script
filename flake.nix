@@ -14,12 +14,14 @@
                             lib =
                                 {
                                     default-name ? "script" ,
+                                    mounts ? [ ] ,
                                     shell-scripts ? null
                                 } :
                                     let
                                         _visitor = builtins.getAttr system visitor.lib ;
                                         primary =
                                             {
+                                                default-name = if builtins.typeOf default-name == "string" then default-name else builtins.throw "default-name is not string but ${ builtins.typeOf default-name }." ;
                                                 shell-scripts =
                                                     _visitor
                                                         {
@@ -133,7 +135,7 @@
                                                                 let
                                                                     name =
                                                                         if builtins.length path > 0 then builtins.elemAt path ( ( builtins.length path ) - 1 )
-                                                                        else default-name ;
+                                                                        else primary.default-name ;
                                                                     user-environment =
                                                                         pkgs.buildFHSUserEnv
                                                                             {
