@@ -196,6 +196,9 @@
                                                                                                         in
                                                                                                             builtins.concatLists
                                                                                                                 [
+                                                                                                                    (
+                                                                                                                        builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( pkgs.coreutils }/bin/mkdir --directory )" ) ( builtins.length primary.mounts )
+                                                                                                                    )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status ; fi"
