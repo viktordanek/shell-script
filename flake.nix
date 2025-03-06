@@ -68,13 +68,13 @@
                                                                                             {
                                                                                                 installPhase =
                                                                                                     ''
-                                                                                                        ${ pkgs.coreutils }/bin/cat ${ point.script } > $out &&
+                                                                                                        ${ pkgs.coreutils }/bin/cat ${ secondary.script } > $out &&
                                                                                                             ${ pkgs.coreutils }/bin/chmod 0555 $out
                                                                                                     '' ;
                                                                                                 name = builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) ;
                                                                                                 src = ./. ;
                                                                                             } ;
-                                                                                    point =
+                                                                                    secondary =
                                                                                         let
                                                                                             identity =
                                                                                                 {
@@ -101,12 +101,16 @@
                                                                                                                         string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
                                                                                                                 in environment injection ;
-                                                                                                        script = script ;
+                                                                                                        script =
+                                                                                                            if builtins.typeOf script == "string" then
+                                                                                                                if builtins.pathExists script then script
+                                                                                                                else builtins.throw "The path for ${ script } does not exist."
+                                                                                                            else throw [ "string" ] path script ;
                                                                                                     } ;
                                                                                             in identity ( value null ) ;
                                                                                     in
                                                                                         [
-                                                                                            "makeWrapper ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] path ] ) } ${ builtins.concatStringsSep " " point.environment }"
+                                                                                            "makeWrapper ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] path ] ) } ${ builtins.concatStringsSep " " secondary.environment }"
                                                                                         ] ;
                                                                     }
                                                                     {
@@ -151,7 +155,10 @@
                                                                     user-environment =
                                                                         pkgs.buildFHSUserEnv
                                                                             {
-                                                                                extraBwrapArgs = [ "--ro-bind ${ derivation } /shell-scripts" ] ;
+                                                                                extraBwrapArgs =
+                                                                                    let
+                                                                                        mapper = { host , sandbox , test } : "--bind ${ host } ${ sandbox }" ;
+                                                                                        in builtins.concatLists [ [ "--ro-bind ${ derivation } /shell-scripts" ] ( builtins.map mapper primary.mounts ) ] ;
                                                                                 name = name ;
                                                                                 runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/shell-scripts" ] path ] ) ;
                                                                             } ;
