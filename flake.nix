@@ -184,16 +184,15 @@
                                                                                                         user-environment =
                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                 {
-                                                                                                                    # extraBwrapArgs =
-                                                                                                                    #     let
-                                                                                                                    #         generator =
-                                                                                                                    #             index :
-                                                                                                                    #                 let
-                                                                                                                    #                     p = builtins.elemAt primary.mounts index ;
-                                                                                                                    #                     in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ p.sandbox }" ;
-                                                                                                                    #                     # in "" ;
-                                                                                                                    #         # in builtins.genList generator ( builtins.length primary.mounts ) ;
-                                                                                                                    #         in [ ] ;
+                                                                                                                    extraBwrapArgs =
+                                                                                                                        let
+                                                                                                                            generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        p = builtins.elemAt primary.mounts index ;
+                                                                                                                                        in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ p.sandbox }" ;
+                                                                                                                                        # in "" ;
+                                                                                                                            in builtins.genList generator ( builtins.length primary.mounts ) ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = point.test ;
                                                                                                                 } ;
