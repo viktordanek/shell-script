@@ -102,9 +102,7 @@
                                                                                                                     } ;
                                                                                                                 in environment injection ;
                                                                                                         script =
-                                                                                                            if builtins.typeOf script == "string" then
-                                                                                                                if builtins.pathExists script then script
-                                                                                                                else builtins.throw "The path for ${ script } does not exist."
+                                                                                                            if builtins.typeOf script == "string" then script
                                                                                                             else throw [ "string" ] path script ;
                                                                                                     } ;
                                                                                             in identity ( value null ) ;
@@ -191,7 +189,7 @@
                                                                                                                             generator =
                                                                                                                                 index :
                                                                                                                                     let
-                                                                                                                                        p = builtins.elemAt primary index ;
+                                                                                                                                        p = builtins.elemAt primary.mounts index ;
                                                                                                                                         in "--bind ${ p.host } ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
                                                                                                                             in builtins.genList generator ( builtins.length primary.mounts ) ;
                                                                                                                     name = "test-candidate" ;
@@ -257,6 +255,14 @@
                                                         candidate =
                                                             lib
                                                                 {
+                                                                    mounts =
+                                                                        [
+                                                                            {
+                                                                                "host" = "/tmp" ;
+                                                                                "sandbox" = "/test-temp" ;
+                                                                                "test" = "wtf" ;
+                                                                            }
+                                                                        ] ;
                                                                     shell-scripts =
                                                                         {
                                                                             alpha =
