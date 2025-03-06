@@ -201,7 +201,7 @@
                                                                                                                             error = error ;
                                                                                                                             output = output ;
                                                                                                                             status = status ;
-                                                                                                                            test = status ;
+                                                                                                                            test = test ;
                                                                                                                         } ;
                                                                                                                 in identity ( value null ) ;
                                                                                                         user-environment =
@@ -212,9 +212,10 @@
                                                                                                                             generator =
                                                                                                                                 index :
                                                                                                                                     let
-                                                                                                                                        sandbox = builtins.elemAt ( builtins.attrValues ( primary.mounts ) ) index ;
+                                                                                                                                        sandbox = builtins.elemAt ( builtins.attrNames ( primary.mounts ) ) index ;
                                                                                                                                         in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ sandbox }" ;
-                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
+                                                                                                                            x = builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
+                                                                                                                            in builtins.trace ( builtins.toJSON x ) x  ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = secondary.test ;
                                                                                                                     targetPkgs = pkgs : [ candidate ] ;
@@ -223,13 +224,17 @@
                                                                                                             builtins.concatLists
                                                                                                                 [
                                                                                                                     (
-                                                                                                                        builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                        builtins.genList ( index : "export MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ; then :; fi"
                                                                                                                         "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.observed" ] ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) }"
+                                                                                                                    ]
+                                                                                                                    [
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.test } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
                                                                                                                     ]
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/echo ${ secondary.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.expected" ] ] ) }"
@@ -309,6 +314,7 @@
                                                                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
                                                                                                     ( self "FIB" ( self : self.fib ) )
+                                                                                                    ( string "WHICH" "${ pkgs.which }/bin/which" )
                                                                                                 ] ;
                                                                                         tests =
                                                                                             [
