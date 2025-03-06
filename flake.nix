@@ -219,8 +219,17 @@
                                                                                                                     )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                        "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status ; fi"
+                                                                                                                        "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.observed 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error.observed ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status.observed ; fi"
                                                                                                                     ]
+                                                                                                                    (
+                                                                                                                        if builtins.typeOf point.output == "null" then [ ]
+                                                                                                                        else if builtins.typeOf point.output == "string" then
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/echo ${ point.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
+                                                                                                                                "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output.expected"
+                                                                                                                            ]
+                                                                                                                        else builtins.throw "WTF"
+                                                                                                                    )
                                                                                                                     (
                                                                                                                         if builtins.length primary.mounts == 0 then [ ]
                                                                                                                         else
@@ -308,6 +317,7 @@
                                                                                                     ignore :
                                                                                                         {
                                                                                                             test = "fib 0" ;
+                                                                                                            output = "0" ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
