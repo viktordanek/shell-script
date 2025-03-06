@@ -214,8 +214,7 @@
                                                                                                                                     let
                                                                                                                                         sandbox = builtins.elemAt ( builtins.attrNames ( primary.mounts ) ) index ;
                                                                                                                                         in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ sandbox }" ;
-                                                                                                                            x = builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
-                                                                                                                            in builtins.trace ( builtins.toJSON x ) x  ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = secondary.test ;
                                                                                                                     targetPkgs = pkgs : [ candidate ] ;
@@ -327,6 +326,31 @@
                                                                                                 )
                                                                                             ] ;
                                                                                     } ;
+                                                                            foobar =
+                                                                                ignore :
+                                                                                    {
+                                                                                        script = self + "/scripts/foobar.sh" ;
+                                                                                        environment =
+                                                                                            { self , string } :
+                                                                                                [
+                                                                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                                    ( string "STANDARD_ERROR" "b2c7c67b1451b4e2b850c29eacbe2ce6f3a9a63456e30e2c43577e4be49699c6631610527464c4b54f76257a6b396893bf1b991626c6875c159861e385905820" )
+                                                                                                    ( string "STANDARD_OUTPUT" "e8c856e1819a2403d5b210a8abebcb6c75abdfd4e5fd0d93669d4b80fe0bfda8c70cff03ba4f47564506bd5c21c0bb9710ff6f270aa330721ee96707887e50a5" )
+                                                                                                    ( string "STATUS" 113 )
+                                                                                                    ( string "TOKEN" "7861c7b30f4c436819c890600b78ca11e10494c9abea9cae750c26237bc70311b60bb9f8449b32832713438b36e8eaf5ec719445e6983c8799f7e193c9805a7" )
+                                                                                                ] ;
+                                                                                        tests =
+                                                                                            [
+                                                                                                (
+                                                                                                    ignore :
+                                                                                                       {
+                                                                                                            error = "b2c7c67b1451b4e2b850c29eacbe2ce6f3a9a63456e30e2c43577e4be49699c6631610527464c4b54f76257a6b396893bf1b991626c6875c159861e385905820" ;
+                                                                                                            output = "e8c856e1819a2403d5b210a8abebcb6c75abdfd4e5fd0d93669d4b80fe0bfda8c70cff03ba4f47564506bd5c21c0bb9710ff6f270aa330721ee96707887e50a5" ;
+                                                                                                            test = "foobar c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                        }
+                                                                                                )
+                                                                                            ] ;
+                                                                                    } ;
                                                                         } ;
                                                                 } ;
                                                         in
@@ -334,7 +358,7 @@
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests.fib } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests.foobar } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
