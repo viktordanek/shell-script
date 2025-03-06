@@ -14,7 +14,7 @@
                             lib =
                                 {
                                     default-name ? "script" ,
-                                    mounts ? [ ] ,
+                                    mounts ? { } ,
                                     shell-scripts ? null
                                 } :
                                     let
@@ -23,17 +23,11 @@
                                             {
                                                 default-name = if builtins.typeOf default-name == "string" then default-name else builtins.throw "default-name is not string but ${ builtins.typeOf default-name }." ;
                                                 mounts =
-                                                    if builtins.typeOf mounts == "list" then
+                                                    if builtins.typeOf mounts == "set" then
                                                         let
-                                                            mapper =
-                                                                { host , sandbox , test } :
-                                                                    {
-                                                                        host = if builtins.typeOf host == "string" then host else builtins.throw "host is not string but ${ builtins.typeOf host }." ;
-                                                                        sandbox = if builtins.typeOf sandbox == "string" then sandbox else builtins.throw "sandbox is not string but ${ builtins.typeOf sandbox }." ;
-                                                                        test = if builtins.typeOf test == "string" then test else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
-                                                                    } ;
-                                                                in builtins.map mapper mounts
-                                                    else builtins.throw "mounts is not list but ${ builtins.typeOf mounts }." ;
+                                                            mapper = name : value : if builtins.typeOf value == "string" then value else builtins.throw "The ${ name } attribute of mounts is not string but ${ builtins.typeOf value }." ;
+                                                                in builtins.mapAttrs mapper mounts
+                                                    else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                 shell-scripts =
                                                     _visitor
                                                         {
@@ -155,8 +149,8 @@
                                                                             {
                                                                                 extraBwrapArgs =
                                                                                     let
-                                                                                        mapper = { host , sandbox , test } : "--bind ${ host } ${ sandbox }" ;
-                                                                                        in builtins.concatLists [ [ "--ro-bind ${ derivation } /shell-scripts" ] ( builtins.map mapper primary.mounts ) ] ;
+                                                                                        mapper = sandbox : host : "--bind ${ host } ${ sandbox }" ;
+                                                                                        in builtins.concatLists [ [ "--ro-bind ${ derivation } /shell-scripts" ] ( builtins.attrValues ( builtins.mapAttrs mapper primary.mounts ) ) ] ;
                                                                                 name = name ;
                                                                                 runScript = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/shell-scripts" ] path ] ) ;
                                                                             } ;
@@ -218,9 +212,9 @@
                                                                                                                             generator =
                                                                                                                                 index :
                                                                                                                                     let
-                                                                                                                                        p = builtins.elemAt primary.mounts index ;
-                                                                                                                                        in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ p.sandbox }" ;
-                                                                                                                            in builtins.genList generator ( builtins.length primary.mounts ) ;
+                                                                                                                                        sandbox = builtins.elemAt ( builtins.attrValues ( primary.mounts ) ) index ;
+                                                                                                                                        in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ sandbox }" ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = secondary.test ;
                                                                                                                     targetPkgs = pkgs : [ candidate ] ;
@@ -229,35 +223,30 @@
                                                                                                             builtins.concatLists
                                                                                                                 [
                                                                                                                     (
-                                                                                                                        builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length primary.mounts )
+                                                                                                                        builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                        "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/output.observed 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/error.observed ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status.observed ; fi"
+                                                                                                                        "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ; then :; fi"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.observed" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) }"
                                                                                                                     ]
                                                                                                                     [
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/output.expected"
-                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/output.expected"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.expected" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.expected" ] ] ) }"
                                                                                                                     ]
                                                                                                                     [
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/error.expected"
-                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/error.expected"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.expected" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.expected" ] ] ) }"
                                                                                                                     ]
                                                                                                                     [
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.status } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status.expected"
-                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0444 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status.expected"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ secondary.status } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.expected" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.expected" ] ] ) }"
                                                                                                                     ]
-                                                                                                                    (
-                                                                                                                        if builtins.length primary.mounts == 0 then [ ]
-                                                                                                                        else
-                                                                                                                            [
-                                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
-                                                                                                                            ]
-                                                                                                                    )
                                                                                                                     (
                                                                                                                         let
-                                                                                                                            generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }/${ builtins.toString index }.observed" ;
-                                                                                                                            in builtins.genList generator ( builtins.length primary.mounts )
+                                                                                                                            generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.observed" ] ] ) }" ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                 ] ;
                                                                                         }
@@ -302,14 +291,7 @@
                                                         candidate =
                                                             lib
                                                                 {
-                                                                    mounts =
-                                                                        [
-                                                                            {
-                                                                                "host" = "/tmp" ;
-                                                                                "sandbox" = "/test-temp" ;
-                                                                                "test" = "wtf" ;
-                                                                            }
-                                                                        ] ;
+                                                                    mounts = { "/sandbox" = "/tmp" ; } ;
                                                                     shell-scripts =
                                                                         {
                                                                             alpha =
