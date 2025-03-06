@@ -199,9 +199,9 @@
                                                                                                         in
                                                                                                             builtins.concatLists
                                                                                                                 [
-                                                                                                                    # (
-                                                                                                                    #     builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( pkgs.coreutils }/bin/mkdir --directory )" ) ( builtins.length primary.mounts )
-                                                                                                                    # )
+                                                                                                                    (
+                                                                                                                        builtins.genList ( index : "MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length primary.mounts )
+                                                                                                                    )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status ; fi"
@@ -212,6 +212,11 @@
                                                                                                                             [
                                                                                                                                 "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
                                                                                                                             ]
+                                                                                                                    )
+                                                                                                                    (
+                                                                                                                        let
+                                                                                                                            generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }/${ builtins.toString index }.observed" ;
+                                                                                                                            in builtins.genList generator ( builtins.length primary.mounts )
                                                                                                                     )
                                                                                                                 ] ;
                                                                                         }
