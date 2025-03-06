@@ -22,6 +22,18 @@
                                         primary =
                                             {
                                                 default-name = if builtins.typeOf default-name == "string" then default-name else builtins.throw "default-name is not string but ${ builtins.typeOf default-name }." ;
+                                                mounts =
+                                                    if builtins.typeOf mounts == "list" then
+                                                        let
+                                                            mapper =
+                                                                { host , sandbox , test } :
+                                                                    {
+                                                                        host = if builtins.typeOf host == "string" then host else builtins.throw "host is not string but ${ builtins.typeOf host }." ;
+                                                                        sandbox = if builtins.typeOf sandbox == "string" then sandbox else builtins.throw "sandbox is not string but ${ builtins.typeOf sandbox }." ;
+                                                                        test = if builtins.typeOf test == "string" then test else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
+                                                                    } ;
+                                                                in builtins.map mapper mounts
+                                                    else builtins.throw "mounts is not list but ${ builtins.typeOf mounts }." ;
                                                 shell-scripts =
                                                     _visitor
                                                         {
