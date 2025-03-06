@@ -207,6 +207,13 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "if ! ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-output 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/standard-error ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }/status ; fi"
                                                                                                                     ]
+                                                                                                                    (
+                                                                                                                        if builtins.length primary.mounts == 0 then [ ]
+                                                                                                                        else
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
+                                                                                                                            ]
+                                                                                                                    )
                                                                                                                 ] ;
                                                                                         }
                                                                                         {
