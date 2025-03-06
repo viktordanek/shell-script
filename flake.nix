@@ -188,8 +188,12 @@
                                                                                                                 {
                                                                                                                     extraBwrapArgs =
                                                                                                                         let
-                                                                                                                            mapper = { host , sandbox , test } : "--bind ${ test } ${ sandbox }" ;
-                                                                                                                            in builtins.map mapper primary.mounts ;
+                                                                                                                            generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        p = builtins.elemAt primary index ;
+                                                                                                                                        in "--bind ${ p.host } ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
+                                                                                                                            in builtins.genList generator ( builtins.length primary.mounts ) ;
                                                                                                                     name = "test-candidate" ;
                                                                                                                     runScript = point.test ;
                                                                                                                 } ;
