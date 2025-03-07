@@ -246,7 +246,7 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "expected" ] ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "observed" ] ] ) }"
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ builtins.toString ( secondary.test name "${ pkgs.coreutils }/bin/echo" ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo '${ builtins.toString ( secondary.test name "${ pkgs.coreutils }/bin/echo" ) }' > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
                                                                                                                     ]
                                                                                                                     (
                                                                                                                         let
@@ -397,18 +397,18 @@
                                                                                                 (
                                                                                                     ignore :
                                                                                                        {
-                                                                                                            error = "50885ccf7ec0a2420f1c7555e54df8512508f93002313cfd71d6de510f8a8a6c035beca3589f2a5248069e02f57535ef3231004cd8d40f8a79b28d605fb6f89b" ;
+                                                                                                            error = "cda54c2ea3f3b8a7cc2ecc3fcfdbdf16f01ad317614acd60e1cdd3232dc269904e69f5dd7f7fa76309b3f277ceaa1dea931d2fdb37db5afa543421c5457993da" ;
                                                                                                             mounts =
                                                                                                                 {
                                                                                                                     "/sandbox" =
                                                                                                                         {
-                                                                                                                            expected = self + "/mounts/RSGhGwNk" ;
+                                                                                                                            expected = self + "/mounts/K4BODmfI" ;
                                                                                                                             initial = self + "/mounts/QoqNiM1R" ;
                                                                                                                         } ;
                                                                                                                 } ;
-                                                                                                            output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
-                                                                                                            test = candidate : echo : "${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
-                                                                                                            status = 35 ;
+                                                                                                            output = "c8178d4c4118a83848b4b11279e10b0a7a9b3a322973f6893a5da5bde718d052f205ed89264afcca9adc66e0fbc03cb1ba8b35a87de734e332af0e393478abb3" ;
+                                                                                                            test = candidate : echo : "${ echo } f37938b0af93fdfe59ae7fb1d76c4aa6bc14fbbe50f37c1963216253dc5d0a4cb9d54721d52b632b4a74d2d2b461bfc11ac35e1f985cdd90d3c79fe1bfe674e9 | ${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                            status = 11 ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
