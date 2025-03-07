@@ -276,7 +276,7 @@
                                                                                                                     ]
                                                                                                                     (
                                                                                                                         let
-                                                                                                                            generator = index : "${ pkgs.coreutils }/bin/mv ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.observed" ] ] ) }" ;
+                                                                                                                            generator = index : "${ pkgs.coreutils }/bin/cp --recursive ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.observed" ] ] ) }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     (
@@ -390,7 +390,7 @@
                                                                                                                 {
                                                                                                                     "/sandbox" =
                                                                                                                         {
-                                                                                                                            initial = self + "/mounts/RSGhGwNk/file" ;
+                                                                                                                            initial = self + "/mounts/RSGhGwNk" ;
                                                                                                                             expected = self + "/mounts/QoqNiM1R" ;
                                                                                                                         } ;
                                                                                                                 } ;
