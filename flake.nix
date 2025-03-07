@@ -237,21 +237,21 @@
                                                                                                             builtins.concatLists
                                                                                                                 [
                                                                                                                     (
-                                                                                                                        builtins.genList ( index : "export MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --directory )" ) ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                        builtins.genList ( index : "export MOUNT_${ builtins.toString index }=$( ${ pkgs.coreutils }/bin/mktemp --dry-run )" ) ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     [
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                     ]
-                                                                                                                    # (
-                                                                                                                    #     let
-                                                                                                                    #        generator =
-                                                                                                                    #             index :
-                                                                                                                    #                 let
-                                                                                                                    #                     mount = builtins.getAttr tag secondary.mounts ;
-                                                                                                                    #                     tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
-                                                                                                                    #                     in "${ pkgs.coreutils }/bin/cp --recursive ${ mount.initial } ${ builtins.concatStringsSep "/" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
-                                                                                                                    #         in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
-                                                                                                                    # )
+                                                                                                                    (
+                                                                                                                        let
+                                                                                                                           generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        mount = builtins.getAttr tag secondary.mounts ;
+                                                                                                                                        tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
+                                                                                                                                        in "${ pkgs.coreutils }/bin/cp --recursive ${ mount.initial } ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                    )
                                                                                                                     [
                                                                                                                         "if ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.observed" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "status.observed" ] ] ) } ; fi"
                                                                                                                         "${ pkgs.coreutils }/bin/chmod 0755 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "output.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "error.observed" ] ] ) }"
