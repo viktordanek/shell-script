@@ -254,7 +254,7 @@
                                                                                                                                     let
                                                                                                                                         mount = builtins.getAttr tag secondary.mounts ;
                                                                                                                                         tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
-                                                                                                                                        in "${ pkgs.coreutils }/bin/cp --recursive ${ mount.initial } ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
+                                                                                                                                        in "${ pkgs.coreutils }/bin/cp --no-preserve=mode --recursive ${ mount.initial } ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     [
@@ -281,7 +281,7 @@
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                     [
-                                                                                                                        "${ pkgs.findutils }/bin/find --recursive ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "expected" ] ] ) }" ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "expected" ] ] ) }" > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "diff" ] ] ) }"
+                                                                                                                        "if ${ pkgs.diffutils }/bin/diff --recursive ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "expected" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "observed" ] ] ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "diff" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "diff.status" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "diff.status" ] ] ) } ; fi"
                                                                                                                     ]
                                                                                                                 ] ;
                                                                                         }
@@ -379,18 +379,18 @@
                                                                                                 (
                                                                                                     ignore :
                                                                                                        {
-                                                                                                            error = "b2c7c67b1451b4e2b850c29eacbe2ce6f3a9a63456e30e2c43577e4be49699c6631610527464c4b54f76257a6b396893bf1b991626c6875c159861e385905820" ;
+                                                                                                            error = "50885ccf7ec0a2420f1c7555e54df8512508f93002313cfd71d6de510f8a8a6c035beca3589f2a5248069e02f57535ef3231004cd8d40f8a79b28d605fb6f89b" ;
                                                                                                             mounts =
                                                                                                                 {
                                                                                                                     "/sandbox" =
                                                                                                                         {
-                                                                                                                            initial = self + "/mounts/RSGhGwNk" ;
-                                                                                                                            expected = self + "/mounts/QoqNiM1R" ;
+                                                                                                                            expected = self + "/mounts/RSGhGwNk" ;
+                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
                                                                                                                         } ;
                                                                                                                 } ;
-                                                                                                            output = "e8c856e1819a2403d5b210a8abebcb6c75abdfd4e5fd0d93669d4b80fe0bfda8c70cff03ba4f47564506bd5c21c0bb9710ff6f270aa330721ee96707887e50a5" ;
+                                                                                                            output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
                                                                                                             test = "foobar c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
-                                                                                                            status = 113 ;
+                                                                                                            status = 35 ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
