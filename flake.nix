@@ -160,6 +160,118 @@
                                                     }
                                                     { }
                                                     primary.shell-scripts ;
+                                            tests2 =
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            let
+                                                                constructors =
+                                                                    _visitor
+                                                                        {
+                                                                            lambda =
+                                                                                path : value :
+                                                                                    let
+                                                                                        expected = builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ;
+                                                                                        observed = builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ;
+                                                                                        point = value null ;
+                                                                                        in
+                                                                                            _visitor
+                                                                                                {
+                                                                                                    lambda =
+                                                                                                        path : value :
+                                                                                                            let
+                                                                                                                secondary =
+                                                                                                                    let
+                                                                                                                        identity =
+                                                                                                                            {
+                                                                                                                                error ? "" ,
+                                                                                                                                mounts ? { } ,
+                                                                                                                                output ? "" ,
+                                                                                                                                status ? "0" ,
+                                                                                                                                test
+                                                                                                                            } :
+                                                                                                                                {
+                                                                                                                                    error = error ;
+                                                                                                                                    mounts =
+                                                                                                                                        if builtins.typeOf mounts == "set" then
+                                                                                                                                            if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts do not match.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
+                                                                                                                                            else
+                                                                                                                                                let
+                                                                                                                                                    mapper =
+                                                                                                                                                        name : { initial , expected } :
+                                                                                                                                                            {
+                                                                                                                                                                initial = initial ;
+                                                                                                                                                                expected = expected ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in builtins.mapAttrs mapper mounts
+                                                                                                                                        else builtins.throw [ "set" ] path mounts ;
+                                                                                                                                    output = output ;
+                                                                                                                                    status = status ;
+                                                                                                                                    test = test ;
+                                                                                                                                } ;
+                                                                                                                        in identity ( value null ) ;
+                                                                                                                in
+                                                                                                                    [
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "error" ( builtins.toString secondary.error ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/error"
+                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "output" ( builtins.toString secondary.output ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/output"
+                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "status" ( builtins.toString secondary.status ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/status"
+                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "test" ( builtins.toString secondary.test ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/test"
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                    ] ;
+                                                                                                    null = path : value : [ ] ;
+                                                                                                }
+                                                                                                {
+                                                                                                    list =
+                                                                                                        path : list :
+                                                                                                            builtins.concatLists
+                                                                                                                [
+                                                                                                                    [
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                    ]
+                                                                                                                ] ;
+                                                                                                    set =
+                                                                                                        path : set :
+                                                                                                            builtins.concatLists
+                                                                                                                [
+                                                                                                                    [
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                    ]
+                                                                                                               ] ;
+                                                                                                }
+                                                                                                point.tests ;
+                                                                        }
+                                                                        {
+                                                                            list =
+                                                                                path : list :
+                                                                                    builtins.concatLists
+                                                                                        [
+                                                                                            [
+                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                            ]
+                                                                                            ( builtins.concatLists list )
+                                                                                        ] ;
+                                                                            set =
+                                                                                path : set :
+                                                                                    builtins.concatLists
+                                                                                        [
+                                                                                            [
+                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                            ]
+                                                                                            ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                        ] ;
+                                                                        }
+                                                                        primary.shell-scripts ;
+                                                                expected = [ "$out" "expected" ] ;
+                                                                observed = [ "$out" "observed" ] ;
+                                                                in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
+                                                        name = "tests" ;
+                                                        src = ./. ;
+                                                    } ;
                                             tests =
                                                 _visitor
                                                     {
@@ -420,7 +532,7 @@
                                                                 ${ pkgs.coreutils }/bin/touch $out &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests.foobar } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests2 } &&
                                                                     exit 64
                                                             '' ;
                                                 name = "easy" ;
