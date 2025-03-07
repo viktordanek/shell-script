@@ -230,6 +230,7 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                     ]
+                                                                                                                    # ( builtins.concatLists list )
                                                                                                                 ] ;
                                                                                                     set =
                                                                                                         path : set :
@@ -239,6 +240,7 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                     ]
+                                                                                                                    ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                                                ] ;
                                                                                                 }
                                                                                                 point.tests ;
