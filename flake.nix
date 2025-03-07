@@ -169,6 +169,7 @@
                                                                     {
                                                                         installPhase =
                                                                             let
+                                                                                name = if builtins.length path > 0 then builtins.toString ( builtins.elemAt path ( ( builtins.length path ) - 1 ) ) else primary.default-name ;
                                                                                 candidate =
                                                                                     pkgs.stdenv.mkDerivation
                                                                                         {
@@ -232,7 +233,7 @@
                                                                                                                                         in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ sandbox }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
                                                                                                                     name = "test-candidate" ;
-                                                                                                                    runScript = secondary.test ;
+                                                                                                                    runScript = pkgs.writeShellScript "test" ( secondary.test name "${ pkgs.coreutils }/bin/echo" ) ;
                                                                                                                     targetPkgs = pkgs : [ candidate ] ;
                                                                                                                 } ;
                                                                                                         in
@@ -245,7 +246,7 @@
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "expected" ] ] ) }"
                                                                                                                         "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "observed" ] ] ) }"
-                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ builtins.toString secondary.test } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
+                                                                                                                        "${ pkgs.coreutils }/bin/echo ${ builtins.toString ( secondary.test name "${ pkgs.coreutils }/bin/echo" ) } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "test" ] ] ) }"
                                                                                                                     ]
                                                                                                                     (
                                                                                                                         let
@@ -389,7 +390,24 @@
                                                                                                                         } ;
                                                                                                                 } ;
                                                                                                             output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
-                                                                                                            test = "foobar c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                            test = candidate : echo : "${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                            status = 35 ;
+                                                                                                        }
+                                                                                                )
+                                                                                                (
+                                                                                                    ignore :
+                                                                                                       {
+                                                                                                            error = "50885ccf7ec0a2420f1c7555e54df8512508f93002313cfd71d6de510f8a8a6c035beca3589f2a5248069e02f57535ef3231004cd8d40f8a79b28d605fb6f89b" ;
+                                                                                                            mounts =
+                                                                                                                {
+                                                                                                                    "/sandbox" =
+                                                                                                                        {
+                                                                                                                            expected = self + "/mounts/RSGhGwNk" ;
+                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                                        } ;
+                                                                                                                } ;
+                                                                                                            output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
+                                                                                                            test = candidate : echo : "${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
                                                                                                             status = 35 ;
                                                                                                         }
                                                                                                 )
