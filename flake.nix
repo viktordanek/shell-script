@@ -211,7 +211,7 @@
                                                                                                                                                         initial = initial ;
                                                                                                                                                         expected = expected ;
                                                                                                                                                     } ;
-                                                                                                                                            in builtins.map mapper mounts
+                                                                                                                                            in builtins.mapAttrs mapper mounts
                                                                                                                                 else builtins.throw [ "set" ] path mounts ;
                                                                                                                             output = output ;
                                                                                                                             status = status ;
@@ -272,7 +272,7 @@
                                                                                                                                     let
                                                                                                                                         mount = builtins.getAttr tag secondary.mounts ;
                                                                                                                                         tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
-                                                                                                                                        in "${ pkgs.coreutils }/bin/true ${ tag } ${ mount }" ; # "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.expected" ] ] ) }" ;
+                                                                                                                                        in "${ pkgs.coreutils }/bin/true ${ tag } ${ builtins.trace ( builtins.typeOf mount ) "" }" ; # "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" ] ( builtins.map builtins.toJSON path ) [ "mounts.${ builtins.toString index }.expected" ] ] ) }" ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                     )
                                                                                                                 ] ;
