@@ -81,6 +81,7 @@
                                                                                                             let
                                                                                                                 injection =
                                                                                                                     {
+                                                                                                                        path = name : index : "--set ${ name } ${ builtins.toString ( builtins.elemAt path index ) }" ;
                                                                                                                         self =
                                                                                                                             name : lambda :
                                                                                                                                 let
@@ -92,6 +93,7 @@
                                                                                                                                             { }
                                                                                                                                             primary.shell-scripts ;
                                                                                                                                     in "--set ${ name } $out/${ builtins.toString ( lambda self ) }" ;
+                                                                                                                        standard-input = { name ? "STANDARD_INPUT" } : "--run 'export ${ name }=$( if [ -f /proc/self/fd/0 ] || [ -p /proc/self/fd/0 ] ; then ${ pkgs.coreutils }/bin/cat ; else ${ pkgs.coreutils }/bin/echo ; fi )'" ;
                                                                                                                         string = name : value : "--set ${ name } ${ builtins.toString value }" ;
                                                                                                                     } ;
                                                                                                                 in environment injection ;
@@ -343,7 +345,7 @@
                                                                                     {
                                                                                         script = self + "/scripts/fib.sh" ;
                                                                                         environment =
-                                                                                            { self , string } :
+                                                                                            { path , self , standard-input , string } :
                                                                                                 [
                                                                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
@@ -366,12 +368,16 @@
                                                                                     {
                                                                                         script = self + "/scripts/foobar.sh" ;
                                                                                         environment =
-                                                                                            { self , string } :
+                                                                                            { path , self , standard-input , string } :
+
                                                                                                 [
+                                                                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                                    ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
                                                                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                                    ( string "STANDARD_ERROR" "b2c7c67b1451b4e2b850c29eacbe2ce6f3a9a63456e30e2c43577e4be49699c6631610527464c4b54f76257a6b396893bf1b991626c6875c159861e385905820" )
-                                                                                                    ( string "STANDARD_OUTPUT" "e8c856e1819a2403d5b210a8abebcb6c75abdfd4e5fd0d93669d4b80fe0bfda8c70cff03ba4f47564506bd5c21c0bb9710ff6f270aa330721ee96707887e50a5" )
-                                                                                                    ( string "STATUS" 113 )
+                                                                                                    ( self "FOOBAR" ( self : self.foobar ) )
+                                                                                                    ( path "NAME" 0 )
+                                                                                                    ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                                    ( standard-input { name = "ceb56d2bcebc8e9cc485a093712de696d47b96ca866254795e566f370e2e76d92d7522558aaf4e9e7cdd6b603b527cee48a1af68a0abc1b68f2348f055346408" ; } )
                                                                                                     ( string "TOKEN" "7861c7b30f4c436819c890600b78ca11e10494c9abea9cae750c26237bc70311b60bb9f8449b32832713438b36e8eaf5ec719445e6983c8799f7e193c9805a7" )
                                                                                                 ] ;
                                                                                         tests =
@@ -384,7 +390,7 @@
                                                                                                                 {
                                                                                                                     "/sandbox" =
                                                                                                                         {
-                                                                                                                            initial = self + "/mounts/QoqNiM1R/file" ;
+                                                                                                                            initial = self + "/mounts/RSGhGwNk/file" ;
                                                                                                                             expected = self + "/mounts/QoqNiM1R/file" ;
                                                                                                                         } ;
                                                                                                                 } ;
