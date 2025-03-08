@@ -263,7 +263,7 @@
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "output" ( builtins.toString secondary.output ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) [ "output" ] ] ) }"
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "status" ( builtins.toString secondary.status ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                                                 "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                                "if ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "output" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "error" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; fi"
+                                                                                                                                "if ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "output" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "error" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo -n ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo -n ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; fi"
                                                                                                                             ]
                                                                                                                             (
                                                                                                                                 let
@@ -272,15 +272,11 @@
                                                                                                                                             let
                                                                                                                                                 mount = builtins.getAttr tag ( secondary.mounts ) ;
                                                                                                                                                 tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
-                                                                                                                                                in "${ pkgs.coreutils }/bin/cp --recursive ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) [ "mount.${ builtins.toString index }" ] ] ) }" ;
+                                                                                                                                                in "${ pkgs.coreutils }/bin/cp --recursive ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "mount.${ builtins.toString index }" ] ] ) }" ;
                                                                                                                                     in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                             )
                                                                                                                             [
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate }/bin/candidate ${ builtins.concatStringsSep "/" ( builtins.concatLists [ test ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                            ]
-                                                                                                                            [
-                                                                                                                                "${ pkgs.coreutils }/bin/echo $out"
-                                                                                                                                "${ pkgs.diffutils }/bin/diff $out/expected $out/observed"
                                                                                                                             ]
                                                                                                                         ] ;
                                                                                                     null = path : value : [ ] ;
@@ -339,7 +335,7 @@
                                                                 expected = [ "$out" "expected" ] ;
                                                                 observed = [ "$out" "observed" ] ;
                                                                 test = [ "$out" "test" ] ;
-                                                                in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
+                                                                in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors [ "${ pkgs.coreutils }/bin/echo $out" "${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed" ] ] ) ;
                                                         name = "tests" ;
                                                         src = ./. ;
                                                     } ;
@@ -381,8 +377,8 @@
                                                                                                     {
                                                                                                         "/sandbox" =
                                                                                                             {
-                                                                                                                expected = self + "/mounts/K4BODmfI" ;
-                                                                                                                initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                                expected = self + "/mounts/xDFzfle2" ;
+                                                                                                                initial = self + "/mounts/xDFzfle2" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 output = "0" ;
@@ -407,6 +403,7 @@
                                                                                         ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
                                                                                         ( standard-input { name = "ceb56d2bcebc8e9cc485a093712de696d47b96ca866254795e566f370e2e76d92d7522558aaf4e9e7cdd6b603b527cee48a1af68a0abc1b68f2348f055346408" ; } )
                                                                                         ( string "TOKEN" "7861c7b30f4c436819c890600b78ca11e10494c9abea9cae750c26237bc70311b60bb9f8449b32832713438b36e8eaf5ec719445e6983c8799f7e193c9805a7" )
+                                                                                        ( string "TR" "${ pkgs.coreutils }/bin/tr" )
                                                                                     ] ;
                                                                             tests =
                                                                                 [
