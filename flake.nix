@@ -136,7 +136,6 @@
                                                 } ;
                                     in
                                         {
-                                            derivation = derivation ;
                                             shell-scripts =
                                                 _visitor
                                                     {
