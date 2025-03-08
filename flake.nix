@@ -14,6 +14,7 @@
                             lib =
                                 {
                                     default-name ? "script" ,
+                                    extensions ? [ ] ,
                                     mounts ? { } ,
                                     shell-scripts ? null
                                 } :
@@ -22,6 +23,7 @@
                                         primary =
                                             {
                                                 default-name = if builtins.typeOf default-name == "string" then default-name else builtins.throw "default-name is not string but ${ builtins.typeOf default-name }." ;
+                                                extensions = if builtins.typeOf extensions == "list" then extensions else builtins.throw "extensions is not list but ${ builtins.typeOf extensions }." ;
                                                 mounts =
                                                     if builtins.typeOf mounts == "set" then
                                                         let
@@ -80,23 +82,29 @@
                                                                                                         environment =
                                                                                                             let
                                                                                                                 injection =
-                                                                                                                    {
-                                                                                                                        path = name : index : "--set ${ name } ${ builtins.toString ( builtins.elemAt path index ) }" ;
-                                                                                                                        self =
-                                                                                                                            name : lambda :
-                                                                                                                                let
-                                                                                                                                    self =
-                                                                                                                                        _visitor
-                                                                                                                                            {
-                                                                                                                                                lambda = path : value : builtins.concatStringsSep "" ( builtins.map builtins.toJSON path ) ;
-                                                                                                                                            }
-                                                                                                                                            { }
-                                                                                                                                            primary.shell-scripts ;
-                                                                                                                                    in "--set ${ name } $out/${ builtins.toString ( lambda self ) }" ;
-                                                                                                                        standard-input = { name ? "STANDARD_INPUT" } : "--run 'export ${ name }=$( if [ -f /proc/self/fd/0 ] || [ -p /proc/self/fd/0 ] ; then ${ pkgs.coreutils }/bin/cat ; else ${ pkgs.coreutils }/bin/echo ; fi )'" ;
-                                                                                                                        string = name : value : "--set ${ name } ${ builtins.toString value }" ;
-                                                                                                                    } ;
-                                                                                                                in environment injection ;
+                                                                                                                    [
+                                                                                                                        { name = "path" ; value = name : index : "--set ${ name } ${ builtins.toString ( builtins.elemAt path index ) }" ; }
+                                                                                                                        {
+                                                                                                                            name = "self" ;
+                                                                                                                            value =
+                                                                                                                                name : lambda :
+                                                                                                                                    let
+                                                                                                                                        self =
+                                                                                                                                            _visitor
+                                                                                                                                                {
+                                                                                                                                                    lambda = path : value : builtins.concatStringsSep "" ( builtins.map builtins.toJSON path ) ;
+                                                                                                                                                }
+                                                                                                                                                { }
+                                                                                                                                                primary.shell-scripts ;
+                                                                                                                                        in "--set ${ name } $out/${ builtins.toString ( lambda self ) }" ;
+                                                                                                                        }
+                                                                                                                        {
+                                                                                                                            name = "standard-input" ;
+                                                                                                                            value = { name ? "STANDARD_INPUT" } : "--run 'export ${ name }=$( if [ -f /proc/self/fd/0 ] || [ -p /proc/self/fd/0 ] ; then ${ pkgs.coreutils }/bin/cat ; else ${ pkgs.coreutils }/bin/echo ; fi )'" ;
+                                                                                                                        }
+                                                                                                                        { name = "string" ; value = name : value : "--set ${ name } ${ builtins.toString value }" ; }
+                                                                                                                    ] ;
+                                                                                                                in environment ( builtins.listToAttrs ( builtins.concatLists [ injection extensions ] ) ) ;
                                                                                                         script =
                                                                                                             if builtins.typeOf script == "string" then script
                                                                                                             else throw [ "string" ] path script ;
