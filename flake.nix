@@ -276,6 +276,9 @@
                                                                                                                                                 in "${ pkgs.coreutils }/bin/cp --recursive ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) [ "mount.${ builtins.toString index }" ] ] ) }" ;
                                                                                                                                     in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
                                                                                                                             )
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate }/bin/candidate ${ builtins.concatStringsSep "/" ( builtins.concatLists [ test ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                            ]
                                                                                                                         ] ;
                                                                                                     null = path : value : [ ] ;
                                                                                                 }
