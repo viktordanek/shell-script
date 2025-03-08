@@ -160,7 +160,7 @@
                                                     }
                                                     { }
                                                     primary.shell-scripts ;
-                                            tests2 =
+                                            tests =
                                                 pkgs.stdenv.mkDerivation
                                                     {
                                                         installPhase =
@@ -279,6 +279,10 @@
                                                                                                                             [
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ candidate }/bin/candidate ${ builtins.concatStringsSep "/" ( builtins.concatLists [ test ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                             ]
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/echo $out"
+                                                                                                                                "${ pkgs.diffutils }/bin/diff $out/expected $out/observed"
+                                                                                                                            ]
                                                                                                                         ] ;
                                                                                                     null = path : value : [ ] ;
                                                                                                 }
@@ -345,120 +349,107 @@
                             in
                                 {
                                     checks.easy =
-                                        pkgs.stdenv.mkDerivation
-                                            {
-                                                installPhase =
-                                                    let
-                                                        candidate =
-                                                            lib
-                                                                {
-                                                                    mounts = { "/sandbox" = "/tmp" ; } ;
-                                                                    shell-scripts =
+                                        let
+                                            candidate =
+                                                lib
+                                                    {
+                                                        mounts = { "/sandbox" = "/tmp" ; } ;
+                                                        shell-scripts =
+                                                            {
+                                                                alpha =
+                                                                    ignore :
                                                                         {
-                                                                            alpha =
-                                                                                ignore :
-                                                                                    {
-                                                                                        script = self + "/scripts/alpha.sh" ;
-                                                                                    } ;
-                                                                            fib =
-                                                                                ignore :
-                                                                                    {
-                                                                                        script = self + "/scripts/fib.sh" ;
-                                                                                        environment =
-                                                                                            { path , self , standard-input , string } :
-                                                                                                [
-                                                                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                                    ( self "FIB" ( self : self.fib ) )
-                                                                                                    ( string "WHICH" "${ pkgs.which }/bin/which" )
-                                                                                                ] ;
-                                                                                        tests =
-                                                                                            [
-                                                                                                (
-                                                                                                    ignore :
-                                                                                                        {
-                                                                                                            mounts =
-                                                                                                                {
-                                                                                                                    "/sandbox" =
-                                                                                                                        {
-                                                                                                                            expected = self + "/mounts/K4BODmfI" ;
-                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
-                                                                                                                        } ;
-                                                                                                                } ;
-                                                                                                            output = "0" ;
-                                                                                                            test = "candidate 0" ;
-                                                                                                        }
-                                                                                                )
-                                                                                            ] ;
-                                                                                    } ;
-                                                                            foobar =
-                                                                                ignore :
-                                                                                    {
-                                                                                        script = self + "/scripts/foobar.sh" ;
-                                                                                        environment =
-                                                                                            { path , self , standard-input , string } :
-
-                                                                                                [
-                                                                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                                    ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
-                                                                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                                    ( self "FOOBAR" ( self : self.foobar ) )
-                                                                                                    ( path "NAME" 0 )
-                                                                                                    ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                                                                    ( standard-input { name = "ceb56d2bcebc8e9cc485a093712de696d47b96ca866254795e566f370e2e76d92d7522558aaf4e9e7cdd6b603b527cee48a1af68a0abc1b68f2348f055346408" ; } )
-                                                                                                    ( string "TOKEN" "7861c7b30f4c436819c890600b78ca11e10494c9abea9cae750c26237bc70311b60bb9f8449b32832713438b36e8eaf5ec719445e6983c8799f7e193c9805a7" )
-                                                                                                ] ;
-                                                                                        tests =
-                                                                                            [
-                                                                                                (
-                                                                                                    ignore :
-                                                                                                       {
-                                                                                                            error = "50885ccf7ec0a2420f1c7555e54df8512508f93002313cfd71d6de510f8a8a6c035beca3589f2a5248069e02f57535ef3231004cd8d40f8a79b28d605fb6f89b" ;
-                                                                                                            mounts =
-                                                                                                                {
-                                                                                                                    "/sandbox" =
-                                                                                                                        {
-                                                                                                                            expected = self + "/mounts/RSGhGwNk" ;
-                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
-                                                                                                                        } ;
-                                                                                                                } ;
-                                                                                                            output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
-                                                                                                            test = "candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
-                                                                                                            status = 35 ;
-                                                                                                        }
-                                                                                                )
-                                                                                                (
-                                                                                                    ignore :
-                                                                                                       {
-                                                                                                            error = "cda54c2ea3f3b8a7cc2ecc3fcfdbdf16f01ad317614acd60e1cdd3232dc269904e69f5dd7f7fa76309b3f277ceaa1dea931d2fdb37db5afa543421c5457993da" ;
-                                                                                                            mounts =
-                                                                                                                {
-                                                                                                                    "/sandbox" =
-                                                                                                                        {
-                                                                                                                            expected = self + "/mounts/K4BODmfI" ;
-                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
-                                                                                                                        } ;
-                                                                                                                } ;
-                                                                                                            output = "c8178d4c4118a83848b4b11279e10b0a7a9b3a322973f6893a5da5bde718d052f205ed89264afcca9adc66e0fbc03cb1ba8b35a87de734e332af0e393478abb3" ;
-                                                                                                            test = "${ pkgs.coreutils }/bin/echo f37938b0af93fdfe59ae7fb1d76c4aa6bc14fbbe50f37c1963216253dc5d0a4cb9d54721d52b632b4a74d2d2b461bfc11ac35e1f985cdd90d3c79fe1bfe674e9 | candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
-                                                                                                            status = 11 ;
-                                                                                                        }
-                                                                                                )
-                                                                                            ] ;
-                                                                                    } ;
+                                                                            script = self + "/scripts/alpha.sh" ;
                                                                         } ;
-                                                                } ;
-                                                        in
-                                                            ''
-                                                                ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.derivation } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.shell-scripts.fib } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ candidate.tests2 } &&
-                                                                    exit 64
-                                                            '' ;
-                                                name = "easy" ;
-                                                src = ./. ;
-                                            } ;
+                                                                fib =
+                                                                    ignore :
+                                                                        {
+                                                                            script = self + "/scripts/fib.sh" ;
+                                                                            environment =
+                                                                                { path , self , standard-input , string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( self "FIB" ( self : self.fib ) )
+                                                                                        ( string "WHICH" "${ pkgs.which }/bin/which" )
+                                                                                    ] ;
+                                                                            tests =
+                                                                                [
+                                                                                    (
+                                                                                        ignore :
+                                                                                            {
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/sandbox" =
+                                                                                                            {
+                                                                                                                expected = self + "/mounts/K4BODmfI" ;
+                                                                                                                initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                output = "0" ;
+                                                                                                test = "candidate 0" ;
+                                                                                            }
+                                                                                    )
+                                                                                ] ;
+                                                                        } ;
+                                                                foobar =
+                                                                    ignore :
+                                                                        {
+                                                                            script = self + "/scripts/foobar.sh" ;
+                                                                            environment =
+                                                                                { path , self , standard-input , string } :
+
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( self "FOOBAR" ( self : self.foobar ) )
+                                                                                        ( path "NAME" 0 )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                        ( standard-input { name = "ceb56d2bcebc8e9cc485a093712de696d47b96ca866254795e566f370e2e76d92d7522558aaf4e9e7cdd6b603b527cee48a1af68a0abc1b68f2348f055346408" ; } )
+                                                                                        ( string "TOKEN" "7861c7b30f4c436819c890600b78ca11e10494c9abea9cae750c26237bc70311b60bb9f8449b32832713438b36e8eaf5ec719445e6983c8799f7e193c9805a7" )
+                                                                                    ] ;
+                                                                            tests =
+                                                                                [
+                                                                                    (
+                                                                                        ignore :
+                                                                                           {
+                                                                                                error = "50885ccf7ec0a2420f1c7555e54df8512508f93002313cfd71d6de510f8a8a6c035beca3589f2a5248069e02f57535ef3231004cd8d40f8a79b28d605fb6f89b" ;
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/sandbox" =
+                                                                                                            {
+                                                                                                                expected = self + "/mounts/RSGhGwNk" ;
+                                                                                                                initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
+                                                                                                test = "candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                status = 35 ;
+                                                                                            }
+                                                                                    )
+                                                                                    (
+                                                                                        ignore :
+                                                                                           {
+                                                                                                error = "cda54c2ea3f3b8a7cc2ecc3fcfdbdf16f01ad317614acd60e1cdd3232dc269904e69f5dd7f7fa76309b3f277ceaa1dea931d2fdb37db5afa543421c5457993da" ;
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/sandbox" =
+                                                                                                            {
+                                                                                                                expected = self + "/mounts/K4BODmfI" ;
+                                                                                                                initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                output = "c8178d4c4118a83848b4b11279e10b0a7a9b3a322973f6893a5da5bde718d052f205ed89264afcca9adc66e0fbc03cb1ba8b35a87de734e332af0e393478abb3" ;
+                                                                                                test = "${ pkgs.coreutils }/bin/echo f37938b0af93fdfe59ae7fb1d76c4aa6bc14fbbe50f37c1963216253dc5d0a4cb9d54721d52b632b4a74d2d2b461bfc11ac35e1f985cdd90d3c79fe1bfe674e9 | candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                status = 11 ;
+                                                                                            }
+                                                                                    )
+                                                                                ] ;
+                                                                        } ;
+                                                            } ;
+                                                    } ;
+                                            in candidate.tests ;
                                     lib = lib ;
                                 } ;
                 in flake-utils.lib.eachDefaultSystem fun ;
