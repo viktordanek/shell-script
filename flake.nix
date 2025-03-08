@@ -194,7 +194,7 @@
                                                                                                                                     error = error ;
                                                                                                                                     mounts =
                                                                                                                                         if builtins.typeOf mounts == "set" then
-                                                                                                                                            if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts do not match.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
+                                                                                                                                            if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts do not match for ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) }.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
                                                                                                                                             else
                                                                                                                                                 let
                                                                                                                                                     mapper =
@@ -211,14 +211,28 @@
                                                                                                                                 } ;
                                                                                                                         in identity ( value null ) ;
                                                                                                                 in
-                                                                                                                    [
-                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "error" ( builtins.toString secondary.error ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/error"
-                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "output" ( builtins.toString secondary.output ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/output"
-                                                                                                                        "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "status" ( builtins.toString secondary.status ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/status"
-                                                                                                                        # "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "test" ( builtins.toString secondary.test ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/test"
-                                                                                                                        "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                    ] ;
+                                                                                                                    builtins.concatLists
+                                                                                                                        [
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "error" ( builtins.toString secondary.error ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/error"
+                                                                                                                            ]
+                                                                                                                            (
+                                                                                                                                let
+                                                                                                                                    generator =
+                                                                                                                                        index :
+                                                                                                                                            let
+                                                                                                                                                mount = builtins.getAttr tag ( secondary.mounts ) ;
+                                                                                                                                                tag = builtins.elemAt ( builtins.attrNames primary.mounts ) index ;
+                                                                                                                                                in "${ pkgs.coreutils }/bin/cp --no-preserve=mode --recursive ${ mount.initial } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) [ "mount.${ builtins.toString index }" ] ] ) }" ;
+                                                                                                                                    in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) )
+                                                                                                                            )
+                                                                                                                            [
+                                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "output" ( builtins.toString secondary.output ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/output"
+                                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "status" ( builtins.toString secondary.status ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/status"
+                                                                                                                                "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                            ]
+                                                                                                                        ] ;
                                                                                                     null = path : value : [ ] ;
                                                                                                 }
                                                                                                 {
@@ -319,7 +333,7 @@
                                                                                                                             error = error ;
                                                                                                                             mounts =
                                                                                                                                 if builtins.typeOf mounts == "set" then
-                                                                                                                                    if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts do not match.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
+                                                                                                                                    if builtins.attrNames mounts != builtins.attrNames primary.mounts then builtins.throw "The mounts for ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } do not match.  ${ builtins.toJSON mounts } versus ${ builtins.toJSON primary.mounts }."
                                                                                                                                     else
                                                                                                                                         let
                                                                                                                                             mapper =
@@ -466,8 +480,16 @@
                                                                                                 (
                                                                                                     ignore :
                                                                                                         {
-                                                                                                            test = "fib 0" ;
+                                                                                                            mounts =
+                                                                                                                {
+                                                                                                                    "/sandbox" =
+                                                                                                                        {
+                                                                                                                            expected = self + "/mounts/K4BODmfI" ;
+                                                                                                                            initial = self + "/mounts/QoqNiM1R" ;
+                                                                                                                        } ;
+                                                                                                                } ;
                                                                                                             output = "0" ;
+                                                                                                            test = "fib 0" ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
