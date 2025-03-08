@@ -171,6 +171,18 @@
                                                                             lambda =
                                                                                 path : value :
                                                                                     let
+                                                                                        candidate =
+                                                                                            pkgs.stdenv.mkDerivation
+                                                                                                {
+                                                                                                    installPhase =
+                                                                                                        ''
+                                                                                                            ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                                                ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ derivation ] ( builtins.map builtins.toJSON path ) ] ) } $out/bin/candidate
+                                                                                                        '' ;
+                                                                                                    name = "candidate" ;
+                                                                                                    src = ./. ;
+                                                                                                } ;
                                                                                         expected = builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ;
                                                                                         observed = builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ;
                                                                                         point = value null ;
@@ -210,6 +222,21 @@
                                                                                                                                     test = test ;
                                                                                                                                 } ;
                                                                                                                         in identity ( value null ) ;
+                                                                                                                user-environment =
+                                                                                                                    pkgs.buildFHSUserEnv
+                                                                                                                        {
+                                                                                                                            extraBwrapArgs =
+                                                                                                                                let
+                                                                                                                                    generator =
+                                                                                                                                        index :
+                                                                                                                                            let
+                                                                                                                                                sandbox = builtins.elemAt ( builtins.attrNames ( primary.mounts ) ) index ;
+                                                                                                                                                in "--bind ${ builtins.concatStringsSep "" [ "$" "{" "MOUNT_" ( builtins.toString index ) "}" ] } ${ sandbox }" ;
+                                                                                                                                    in builtins.genList generator ( builtins.length ( builtins.attrValues primary.mounts ) ) ;
+                                                                                                                            name = "test-candidate" ;
+                                                                                                                            runScript = pkgs.writeShellScript "test" secondary.test ;
+                                                                                                                            targetPkgs = pkgs : [ candidate ] ;
+                                                                                                                        } ;
                                                                                                                 in
                                                                                                                     builtins.concatLists
                                                                                                                         [
@@ -236,6 +263,7 @@
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "output" ( builtins.toString secondary.output ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/output"
                                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.toFile "status" ( builtins.toString secondary.status ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ expected ( builtins.map builtins.toJSON path ) ] ) }/status"
                                                                                                                                 "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                                "if ${ user-environment }/bin/test-candidate > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "output" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "error" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ observed ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; fi"
                                                                                                                             ]
                                                                                                                         ] ;
                                                                                                     null = path : value : [ ] ;
@@ -494,7 +522,7 @@
                                                                                                                         } ;
                                                                                                                 } ;
                                                                                                             output = "0" ;
-                                                                                                            test = "fib 0" ;
+                                                                                                            test = "candidate 0" ;
                                                                                                         }
                                                                                                 )
                                                                                             ] ;
@@ -531,7 +559,7 @@
                                                                                                                         } ;
                                                                                                                 } ;
                                                                                                             output = "45c6ae4c0d3b624d4aa46d90b1ff7dfc996f05827014339549e01b3cb4465cde65493280935d121481c08871aac8ef4739253347e132411d2a1d5075c66bf067" ;
-                                                                                                            test = candidate : echo : "${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                            test = "candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
                                                                                                             status = 35 ;
                                                                                                         }
                                                                                                 )
@@ -548,7 +576,7 @@
                                                                                                                         } ;
                                                                                                                 } ;
                                                                                                             output = "c8178d4c4118a83848b4b11279e10b0a7a9b3a322973f6893a5da5bde718d052f205ed89264afcca9adc66e0fbc03cb1ba8b35a87de734e332af0e393478abb3" ;
-                                                                                                            test = candidate : echo : "${ echo } f37938b0af93fdfe59ae7fb1d76c4aa6bc14fbbe50f37c1963216253dc5d0a4cb9d54721d52b632b4a74d2d2b461bfc11ac35e1f985cdd90d3c79fe1bfe674e9 | ${ candidate } c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
+                                                                                                            test = "${ pkgs.coreutils }/bin/echo f37938b0af93fdfe59ae7fb1d76c4aa6bc14fbbe50f37c1963216253dc5d0a4cb9d54721d52b632b4a74d2d2b461bfc11ac35e1f985cdd90d3c79fe1bfe674e9 | candidate c64de1b7282c845986c0cf68c2063a11974e7eb0182f30a315a786c071bd253b6e97ce0afbfb774659177fdf97471f9637b07a1e5c0dff4c6c3a5dfcb05f0a50" ;
                                                                                                             status = 11 ;
                                                                                                         }
                                                                                                 )
