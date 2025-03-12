@@ -367,7 +367,16 @@
                                                                 fib =
                                                                     ignore :
                                                                         {
-                                                                            script = self + "/scripts/fib.sh" ;
+                                                                            script =
+                                                                                pkgs.stdenv.mkDerivation
+                                                                                    {
+                                                                                        installScript =
+                                                                                            ''
+                                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ self + "/scripts/fib.sh" } $out
+                                                                                            '' ;
+                                                                                        name = "fib" ;
+                                                                                        src = ./. ;
+                                                                                    } ;
                                                                             environment =
                                                                                 { path , self , standard-input , string } :
                                                                                     [
