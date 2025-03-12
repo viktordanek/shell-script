@@ -376,9 +376,9 @@
                                                                             script =
                                                                                 pkgs.stdenv.mkDerivation
                                                                                     {
-                                                                                        installScript =
+                                                                                        installPhase =
                                                                                             ''
-                                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ self + "/scripts/fib.sh" } $out
+                                                                                                ${ pkgs.coreutils }/bin/cat ${ self + "/scripts/fib.sh" } > $out
                                                                                             '' ;
                                                                                         name = "fib" ;
                                                                                         src = ./. ;
