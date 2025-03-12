@@ -40,7 +40,13 @@
                                                                             { environment ? { ... } : [ ] , script , tests ? null } :
                                                                                 {
                                                                                     environment = environment ;
-                                                                                    script = script ;
+                                                                                    script =
+                                                                                        if builtins.typeOf pkgs == "set" then
+                                                                                            let
+                                                                                                eval = builtins.tryEval ( builtins.toString script ) ;
+                                                                                                in if eval.success then eval.value else builtins.throw "The script defined at ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } is a set but not stringable."
+                                                                                        else if builtins.typeOf script == "string" then script
+                                                                                        else throw [ "string" "set" ] path value ;
                                                                                     tests = tests ;
                                                                                 } ;
                                                                         in ignore : identity ( value null ) ;
@@ -367,7 +373,16 @@
                                                                 fib =
                                                                     ignore :
                                                                         {
-                                                                            script = self + "/scripts/fib.sh" ;
+                                                                            script =
+                                                                                pkgs.stdenv.mkDerivation
+                                                                                    {
+                                                                                        installPhase =
+                                                                                            ''
+                                                                                                ${ pkgs.coreutils }/bin/cat ${ self + "/scripts/fib.sh" } > $out
+                                                                                            '' ;
+                                                                                        name = "fib" ;
+                                                                                        src = ./. ;
+                                                                                    } ;
                                                                             environment =
                                                                                 { path , self , standard-input , string } :
                                                                                     [
