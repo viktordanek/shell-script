@@ -161,7 +161,7 @@
                                                                                                                                     name : { expected , initial } :
                                                                                                                                         [
                                                                                                                                             "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
-                                                                                                                                            # "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial } /build/mounts/${ name }"
+                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial } /build/mounts/${ name }"
                                                                                                                                             "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
                                                                                                                                         ] ;
                                                                                                                                 in builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) )
@@ -198,11 +198,19 @@
                                                                                                         (
                                                                                                             if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
                                                                                                             else
-                                                                                                                let
-                                                                                                                    mapper =
-                                                                                                                        name : value :
-                                                                                                                            [ ] ; # "${ pkgs.coreutils }/bin/mv /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
-                                                                                                                    in builtins.map mapper ( builtins.attrNames secondary.mounts )
+                                                                                                                builtins.concatLists
+                                                                                                                    [
+                                                                                                                        [
+                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
+                                                                                                                        ]
+                                                                                                                        (
+                                                                                                                            let
+                                                                                                                                mapper =
+                                                                                                                                    name :
+                                                                                                                                        "${ pkgs.coreutils }/bin/cp --recursive /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
+                                                                                                                                in builtins.map mapper ( builtins.attrNames secondary.mounts )
+                                                                                                                        )
+                                                                                                                    ]
                                                                                                         )
                                                                                                     ] ;
                                                                                 null = path : value : [ ] ;
