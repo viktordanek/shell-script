@@ -3,4 +3,5 @@ SINGLETON=$( ${CAT} /singleton/file ) &&
   ${CHMOD} 0777 /singleton/file &&
   ${ECHO} singleton ${SINGLETON} ${STANDARD_INPUT} > /singleton/file &&
   ${ECHO} standard-output ${SINGLETON} ${STANDARD_INPUT} &&
-  ${ECHO} standard-error ${SINGLETON} ${STANDARD_INPUT} >&2
+  ${ECHO} standard-error ${SINGLETON} ${STANDARD_INPUT} >&2 &&
+  exit $(( 0x${SINGLETON} % 256 ))
