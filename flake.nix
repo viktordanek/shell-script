@@ -90,7 +90,7 @@
                                                                                                         {
                                                                                                             arguments ? [ ] ,
                                                                                                             file ? null ,
-                                                                                                            mounts ? [ ] ,
+                                                                                                            mounts ? { } ,
                                                                                                             pipe ? null ,
                                                                                                             status ? 0
                                                                                                         } :
@@ -107,10 +107,10 @@
                                                                                                                             in if eval.success == true then [ "<" eval.value ] else builtins.throw "file (${ file }) is not a string that can be filed"
                                                                                                                     else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
                                                                                                                 mounts =
-                                                                                                                    if builtins.type mounts == "list" then
+                                                                                                                    if builtins.type mounts == "set" then
                                                                                                                         let
                                                                                                                             mapper =
-                                                                                                                                { initial ? null , expected } :
+                                                                                                                                name : { initial ? null , expected } :
                                                                                                                                     {
                                                                                                                                         initial =
                                                                                                                                             if builtins.typeOf initial == "null" then initial
@@ -124,8 +124,8 @@
                                                                                                                                                 else builtins.throw "there is no path for ${ expected }."
                                                                                                                                             else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
                                                                                                                                     } ;
-                                                                                                                            in builtins.map mapper mounts
-                                                                                                                    else builtins.throw "mounts is not list but ${ builtins.typeOf mounts }." ;
+                                                                                                                            in builtins.mapAttrs mapper mounts
+                                                                                                                    else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                                                                                 pipe =
                                                                                                                     if builtins.typeOf pipe == "null" then [ ]
                                                                                                                     else if builtins.typeOf pipe == "string" then
@@ -140,24 +140,28 @@
                                                                                                 in identity ( value null ) ;
                                                                                             in
                                                                                                 [
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     (
                                                                                                         let
                                                                                                             test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
-                                                                                                                "makeWrapper ${ test } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) } --set PATH ${ pkgs.coreutils }"
+                                                                                                                "${ pkgs.coreutils }/bin/cat ${ test } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
                                                                                                     )
+                                                                                                    # "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
+                                                                                                    # "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) } --set PATH ${ pkgs.coreutils }/bin"
+                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    # (
+                                                                                                    #     let
+                                                                                                    #         user-environment =
+                                                                                                    #             pkgs.buildFHSUserEnv
+                                                                                                    #                 {
+                                                                                                    #                     name = "observation" ;
+                                                                                                    #                     runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
+                                                                                                    #                     targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
+                                                                                                    #                 } ;
+                                                                                                    #         in "${ user-environment }/bin/observation"
+                                                                                                    # )
                                                                                                     "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    (
-                                                                                                        let
-                                                                                                            user-environment =
-                                                                                                                pkgs.buildFHSUserEnv
-                                                                                                                    {
-                                                                                                                        name = "observation" ;
-                                                                                                                        runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }" ;
-                                                                                                                        targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
-                                                                                                                    } ;
-                                                                                                            in "${ user-environment }/bin/observation"
-                                                                                                    )
                                                                                                     "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
