@@ -109,7 +109,7 @@
                                                                                                                             in if eval.success == true then [ "<" eval.value ] else builtins.throw "file (${ file }) is not a string that can be filed"
                                                                                                                     else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
                                                                                                                 mounts =
-                                                                                                                    if builtins.type mounts == "set" then
+                                                                                                                    if builtins.typeOf mounts == "set" then
                                                                                                                         let
                                                                                                                             mapper =
                                                                                                                                 name : { initial ? null , expected } :
