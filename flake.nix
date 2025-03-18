@@ -288,6 +288,7 @@
                                                                                 { string } :
                                                                                     [
                                                                                         ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
                                                                                         ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
                                                                                     ] ;
                                                                             extensions =
