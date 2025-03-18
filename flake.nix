@@ -72,6 +72,75 @@
                                                                     constructors =
                                                                         _visitor
                                                                             {
+                                                                                lambda =
+                                                                                    path : value :
+                                                                                        let
+                                                                                            secondary =
+                                                                                                let
+                                                                                                    identity =
+                                                                                                        {
+                                                                                                            arguments ? [ ] ,
+                                                                                                            count ? 2 ,
+                                                                                                            file ? null ,
+                                                                                                            pipe ? null ,
+                                                                                                            paste ? null ,
+                                                                                                            status ? 0
+                                                                                                        } :
+                                                                                                            {
+                                                                                                                arguments =
+                                                                                                                    if builtins.typeOf arguments == "list" then
+                                                                                                                        builtins.map ( a : if builtins.typeOf a == "string" then a else builtins.throw "argument is not string but ${ builtins.typeOf a }." ) arguments
+                                                                                                                    else builtins.throw "arguments is not list but ${ builtins.typeOf arguments }." ;
+                                                                                                                count =
+                                                                                                                    if builtins.typeOf count == "int" then
+                                                                                                                        if count >= 0 then count
+                                                                                                                        else builtins.throw "count ${ count } is negative"
+                                                                                                                    else builtins.throw "count is not int but ${ builtins.typeOf count }." ;
+                                                                                                                file =
+                                                                                                                    if builtins.typeOf file == "null" then file
+                                                                                                                    else if builtins.typeOf file == "string" then
+                                                                                                                        let
+                                                                                                                            eval = builtins.toFile "file" file ;
+                                                                                                                            in if eval.success == true then eval.value else builtins.throw "file (${ file }) is not a string that can be filed"
+                                                                                                                    else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
+                                                                                                                pipe =
+                                                                                                                    if builtins.typeOf pipe == "null" then pipe
+                                                                                                                    else if builtins.typeOf pipe == "string" then
+                                                                                                                        let
+                                                                                                                            eval = builtins.toFile "pipe" pipe ;
+                                                                                                                            in if eval.success == true then eval.value else builtins.throw "pipe (${ pipe }) is not a string that be filed."
+                                                                                                                    else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
+                                                                                                                paste =
+                                                                                                                    if builtins.typeOf paste == "lambda" then
+                                                                                                                        let
+                                                                                                                            generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        eval = builtins.tryEval ( paste variable ) ;
+                                                                                                                                        success =
+                                                                                                                                            if eval.success then
+                                                                                                                                                if builtins.typeOf eval.value == "string" then eval.variable
+                                                                                                                                                else builtins.throw "paste of ${ variable } is not string but ${ builtins.typeOf eval.value }."
+                                                                                                                                            else builtins.throw "paste can not evaluate ${ variable }." ;
+                                                                                                                                        variable = builtins.concatStringsSep "" [ "$" "{" "VARIABLE_" ( builtins.toString index ) "}" ] ;
+                                                                                                                                        in success ;
+                                                                                                                            in builtins.genList generator secondary.count
+                                                                                                                    else if builtins.typeOf paste == "null" then paste
+                                                                                                                    else builtins.throw "paste is not lambda, null but ${ builtins.typeOf paste }." ;
+                                                                                                                status =
+                                                                                                                    if builtins.typeOf status == "int" then builtins.toString status
+                                                                                                                    else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
+                                                                                                            } ;
+                                                                                                in identity ( value null ) ;
+                                                                                            in
+                                                                                                [
+                                                                                                    (
+                                                                                                        let
+                                                                                                            test = builtins.toFile "test" "" ;
+                                                                                                            in
+                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    )
+                                                                                                ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
                                                                             {
