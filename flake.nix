@@ -195,6 +195,15 @@
                                                                                                             )
                                                                                                             "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                         ]
+                                                                                                        (
+                                                                                                            if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
+                                                                                                            else
+                                                                                                                let
+                                                                                                                    mapper =
+                                                                                                                        name : value :
+                                                                                                                            "${ pkgs.coreutils }/bin/mv /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
+                                                                                                                    in [] # [] ;builtins.map mapper ( builtins.attrNames secondary.mounts )
+                                                                                                        )
                                                                                                     ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
