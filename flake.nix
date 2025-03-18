@@ -251,7 +251,15 @@
                                                                             script = self + "/scripts/foobar.sh" ;
                                                                             tests =
                                                                                 {
-                                                                                    null = ignore : { } ;
+                                                                                    null =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        # expected = self + "/mounts/expected" ;
+                                                                                                        # initial = self + "/mounts/initial" ;
+                                                                                                    } ;
+                                                                                            } ;
                                                                                 } ;
                                                                         } ;
                                                                 in
