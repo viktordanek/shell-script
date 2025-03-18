@@ -94,6 +94,8 @@
                                                                                                             file ? null ,
                                                                                                             mounts ? { } ,
                                                                                                             pipe ? null ,
+                                                                                                            standard-error ? "" ,
+                                                                                                            standard-output ? "" ,
                                                                                                             status ? 0
                                                                                                         } :
                                                                                                             {
@@ -135,6 +137,12 @@
                                                                                                                             eval = builtins.toFile "pipe" pipe ;
                                                                                                                             in if eval.success == true then [ "cat" eval.value "|" ] else builtins.throw "pipe (${ pipe }) is not a string that be filed."
                                                                                                                     else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
+                                                                                                                standard-error =
+                                                                                                                    if builtins.typeOf standard-error == "string" then standard-error
+                                                                                                                    else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
+                                                                                                                standard-output =
+                                                                                                                    if builtins.typeOf standard-output == "string" then standard-output
+                                                                                                                    else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
@@ -169,6 +177,11 @@
                                                                                                                         )
                                                                                                                     ]
                                                                                                         )
+                                                                                                        [
+                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.standard-output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) }"
+                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.standard-error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-error" ] ] ) }"
+                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.status } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
+                                                                                                        ]
                                                                                                         [
                                                                                                             "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                             (
@@ -275,9 +288,7 @@
                                                                                 { string } :
                                                                                     [
                                                                                         ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
                                                                                         ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
                                                                                     ] ;
                                                                             extensions =
                                                                                 {

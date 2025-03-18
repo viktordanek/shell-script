@@ -1,4 +1,5 @@
-ls /singleton  # UUID=$( ${CAT} /singleton ) &&
-  # ${ECHO} ${UUID} file | ${SHA512SUM} | ${CUT} --bytes -128 > /singleton/file &&
-  # ${ECHO} ${UUID} standard.output | ${SHA512SUM} | ${CUT} --bytes -128 &&
-  # ${ECHO} ${UUID} standard.error | ${SHA512SUM} | ${CUT} --bytes -128 >&2
+SINGLETON=$( ${CAT} /singleton ) &&
+  STANDARD_INPUT=$( ${CAT} ) &&
+  ${ECHO} singleton ${SINGLETON} ${STANDARD_INPUT} > /singleton/file &&
+  ${ECHO} standard-output ${SINGLETON} ${STANDARD_INPUT} &&
+  ${ECHO} standard-error ${SINGLETON} ${STANDARD_INPUT} >&2
