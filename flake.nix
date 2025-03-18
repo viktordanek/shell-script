@@ -3,9 +3,10 @@
         {
             flake-utils.url = "github:numtide/flake-utils" ;
             nixpkgs.url = "github:NixOs/nixpkgs" ;
+            visitor.url = "github:viktordanek/visitor" ;
         } ;
     outputs =
-        { flake-utils , nixpkgs , self } :
+        { flake-utils , nixpkgs , self , visitor } :
             let
                 fun =
                     system :
@@ -38,15 +39,102 @@
                                                     else if builtins.typeOf tests == "lambda" then tests
                                                     else if builtins.typeOf tests == "list" then tests
                                                     else if builtins.typeOf tests == "set" then tests
-                                                    else builtins.throw "tests is not null, lambda, list, set but ${ builtins.typeOf tests }."
+                                                    else builtins.throw "tests is not null, lambda, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
                                         in
                                             {
+                                                source =
+                                                    pkgs.stdenv.mkDerivation
+                                                        {
+                                                            installPhase =
+                                                                ''
+                                                                    ${ pkgs.coreutils }/bin/cat $src > $out &&
+                                                                        ${ pkgs.coreutils }/bin/chmod 0555 $out
+                                                                '' ;
+                                                            name = "source" ;
+                                                            src = script ;
+                                                            unpack = true ;
+                                                        } ;
                                                 shell-script =
+                                                    pkgs.stdenv.mkDerivation
+                                                        {
+                                                            installPhase =
+                                                                let
+                                                                    in
+                                                                        ''
+                                                                            makeWrapper $src $out ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                        '' ;
+                                                            name = "shell-script" ;
+                                                            nativeBuildInputs = [ pkgs.makeWrapper ] ;
+                                                            src = ./. ;
+                                                            unpack = false ;
+                                                        } ;
+                                                tests =
+                                                    pkgs.stdenv.mkDerivation
+                                                        {
+                                                            installPhase =
+                                                                let
+                                                                    _visitor = builtins.getAttr system visitor.lib ;
+                                                                    constructors =
+                                                                        _visitor
+                                                                            {
+                                                                                null = path : value : [ ] ;
+                                                                            }
+                                                                            {
+                                                                                list =
+                                                                                    path : list :
+                                                                                        builtins.concatLists
+                                                                                            [
+                                                                                                [
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                ]
+                                                                                                ( builtins.concatLists list )
+                                                                                            ] ;
+                                                                                set =
+                                                                                    path : set :
+                                                                                        builtins.concatLists
+                                                                                            [
+                                                                                                [
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                ]
+                                                                                                ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                            ] ;
+                                                                            }
+                                                                            tests ;
+                                                                    in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
+                                                            name = "tests" ;
+                                                            src = script ;
+                                                            unpack = true ;
+                                                        } ;
                                             } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             in
                                 {
+                                    checks =
+                                        {
+                                            foobar =
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            let
+                                                                shell-script =
+                                                                    lib
+                                                                        {
+                                                                            script = self + "/scripts/foobar.sh" ;
+                                                                        } ;
+                                                                in
+                                                                    ''
+                                                                        ${ pkgs.coreutils }/bin/touch $out &&
+                                                                            exit 55
+                                                                    '' ;
+                                                        name = "foobar" ;
+                                                        src = ./. ;
+                                                    } ;
+                                        } ;
                                     lib = lib ;
                                 } ;
                 in flake-utils.lib.eachDefaultSystem fun ;
