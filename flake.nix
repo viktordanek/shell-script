@@ -141,29 +141,32 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
-                                                                                                [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    (
-                                                                                                        let
-                                                                                                            test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
-                                                                                                            in
-                                                                                                                "${ pkgs.coreutils }/bin/cat ${ test } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
-                                                                                                    )
-                                                                                                    "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
-                                                                                                    "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) } --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    (
-                                                                                                        let
-                                                                                                            user-environment =
-                                                                                                                pkgs.buildFHSUserEnv
-                                                                                                                    {
-                                                                                                                        name = "observation" ;
-                                                                                                                        runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
-                                                                                                                    } ;
-                                                                                                            in "# ${ user-environment }/bin/observation"
-                                                                                                    )
-                                                                                                    "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
-                                                                                                ] ;
+                                                                                                builtins.concatLists
+                                                                                                    [
+                                                                                                        [
+                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                            (
+                                                                                                                let
+                                                                                                                    test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
+                                                                                                                    in
+                                                                                                                        "${ pkgs.coreutils }/bin/cat ${ test } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
+                                                                                                            )
+                                                                                                            "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
+                                                                                                            "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) } --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin"
+                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                            (
+                                                                                                                let
+                                                                                                                    user-environment =
+                                                                                                                        pkgs.buildFHSUserEnv
+                                                                                                                            {
+                                                                                                                                name = "observation" ;
+                                                                                                                                runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
+                                                                                                                            } ;
+                                                                                                                    in "# ${ user-environment }/bin/observation"
+                                                                                                            )
+                                                                                                            "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
+                                                                                                        ]
+                                                                                                    ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
                                                                             {
