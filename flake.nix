@@ -160,11 +160,11 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
-                                                                                                # ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                                ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                             ] ;
                                                                             }
                                                                             tests ;
