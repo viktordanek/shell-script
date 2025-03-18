@@ -186,12 +186,12 @@
                                                                                                                             {
                                                                                                                                 extraBwrapArgs =
                                                                                                                                     let
-                                                                                                                                        mapper = value : "--mount /build/mounts/${ value } /${ value }" ;
+                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ value }" ;
                                                                                                                                         in builtins.map mapper ( builtins.attrNames secondary.mounts ) ;
                                                                                                                                 name = "observation" ;
                                                                                                                                 runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
                                                                                                                             } ;
-                                                                                                                    in "# ${ user-environment }/bin/observation"
+                                                                                                                    in "${ user-environment }/bin/observation > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) }"
                                                                                                             )
                                                                                                             "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                         ]
@@ -240,7 +240,18 @@
                                                                                             ] ;
                                                                             }
                                                                             tests ;
-                                                                    in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
+                                                                    root =
+                                                                        builtins.concatLists
+                                                                            [
+                                                                                [
+                                                                                    "${ pkgs.coreutils }/bin/mkdir $out"
+                                                                                ]
+                                                                                constructors
+                                                                                [
+                                                                                    "${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed"
+                                                                                ]
+                                                                            ] ;
+                                                                    in builtins.concatStringsSep " &&\n\t" root ;
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
@@ -262,7 +273,10 @@
                                                                             environment =
                                                                                 { string } :
                                                                                     [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
                                                                                         ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
                                                                                     ] ;
                                                                             extensions =
                                                                                 {
