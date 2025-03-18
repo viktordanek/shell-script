@@ -146,9 +146,18 @@
                                                                                                         (
                                                                                                             if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
                                                                                                             else
-                                                                                                                [
-                                                                                                                    "${ pkgs.coreutils }/bin/mkdir /build/mounts"
-                                                                                                                ]
+                                                                                                                builtins.concatLists
+                                                                                                                    [
+                                                                                                                        [ "${ pkgs.coreutils }/bin/mkdir /build/mounts" ]
+                                                                                                                        (
+                                                                                                                            let
+                                                                                                                                generator =
+                                                                                                                                    index :
+                                                                                                                                        [
+                                                                                                                                        ] ;
+                                                                                                                                in builtins.genList generator ( builtins.length ( builtins.attrNames secondary.mounts ) )
+                                                                                                                        )
+                                                                                                                    ]
                                                                                                         )
                                                                                                         [
                                                                                                             "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
