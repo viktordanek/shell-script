@@ -84,6 +84,7 @@
                                                                                                         {
                                                                                                             arguments ? [ ] ,
                                                                                                             file ? null ,
+                                                                                                            mounts ? [ ] ,
                                                                                                             pipe ? null ,
                                                                                                             status ? 0
                                                                                                         } :
@@ -99,6 +100,26 @@
                                                                                                                             eval = builtins.toFile "file" file ;
                                                                                                                             in if eval.success == true then [ "<" eval.value ] else builtins.throw "file (${ file }) is not a string that can be filed"
                                                                                                                     else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
+                                                                                                                mounts =
+                                                                                                                    if builtins.type mounts == "list" then
+                                                                                                                        let
+                                                                                                                            mapper =
+                                                                                                                                { initial ? null , expected } :
+                                                                                                                                    {
+                                                                                                                                        initial =
+                                                                                                                                            if builtins.typeOf initial == "null" then initial
+                                                                                                                                            else if builtins.typeOf initial == "string" then
+                                                                                                                                                if builtins.pathExists initial then initial
+                                                                                                                                                else builtins.throw "there is no path for ${ initial }."
+                                                                                                                                            else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
+                                                                                                                                        expected =
+                                                                                                                                            if builtins.typeOf expected == "string" then
+                                                                                                                                                if builtins.pathExists expected then expected
+                                                                                                                                                else builtins.throw "there is no path for ${ expected }."
+                                                                                                                                            else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
+                                                                                                                                    } ;
+                                                                                                                            in builtins.map mapper mounts
+                                                                                                                    else builtins.throw "mounts is not list but ${ builtins.typeOf mounts }." ;
                                                                                                                 pipe =
                                                                                                                     if builtins.typeOf pipe == "null" then [ ]
                                                                                                                     else if builtins.typeOf pipe == "string" then
@@ -115,7 +136,7 @@
                                                                                                 [
                                                                                                     (
                                                                                                         let
-                                                                                                            test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe secondary.arguments secondary.file ] ) ) ;
+                                                                                                            test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     )
