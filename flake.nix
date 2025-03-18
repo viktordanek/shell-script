@@ -184,6 +184,10 @@
                                                                                                                     user-environment =
                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                             {
+                                                                                                                                extraBwrapArgs =
+                                                                                                                                    let
+                                                                                                                                        mapper = value : "--mount /build/mounts/${ value } /${ value }" ;
+                                                                                                                                        in builtins.map mapper ( builtins.attrNames secondary.mounts ) ;
                                                                                                                                 name = "observation" ;
                                                                                                                                 runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
                                                                                                                             } ;
