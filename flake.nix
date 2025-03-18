@@ -43,26 +43,25 @@
                                             } ;
                                         in
                                             {
-                                                source =
-                                                    pkgs.stdenv.mkDerivation
-                                                        {
-                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
-                                                            name = "source" ;
-                                                            src = ./. ;
-                                                        } ;
                                                 shell-script =
                                                     pkgs.stdenv.mkDerivation
                                                         {
                                                             installPhase =
                                                                 let
+                                                                    source =
+                                                                        pkgs.stdenv.mkDerivation
+                                                                            {
+                                                                                installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
+                                                                                name = "source" ;
+                                                                                src = ./. ;
+                                                                            } ;
                                                                     in
                                                                         ''
-                                                                            makeWrapper $src $out ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                            makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
                                                                         '' ;
                                                             name = "shell-script" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
-                                                            unpack = false ;
                                                         } ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
@@ -124,7 +123,7 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.source } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
                                                                             exit 55
                                                                     '' ;
                                                         name = "foobar" ;
