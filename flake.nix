@@ -143,19 +143,27 @@
                                                                                             in
                                                                                                 builtins.concatLists
                                                                                                     [
+                                                                                                        [
+                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                        ]
                                                                                                         (
                                                                                                             if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
                                                                                                             else
                                                                                                                 builtins.concatLists
                                                                                                                     [
-                                                                                                                        [ "${ pkgs.coreutils }/bin/mkdir /build/mounts" ]
+                                                                                                                        [
+                                                                                                                            "${ pkgs.coreutils }/bin/mkdir /build/mounts"
+                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
+                                                                                                                        ]
                                                                                                                         (
                                                                                                                             let
-                                                                                                                                generator =
-                                                                                                                                    index :
+                                                                                                                                mapper =
+                                                                                                                                    name : { expected , initial } :
                                                                                                                                         [
+                                                                                                                                            "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
+                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial } /build/mounts/${ name }"
                                                                                                                                         ] ;
-                                                                                                                                in builtins.genList generator ( builtins.length ( builtins.attrNames secondary.mounts ) )
+                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                         )
                                                                                                                     ]
                                                                                                         )
