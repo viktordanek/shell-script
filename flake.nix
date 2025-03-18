@@ -145,7 +145,10 @@
                                                                                                     [
                                                                                                         (
                                                                                                             if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
-                                                                                                            else [ ]
+                                                                                                            else
+                                                                                                                [
+                                                                                                                    "${ pkgs.coreutils }/bin/mkdir /build/mounts"
+                                                                                                                ]
                                                                                                         )
                                                                                                         [
                                                                                                             "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
