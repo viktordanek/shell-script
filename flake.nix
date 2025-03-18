@@ -32,7 +32,9 @@
                                                         builtins.map ( e : if builtins.typeOf e == "lambda" then e else builtins.throw "extension is not lambda but ${ builtins.typeOf e }." ) extensions
                                                     else builtins.throw "extensions is not list but ${ builtins.typeOf extensions }." ;
                                                 script =
-                                                    if builtins.typeOf script == "string" then script
+                                                    if builtins.typeOf script == "string" then
+                                                        if builtins.pathExists script then script
+                                                        else builtins.throw "there is no path for ${ script }."
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
@@ -41,28 +43,29 @@
                                                     else if builtins.typeOf tests == "set" then tests
                                                     else builtins.throw "tests is not null, lambda, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
+                                        shell-script =
+                                            pkgs.stdenv.mkDerivation
+                                                {
+                                                    installPhase =
+                                                        let
+                                                            source =
+                                                                pkgs.stdenv.mkDerivation
+                                                                    {
+                                                                        installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
+                                                                        name = "source" ;
+                                                                        src = ./. ;
+                                                                    } ;
+                                                            in
+                                                                ''
+                                                                    makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                '' ;
+                                                    name = "shell-script" ;
+                                                    nativeBuildInputs = [ pkgs.makeWrapper ] ;
+                                                    src = ./. ;
+                                                } ;
                                         in
                                             {
-                                                shell-script =
-                                                    pkgs.stdenv.mkDerivation
-                                                        {
-                                                            installPhase =
-                                                                let
-                                                                    source =
-                                                                        pkgs.stdenv.mkDerivation
-                                                                            {
-                                                                                installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
-                                                                                name = "source" ;
-                                                                                src = ./. ;
-                                                                            } ;
-                                                                    in
-                                                                        ''
-                                                                            makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
-                                                                        '' ;
-                                                            name = "shell-script" ;
-                                                            nativeBuildInputs = [ pkgs.makeWrapper ] ;
-                                                            src = ./. ;
-                                                        } ;
+                                                shell-script = shell-script ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
@@ -80,10 +83,8 @@
                                                                                                     identity =
                                                                                                         {
                                                                                                             arguments ? [ ] ,
-                                                                                                            count ? 2 ,
                                                                                                             file ? null ,
                                                                                                             pipe ? null ,
-                                                                                                            paste ? null ,
                                                                                                             status ? 0
                                                                                                         } :
                                                                                                             {
@@ -91,42 +92,20 @@
                                                                                                                     if builtins.typeOf arguments == "list" then
                                                                                                                         builtins.map ( a : if builtins.typeOf a == "string" then a else builtins.throw "argument is not string but ${ builtins.typeOf a }." ) arguments
                                                                                                                     else builtins.throw "arguments is not list but ${ builtins.typeOf arguments }." ;
-                                                                                                                count =
-                                                                                                                    if builtins.typeOf count == "int" then
-                                                                                                                        if count >= 0 then count
-                                                                                                                        else builtins.throw "count ${ count } is negative"
-                                                                                                                    else builtins.throw "count is not int but ${ builtins.typeOf count }." ;
                                                                                                                 file =
-                                                                                                                    if builtins.typeOf file == "null" then file
+                                                                                                                    if builtins.typeOf file == "null" then [ ]
                                                                                                                     else if builtins.typeOf file == "string" then
                                                                                                                         let
                                                                                                                             eval = builtins.toFile "file" file ;
-                                                                                                                            in if eval.success == true then eval.value else builtins.throw "file (${ file }) is not a string that can be filed"
+                                                                                                                            in if eval.success == true then [ "<" eval.value ] else builtins.throw "file (${ file }) is not a string that can be filed"
                                                                                                                     else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
                                                                                                                 pipe =
-                                                                                                                    if builtins.typeOf pipe == "null" then pipe
+                                                                                                                    if builtins.typeOf pipe == "null" then [ ]
                                                                                                                     else if builtins.typeOf pipe == "string" then
                                                                                                                         let
                                                                                                                             eval = builtins.toFile "pipe" pipe ;
-                                                                                                                            in if eval.success == true then eval.value else builtins.throw "pipe (${ pipe }) is not a string that be filed."
+                                                                                                                            in if eval.success == true then [ "cat" eval.value "|" ] else builtins.throw "pipe (${ pipe }) is not a string that be filed."
                                                                                                                     else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
-                                                                                                                paste =
-                                                                                                                    if builtins.typeOf paste == "lambda" then
-                                                                                                                        let
-                                                                                                                            generator =
-                                                                                                                                index :
-                                                                                                                                    let
-                                                                                                                                        eval = builtins.tryEval ( paste variable ) ;
-                                                                                                                                        success =
-                                                                                                                                            if eval.success then
-                                                                                                                                                if builtins.typeOf eval.value == "string" then eval.variable
-                                                                                                                                                else builtins.throw "paste of ${ variable } is not string but ${ builtins.typeOf eval.value }."
-                                                                                                                                            else builtins.throw "paste can not evaluate ${ variable }." ;
-                                                                                                                                        variable = builtins.concatStringsSep "" [ "$" "{" "VARIABLE_" ( builtins.toString index ) "}" ] ;
-                                                                                                                                        in success ;
-                                                                                                                            in builtins.genList generator secondary.count
-                                                                                                                    else if builtins.typeOf paste == "null" then paste
-                                                                                                                    else builtins.throw "paste is not lambda, null but ${ builtins.typeOf paste }." ;
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
@@ -136,7 +115,7 @@
                                                                                                 [
                                                                                                     (
                                                                                                         let
-                                                                                                            test = builtins.toFile "test" "" ;
+                                                                                                            test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
                                                                                                                 "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     )
