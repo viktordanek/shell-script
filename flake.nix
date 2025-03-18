@@ -101,8 +101,7 @@
                                                                             tests ;
                                                                     in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
                                                             name = "tests" ;
-                                                            src = script ;
-                                                            unpack = true ;
+                                                            src = ./. ;
                                                         } ;
                                             } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
@@ -124,6 +123,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
                                                                             exit 55
                                                                     '' ;
                                                         name = "foobar" ;
