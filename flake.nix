@@ -114,7 +114,7 @@
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         let
                                                                                                                             mapper =
-                                                                                                                                name : { initial ? null , expected } :
+                                                                                                                                name : { expected , initial ? null , permissions ? null } :
                                                                                                                                     {
                                                                                                                                         initial =
                                                                                                                                             if builtins.typeOf initial == "null" then initial
@@ -127,6 +127,22 @@
                                                                                                                                                 if builtins.pathExists expected then expected
                                                                                                                                                 else builtins.throw "there is no path for ${ expected }."
                                                                                                                                             else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
+                                                                                                                                        permissions =
+                                                                                                                                            _visitor
+                                                                                                                                                {
+                                                                                                                                                    int =
+                                                                                                                                                        path : value :
+                                                                                                                                                            [
+                                                                                                                                                                (
+                                                                                                                                                                    "${ pkgs.coreutils }/bin/chmod ${ builtins.toString value } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/build/mount" ] ( builtins.map builtins.toString path ) ] ) }"
+                                                                                                                                                                )
+                                                                                                                                                            ] ;
+                                                                                                                                                }
+                                                                                                                                                {
+                                                                                                                                                    list = path : list : builtins.concatLists list ;
+                                                                                                                                                    set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
+                                                                                                                                                }
+                                                                                                                                                permissions ;
                                                                                                                                     } ;
                                                                                                                             in builtins.mapAttrs mapper mounts
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
@@ -166,13 +182,19 @@
                                                                                                                         (
                                                                                                                             let
                                                                                                                                 mapper =
-                                                                                                                                    name : { expected , initial } :
-                                                                                                                                        [
-                                                                                                                                            "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial }/* /build/mounts/${ name }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected }/* ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
-                                                                                                                                        ] ;
+                                                                                                                                    name : { expected , initial , permissions } :
+                                                                                                                                        builtins.concatLists
+                                                                                                                                            [
+                                                                                                                                                [
+                                                                                                                                                    "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
+                                                                                                                                                    "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial }/* /build/mounts/${ name }"
+                                                                                                                                                ]
+                                                                                                                                                permissions
+                                                                                                                                                [
+                                                                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
+                                                                                                                                                    "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected }/* ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
+                                                                                                                                                ]
+                                                                                                                                            ] ;
                                                                                                                                 in builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) )
                                                                                                                         )
                                                                                                                     ]
@@ -308,6 +330,10 @@
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
                                                                                                                 initial = self + "/mounts/initial" ;
+                                                                                                                permissions =
+                                                                                                                    {
+                                                                                                                        file = 777 ;
+                                                                                                                    } ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                             } ;
