@@ -63,7 +63,9 @@
                                                                         } ;
                                                                 in
                                                                     ''
-                                                                        makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                        ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                            ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( environment extensions ) }
                                                                     '' ;
                                                         name = name ;
                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -71,7 +73,7 @@
                                                     } ;
                                         in
                                             {
-                                                shell-script = shell-script primary.name ;
+                                                shell-script = "${ shell-script primary.name }/bin/${ primary.name }" ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
