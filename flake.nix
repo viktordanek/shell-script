@@ -218,7 +218,7 @@
                                                                                                                             {
                                                                                                                                 extraBwrapArgs =
                                                                                                                                     let
-                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ builtins.trace value value }" ;
+                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ value }" ;
                                                                                                                                         in builtins.map mapper ( builtins.attrNames secondary.mounts ) ;
                                                                                                                                 name = "observation" ;
                                                                                                                                 runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
@@ -341,8 +341,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
-                                                                            exit 55
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests }
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
