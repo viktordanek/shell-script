@@ -201,8 +201,8 @@
                                                                                                                 let
                                                                                                                     mapper =
                                                                                                                         name : value :
-                                                                                                                            "${ pkgs.coreutils }/bin/mv /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
-                                                                                                                    in builtins.map mapper [] # ( builtins.attrNames secondary.mounts )
+                                                                                                                            [ ] ; # "${ pkgs.coreutils }/bin/mv /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
+                                                                                                                    in builtins.map mapper ( builtins.attrNames secondary.mounts )
                                                                                                         )
                                                                                                     ] ;
                                                                                 null = path : value : [ ] ;
