@@ -134,7 +134,7 @@
                                                                                                                                                         path : value :
                                                                                                                                                             [
                                                                                                                                                                 (
-                                                                                                                                                                    "${ pkgs.coreutils }/bin/chmod ${ builtins.toString value } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/build" "mount" name ] ( builtins.map builtins.toString path ) ] ) }"
+                                                                                                                                                                    "chmod ${ builtins.toString value } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/build" "mounts" name ] ( builtins.map builtins.toString path ) ] ) }"
                                                                                                                                                                 )
                                                                                                                                                             ] ;
                                                                                                                                                 }
@@ -203,7 +203,7 @@
                                                                                                             (
                                                                                                                 let
                                                                                                                     file = builtins.toFile "file" ( builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ permissions [ test ] ] ) ) ;
-                                                                                                                    permissions = [] ; # builtins.concatLists ( builtins.mapAttrs ( name : { expected , initial , permissions } : permissions ) secondary.mounts ) ;
+                                                                                                                    permissions = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , initial , permissions } : permissions ) secondary.mounts ) ) ;
                                                                                                                     test = builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ;
                                                                                                                     in
                                                                                                                         "${ pkgs.coreutils }/bin/cat ${ file } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
