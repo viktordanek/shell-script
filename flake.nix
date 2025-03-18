@@ -162,6 +162,7 @@
                                                                                                                                         [
                                                                                                                                             "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
                                                                                                                                             "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial } /build/mounts/${ name }"
+                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" expected ] ] ) }"
                                                                                                                                         ] ;
                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                         )
@@ -237,6 +238,10 @@
                                                                 shell-script =
                                                                     lib
                                                                         {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "--set ${ name } ${ value }" ;
+                                                                                } ;
                                                                             name = "foobar" ;
                                                                             script = self + "/scripts/foobar.sh" ;
                                                                             tests =
