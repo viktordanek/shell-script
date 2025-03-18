@@ -38,10 +38,9 @@
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
-                                                    else if builtins.typeOf tests == "lambda" then tests
                                                     else if builtins.typeOf tests == "list" then tests
                                                     else if builtins.typeOf tests == "set" then tests
-                                                    else builtins.throw "tests is not null, lambda, list, set but ${ builtins.typeOf tests }." ;
+                                                    else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
                                         shell-script =
                                             pkgs.stdenv.mkDerivation
@@ -138,7 +137,7 @@
                                                                                                         let
                                                                                                             test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.trace test test } ${ let x = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) ; in builtins.trace x x }"
                                                                                                     )
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
@@ -149,9 +148,9 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists list )
                                                                                             ] ;
@@ -188,7 +187,9 @@
                                                                         {
                                                                             script = self + "/scripts/foobar.sh" ;
                                                                             tests =
-                                                                                ignore : { } ;
+                                                                                {
+                                                                                    null = ignore : { } ;
+                                                                                } ;
                                                                         } ;
                                                                 in
                                                                     ''
