@@ -144,9 +144,20 @@
                                                                                                         let
                                                                                                             test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                "makeWrapper ${ test } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) } --set PATH ${ pkgs.coreutils }"
                                                                                                     )
                                                                                                     "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    (
+                                                                                                        let
+                                                                                                            user-environment =
+                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                    {
+                                                                                                                        name = "observation" ;
+                                                                                                                        runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }" ;
+                                                                                                                        targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
+                                                                                                                    } ;
+                                                                                                            in "${ user-environment }/bin/observation"
+                                                                                                    )
                                                                                                     "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
@@ -178,6 +189,7 @@
                                                                             tests ;
                                                                     in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ [ "${ pkgs.coreutils }/bin/mkdir $out" ] constructors ] ) ;
                                                             name = "tests" ;
+                                                            nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
                                                         } ;
                                             } ;
