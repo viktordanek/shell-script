@@ -46,14 +46,9 @@
                                                 source =
                                                     pkgs.stdenv.mkDerivation
                                                         {
-                                                            installPhase =
-                                                                ''
-                                                                    ${ pkgs.coreutils }/bin/cat $src > $out &&
-                                                                        ${ pkgs.coreutils }/bin/chmod 0555 $out
-                                                                '' ;
+                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
                                                             name = "source" ;
-                                                            src = script ;
-                                                            unpack = true ;
+                                                            src = ./. ;
                                                         } ;
                                                 shell-script =
                                                     pkgs.stdenv.mkDerivation
@@ -129,6 +124,7 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.source } &&
                                                                             exit 55
                                                                     '' ;
                                                         name = "foobar" ;
