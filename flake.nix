@@ -15,6 +15,7 @@
                                 {
                                     environment ? x : [ ] ,
                                     extensions ? [ ] ,
+                                    name ,
                                     script ,
                                     tests ? null
                                 } :
@@ -31,6 +32,11 @@
                                                     if builtins.typeOf extensions == "list" then
                                                         builtins.map ( e : if builtins.typeOf e == "lambda" then e else builtins.throw "extension is not lambda but ${ builtins.typeOf e }." ) extensions
                                                     else builtins.throw "extensions is not list but ${ builtins.typeOf extensions }." ;
+                                                name =
+                                                    if builtins.typeOf name == "string" then
+                                                        if pkgs.lib.strings.match "^[a-zA-Z_][a-zA-Z0-9_-]*$" name != null then name
+                                                        else builtins.throw "the name (${ name }) is not suitable for a bash script."
+                                                    else builtins.throw "name is not string but ${ builtins.typeOf name }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
                                                         if builtins.pathExists script then script
@@ -43,28 +49,29 @@
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
                                         shell-script =
-                                            pkgs.stdenv.mkDerivation
-                                                {
-                                                    installPhase =
-                                                        let
-                                                            source =
-                                                                pkgs.stdenv.mkDerivation
-                                                                    {
-                                                                        installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
-                                                                        name = "source" ;
-                                                                        src = ./. ;
-                                                                    } ;
-                                                            in
-                                                                ''
-                                                                    makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
-                                                                '' ;
-                                                    name = "shell-script" ;
-                                                    nativeBuildInputs = [ pkgs.makeWrapper ] ;
-                                                    src = ./. ;
-                                                } ;
+                                            name :
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            let
+                                                                source =
+                                                                    pkgs.stdenv.mkDerivation
+                                                                        {
+                                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
+                                                                            name = "source" ;
+                                                                            src = ./. ;
+                                                                        } ;
+                                                                in
+                                                                    ''
+                                                                        makeWrapper ${ source } $out ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                    '' ;
+                                                        name = name ;
+                                                        nativeBuildInputs = [ pkgs.makeWrapper ] ;
+                                                        src = ./. ;
+                                                    } ;
                                         in
                                             {
-                                                shell-script = shell-script ;
+                                                shell-script = shell-script primary.name ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
@@ -137,8 +144,10 @@
                                                                                                         let
                                                                                                             test = builtins.toFile "test" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) ;
                                                                                                             in
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ builtins.trace test test } ${ let x = builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) ; in builtins.trace x x }"
+                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     )
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
@@ -185,6 +194,7 @@
                                                                 shell-script =
                                                                     lib
                                                                         {
+                                                                            name = "foobar" ;
                                                                             script = self + "/scripts/foobar.sh" ;
                                                                             tests =
                                                                                 {
