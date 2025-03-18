@@ -138,7 +138,7 @@
                                                                                                         let
                                                                                                             test = builtins.toFile "test" "" ;
                                                                                                             in
-                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                                "${ pkgs.coreutils }/bin/ln --symbolic ${ test } ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     )
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
@@ -149,9 +149,9 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ) ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ) ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists list )
                                                                                             ] ;
@@ -160,11 +160,11 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ) ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ) ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStrings ( builtins.concatLists ( [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ) ) }"
+                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    # "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
-                                                                                                ( builtins.concatLists ( builtins.attrValues set ) )
+                                                                                                # ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                             ] ;
                                                                             }
                                                                             tests ;
@@ -187,6 +187,7 @@
                                                                     lib
                                                                         {
                                                                             script = self + "/scripts/foobar.sh" ;
+                                                                            tests = { } ;
                                                                         } ;
                                                                 in
                                                                     ''
