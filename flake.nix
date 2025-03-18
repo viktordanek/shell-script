@@ -162,7 +162,7 @@
                                                                                                                                         [
                                                                                                                                             "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
                                                                                                                                             # "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial } /build/mounts/${ name }"
-                                                                                                                                            # ${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" expected ] ] ) }"
+                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
                                                                                                                                         ] ;
                                                                                                                                 in builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) )
                                                                                                                         )
