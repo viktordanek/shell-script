@@ -29,9 +29,9 @@
                                                         else builtins.throw "environments is not list but ${ builtins.typeOf ( environment primary.extension ) }."
                                                     else builtins.throw "environments is not lambda but ${ builtins.typeOf environment }." ;
                                                 extensions =
-                                                    if builtins.typeOf extensions == "list" then
-                                                        builtins.map ( e : if builtins.typeOf e == "lambda" then e else builtins.throw "extension is not lambda but ${ builtins.typeOf e }." ) extensions
-                                                    else builtins.throw "extensions is not list but ${ builtins.typeOf extensions }." ;
+                                                    if builtins.typeOf extensions == "set" then
+                                                        builtins.mapAttr ( name : value : if builtins.typeOf value == "lambda" then value else builtins.throw "extension is not lambda but ${ builtins.typeOf value }." ) extensions
+                                                    else builtins.throw "extensions is not set but ${ builtins.typeOf extensions }." ;
                                                 name =
                                                     if builtins.typeOf name == "string" then
                                                         if pkgs.lib.strings.match "^[a-zA-Z_][a-zA-Z0-9_-]*$" name != null then name
@@ -238,6 +238,11 @@
                                                                 shell-script =
                                                                     lib
                                                                         {
+                                                                            environment =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                    ] ;
                                                                             extensions =
                                                                                 {
                                                                                     string = name : value : "--set ${ name } ${ value }" ;
