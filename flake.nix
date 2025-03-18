@@ -186,7 +186,7 @@
                                                                                                                             {
                                                                                                                                 extraBwrapArgs =
                                                                                                                                     let
-                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ value }" ;
+                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ builtins.trace value value }" ;
                                                                                                                                         in builtins.map mapper ( builtins.attrNames secondary.mounts ) ;
                                                                                                                                 name = "observation" ;
                                                                                                                                 runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
