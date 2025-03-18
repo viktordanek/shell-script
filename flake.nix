@@ -28,7 +28,17 @@
                                                     else builtins.throw "environments is not lambda but ${ builtins.typeOf environment }." ;
                                                 extensions =
                                                     if builtins.typeOf extensions == "list" then
-                                                        builtins.map ( e : if builtins.typeOf e
+                                                        builtins.map ( e : if builtins.typeOf e == "lambda" then e else builtins.throw "extension is not lambda but ${ builtins.typeOf e }." ) extensions
+                                                    else builtins.throw "extensions is not list but ${ builtins.typeOf extensions }." ;
+                                                script =
+                                                    if builtins.typeOf script == "string" then script
+                                                    else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
+                                                tests =
+                                                    if builtins.typeOf tests == "null" then tests
+                                                    else if builtins.typeOf tests == "lambda" then tests
+                                                    else if builtins.typeOf tests == "list" then tests
+                                                    else if builtins.typeOf tests == "set" then tests
+                                                    else builtins.throw "tests is not null, lambda, list, set but ${ builtins.typeOf tests }."
                                             } ;
                                         in
                                             {
