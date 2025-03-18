@@ -187,7 +187,8 @@
                                                                     lib
                                                                         {
                                                                             script = self + "/scripts/foobar.sh" ;
-                                                                            tests = { } ;
+                                                                            tests =
+                                                                                ignore : { } ;
                                                                         } ;
                                                                 in
                                                                     ''
