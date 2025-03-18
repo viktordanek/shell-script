@@ -143,6 +143,10 @@
                                                                                             in
                                                                                                 builtins.concatLists
                                                                                                     [
+                                                                                                        (
+                                                                                                            if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
+                                                                                                            else [ ]
+                                                                                                        )
                                                                                                         [
                                                                                                             "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                             (
