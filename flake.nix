@@ -1,12 +1,13 @@
 {
     inputs =
         {
+            environment-variable.url = "github:viktordanek/environment-variable" ;
             flake-utils.url = "github:numtide/flake-utils" ;
             nixpkgs.url = "github:NixOs/nixpkgs" ;
             visitor.url = "github:viktordanek/visitor" ;
         } ;
     outputs =
-        { flake-utils , nixpkgs , self , visitor } :
+        { environment-variable , flake-utils , nixpkgs , self , visitor } :
             let
                 fun =
                     system :
