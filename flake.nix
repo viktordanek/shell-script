@@ -158,14 +158,14 @@
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
                                                                                                                         if builtins.match "^/.*" standard-error != null then
-                                                                                                                            if builtins.pathExists standard-error then builtins.readFile standard-error
+                                                                                                                            if builtins.pathExists standard-error then standard-error
                                                                                                                             else builtins.throw "standard-error is an absolute path but there does not exist a path for ${ standard-error }."
                                                                                                                         else builtins.toFile "standard-error" standard-error
                                                                                                                     else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
                                                                                                                 standard-output =
                                                                                                                     if builtins.typeOf standard-output == "string" then
                                                                                                                         if builtins.match "^/.*" standard-output != null then
-                                                                                                                            if builtins.pathExists standard-output then builtins.readFile standard-output
+                                                                                                                            if builtins.pathExists standard-output then standard-output
                                                                                                                             else builtins.throw "standard-output is an absolute path but there does not exist a path for ${ standard-output }."
                                                                                                                         else builtins.toFile "standard-output" standard-output
                                                                                                                     else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
@@ -341,8 +341,8 @@
                                                                                                                     } ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
-                                                                                                standard-output = "standard-output 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060";
+                                                                                                standard-error = self + "/expected/standard-error" ;
+                                                                                                standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 96 ;
                                                                                             } ;
                                                                                     null =
