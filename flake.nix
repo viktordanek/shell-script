@@ -156,10 +156,14 @@
                                                                                                                             in if eval.success == true then [ "cat" eval.value "|" ] else builtins.throw "pipe (${ pipe }) is not a string that be filed."
                                                                                                                     else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
                                                                                                                 standard-error =
-                                                                                                                    if builtins.typeOf standard-error == "string" then standard-error
+                                                                                                                    if builtins.typeOf standard-error == "string" then
+                                                                                                                        if ( builtins.match "^/.*" standard-error != null ) && ( builtins.pathExists standard-error ) then builtins.readFile standard-error
+                                                                                                                        else builtins.toFile "standard-error" standard-error
                                                                                                                     else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
                                                                                                                 standard-output =
-                                                                                                                    if builtins.typeOf standard-output == "string" then standard-output
+                                                                                                                    if builtins.typeOf standard-output == "string" then
+                                                                                                                        if ( builtins.match "^/.*" standard-output != null ) && ( builtins.pathExists standard-output ) then builtins.readFile standard-output
+                                                                                                                        else builtins.toFile "standard-output" standard-output
                                                                                                                     else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
@@ -196,8 +200,8 @@
                                                                                                                     ]
                                                                                                         )
                                                                                                         [
-                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.standard-output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) }"
-                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.standard-error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-error" ] ] ) }"
+                                                                                                            "${ pkgs.coreutils }/bin/cat ${ secondary.standard-output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) }"
+                                                                                                            "${ pkgs.coreutils }/bin/cat ${ secondary.standard-error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-error" ] ] ) }"
                                                                                                             "${ pkgs.coreutils }/bin/echo ${ secondary.status } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
                                                                                                         ]
                                                                                                         [
