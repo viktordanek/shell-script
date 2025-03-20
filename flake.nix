@@ -157,12 +157,16 @@
                                                                                                                     else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
-                                                                                                                        if ( builtins.match "^/.*" standard-error != null ) && ( builtins.pathExists standard-error ) then builtins.readFile standard-error
+                                                                                                                        if builtins.match "^/.*" standard-error != null then
+                                                                                                                            if builtins.pathExists standard-error then builtins.readFile standard-error
+                                                                                                                            else builtins.throw "standard-error is an absolute path but there does not exist a path for ${ standard-error }."
                                                                                                                         else builtins.toFile "standard-error" standard-error
                                                                                                                     else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
                                                                                                                 standard-output =
                                                                                                                     if builtins.typeOf standard-output == "string" then
-                                                                                                                        if ( builtins.match "^/.*" standard-output != null ) && ( builtins.pathExists standard-output ) then builtins.readFile standard-output
+                                                                                                                        if builtins.match "^/.*" standard-output != null then
+                                                                                                                            if builtins.pathExists standard-output then builtins.readFile standard-output
+                                                                                                                            else builtins.throw "standard-output is an absolute path but there does not exist a path for ${ standard-output }."
                                                                                                                         else builtins.toFile "standard-output" standard-output
                                                                                                                     else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
                                                                                                                 status =
@@ -247,6 +251,9 @@
                                                                                                                                         "${ pkgs.coreutils }/bin/cp --recursive /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
                                                                                                                                 in builtins.map mapper ( builtins.attrNames secondary.mounts )
                                                                                                                         )
+                                                                                                                        [
+                                                                                                                            "${ pkgs.coreutils }/bin/rm --recursive --force /build/mounts"
+                                                                                                                        ]
                                                                                                                     ]
                                                                                                         )
                                                                                                     ] ;
@@ -319,6 +326,25 @@
                                                                             script = self + "/scripts/foobar.sh" ;
                                                                             tests =
                                                                                 {
+                                                                                    file =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        singleton =
+                                                                                                            {
+                                                                                                                expected = self + "/mounts/expected" ;
+                                                                                                                initial = self + "/mounts/initial" ;
+                                                                                                                permissions =
+                                                                                                                    {
+                                                                                                                        file = 777 ;
+                                                                                                                    } ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
+                                                                                                standard-output = "standard-output 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060";
+                                                                                                status = 96 ;
+                                                                                            } ;
                                                                                     null =
                                                                                         ignore :
                                                                                             {
