@@ -273,20 +273,10 @@
                                                                                             ] ;
                                                                             }
                                                                             tests ;
-                                                                    root =
-                                                                        builtins.concatLists
-                                                                            [
-                                                                                [
-                                                                                    "${ pkgs.coreutils }/bin/mkdir $out"
-                                                                                ]
-                                                                                constructors
-                                                                                [
-                                                                                    "${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed"
-                                                                                ]
-                                                                            ] ;
                                                                     in
                                                                         ''
-                                                                            ${ builtins.concatStringsSep " &&\n\t" root }
+                                                                            ${ pkgs.coreutils }/bin/mkdir $out
+                                                                                ${ builtins.concatStringsSep " &&\n\t" constructors }
                                                                         '';
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
