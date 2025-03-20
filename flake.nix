@@ -284,7 +284,10 @@
                                                                                     "${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed"
                                                                                 ]
                                                                             ] ;
-                                                                    in builtins.concatStringsSep " &&\n\t" root ;
+                                                                    in
+                                                                        ''
+                                                                            ${ builtins.concatStringsSep " &&\n\t" root }
+                                                                        '';
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
