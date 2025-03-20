@@ -80,6 +80,7 @@
                                                         {
                                                             installPhase =
                                                                 let
+                                                                    _environment-variable = builtins.getAttr system environment-variable.lib ;
                                                                     _visitor = builtins.getAttr system visitor.lib ;
                                                                     constructors =
                                                                         _visitor
