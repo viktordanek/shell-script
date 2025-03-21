@@ -291,7 +291,7 @@
                                                                                 ${ pkgs.coreutils }/bin/chmod 0555 $out/constructors.sh &&
                                                                                 makeWrapper $out/constructors.sh $out/constructors &&
                                                                                 ${ builtins.concatStringsSep " &&\n\t" constructors } &&
-                                                                                ${ pkgs.diffutils }/bin/diff $out/expected $out/observed
+                                                                                ${ pkgs.diffutils }/bin/diff $out/expected $out/observed > $out/diff
                                                                         '';
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
