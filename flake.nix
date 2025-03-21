@@ -308,6 +308,23 @@
                                                     {
                                                         installPhase =
                                                             let
+                                                                no-tests =
+                                                                    lib
+                                                                        {
+                                                                            environment =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                    ] ;
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "--set ${ name } ${ value }" ;
+                                                                                } ;
+                                                                            name = "foobar" ;
+                                                                            script = self + "/scripts/foobar.sh" ;
+                                                                        } ;
                                                                 shell-script =
                                                                     lib
                                                                         {
