@@ -99,6 +99,12 @@
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                             ]
+                                                                                                                            [
+                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
+                                                                                                                            ]
+                                                                                                                            [
+                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
+                                                                                                                            ]
                                                                                                                         ] ;
                                                                                                                 in
                                                                                                                 ''
