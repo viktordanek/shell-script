@@ -100,7 +100,7 @@
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper $out/bin/run-script.sh $out/bin/run-script --set PATH ${ pkgs.coreutils }"
+                                                                                                                                "makeWrapper $out/bin/run-script.sh $out/test/run-script --set PATH ${ pkgs.coreutils }"
                                                                                                                                 (
                                                                                                                                     let
                                                                                                                                         user-environment =
