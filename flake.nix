@@ -90,6 +90,16 @@
                                                                                         let
                                                                                             secondary =
                                                                                                 let
+                                                                                                    derivation =
+                                                                                                        pkgs.stdenv.mkDerivation
+                                                                                                            {
+                                                                                                                installPhase =
+                                                                                                                    ''
+                                                                                                                        ${ pkgs.coreutils }/bin/touch $out
+                                                                                                                    '' ;
+                                                                                                                name = "test" ;
+                                                                                                                src = ./. ;
+                                                                                                            } ;
                                                                                                     identity =
                                                                                                         {
                                                                                                             arguments ? [ ] ,
@@ -175,88 +185,9 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
-                                                                                                builtins.concatLists
-                                                                                                    [
-                                                                                                        [
-                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                        ]
-                                                                                                        (
-                                                                                                            if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
-                                                                                                            else
-                                                                                                                builtins.concatLists
-                                                                                                                    [
-                                                                                                                        [
-                                                                                                                            "${ pkgs.coreutils }/bin/mkdir /build/mounts"
-                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
-                                                                                                                        ]
-                                                                                                                        (
-                                                                                                                            let
-                                                                                                                                mapper =
-                                                                                                                                    name : { expected , initial , permissions } :
-                                                                                                                                        [
-                                                                                                                                            "${ pkgs.coreutils }/bin/mkdir /build/mounts/${ name }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ initial }/* /build/mounts/${ name }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
-                                                                                                                                            "${ pkgs.coreutils }/bin/cp --recursive --preserve=mode ${ expected }/* ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }"
-                                                                                                                                        ] ;
-                                                                                                                                in builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) )
-                                                                                                                        )
-                                                                                                                    ]
-                                                                                                        )
-                                                                                                        [
-                                                                                                            "${ pkgs.coreutils }/bin/cat ${ secondary.standard-output } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) }"
-                                                                                                            "${ pkgs.coreutils }/bin/cat ${ secondary.standard-error } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "standard-error" ] ] ) }"
-                                                                                                            "${ pkgs.coreutils }/bin/echo ${ secondary.status } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) }"
-                                                                                                        ]
-                                                                                                        [
-                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                            (
-                                                                                                                let
-                                                                                                                    file = builtins.toFile "file" ( builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ permissions [ test ] ] ) ) ;
-                                                                                                                    permissions = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , initial , permissions } : permissions ) secondary.mounts ) ) ;
-                                                                                                                    test = builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ;
-                                                                                                                    in
-                                                                                                                        "${ pkgs.coreutils }/bin/cat ${ file } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
-                                                                                                            )
-                                                                                                            "${ pkgs.coreutils }/bin/chmod 0555 ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) }"
-                                                                                                            "makeWrapper ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "script" ] ] ) } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) } --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin"
-                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                            (
-                                                                                                                let
-                                                                                                                    user-environment =
-                                                                                                                        pkgs.buildFHSUserEnv
-                                                                                                                            {
-                                                                                                                                extraBwrapArgs =
-                                                                                                                                    let
-                                                                                                                                        mapper = value : "--bind /build/mounts/${ value } /${ value }" ;
-                                                                                                                                        in builtins.map mapper ( builtins.attrNames secondary.mounts ) ;
-                                                                                                                                name = "observation" ;
-                                                                                                                                runScript = "${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) [ "binary" ] ] ) }" ;
-                                                                                                                            } ;
-                                                                                                                    in "if ${ user-environment }/bin/observation > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "standard-output" ] ] ) } 2> ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "standard-error" ] ] ) } ; then ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; else ${ pkgs.coreutils }/bin/echo ${ builtins.concatStringsSep "" [ "$" "{" "?" "}" ] } > ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "status" ] ] ) } ; fi"
-                                                                                                            )
-                                                                                                        ]
-                                                                                                        (
-                                                                                                            if builtins.length ( builtins.attrNames secondary.mounts ) == 0 then [ ]
-                                                                                                            else
-                                                                                                                builtins.concatLists
-                                                                                                                    [
-                                                                                                                        [
-                                                                                                                            "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" ] ] ) }"
-                                                                                                                        ]
-                                                                                                                        (
-                                                                                                                            let
-                                                                                                                                mapper =
-                                                                                                                                    name :
-                                                                                                                                        "${ pkgs.coreutils }/bin/cp --recursive /build/mounts/${ name } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) [ "mounts" name ] ] ) }" ;
-                                                                                                                                in builtins.map mapper ( builtins.attrNames secondary.mounts )
-                                                                                                                        )
-                                                                                                                        [
-                                                                                                                            "${ pkgs.coreutils }/bin/rm --recursive --force /build/mounts"
-                                                                                                                        ]
-                                                                                                                    ]
-                                                                                                        )
-                                                                                                    ] ;
+                                                                                                [
+                                                                                                    # "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
                                                                             {
@@ -265,9 +196,7 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists list )
                                                                                             ] ;
@@ -276,9 +205,7 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "expected" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "observed" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ pkgs.coreutils }/bin/mkdir ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "test" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                             ] ;
@@ -287,11 +214,12 @@
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                ${ pkgs.coreutils }/bin/echo '${ builtins.concatStringsSep " &&\n\t" constructors }' > $out/constructors.sh &&
-                                                                                ${ pkgs.coreutils }/bin/chmod 0555 $out/constructors.sh &&
-                                                                                makeWrapper $out/constructors.sh $out/constructors &&
-                                                                                ${ builtins.concatStringsSep " &&\n\t" constructors } &&
-                                                                                ${ pkgs.diffutils }/bin/diff $out/expected $out/observed > $out/diff
+                                                                                ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                                ${ pkgs.coreutils }/bin/cat ${ builtins.toFile "constructor" ( builtins.concatStringsSep " &&\n\t" constructors ) } > $out/bin/constructors.sh &&
+                                                                                ${ pkgs.coreutils }/bin/chmod 0555 $out/bin/constructors.sh &&
+                                                                                makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir &&
+                                                                                # --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set EXPECTED $out/expected --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OBSERVED $out/observed --set RM ${ pkgs.coreutils }/bin/rm --set TEST $out/test &&
+                                                                                $out/bin/constructors
                                                                         '';
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -387,7 +315,8 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests }
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
+                                                                            exit 45
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
