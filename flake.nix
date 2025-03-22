@@ -92,10 +92,28 @@
                                                                                                 pkgs.stdenv.mkDerivation
                                                                                                     {
                                                                                                         installPhase =
-                                                                                                            ''
-                                                                                                                ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                                                    ${ pkgs.coreutils }/bin/mkdir $out/bin
-                                                                                                            '' ;
+                                                                                                            let
+                                                                                                                constructors =
+                                                                                                                    _visitor
+                                                                                                                        {
+                                                                                                                        }
+                                                                                                                        {
+                                                                                                                            list =
+                                                                                                                                path : list :
+                                                                                                                                    builtins.concatLists
+                                                                                                                                        [
+                                                                                                                                            [
+                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                                            ]
+                                                                                                                                            ( builtins.concatLists list )
+                                                                                                                                        ] ;
+                                                                                                                        }
+                                                                                                                        secondary.tests ;
+                                                                                                                in
+                                                                                                                ''
+                                                                                                                    ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                                                        ${ pkgs.coreutils }/bin/mkdir $out/bin
+                                                                                                                '' ;
                                                                                                         name = "test" ;
                                                                                                         src = ./. ;
                                                                                                     } ;
