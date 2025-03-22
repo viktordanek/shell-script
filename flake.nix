@@ -96,7 +96,6 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
-                                                                                                                            ( builtins.map ( { index , ... } : "export MOUNT_${ index }=/build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
