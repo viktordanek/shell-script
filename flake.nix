@@ -106,6 +106,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
+                                                                                                                                                    extraBwrapArgs = builtins.map ( mount : mount.bind ) secondary.mounts ;
                                                                                                                                                     name = "user-environment" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
                                                                                                                                                     targetPkgs = targetPkgs : [ ( shell-script "candidate" ) ] ;
@@ -159,38 +160,31 @@
                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         let
-                                                                                                                            mapper =
-                                                                                                                                name : { expected , initial ? null , permissions ? null } :
-                                                                                                                                    {
-                                                                                                                                        initial =
-                                                                                                                                            if builtins.typeOf initial == "null" then initial
-                                                                                                                                            else if builtins.typeOf initial == "string" then
-                                                                                                                                                if builtins.pathExists initial then initial
-                                                                                                                                                else builtins.throw "there is no path for ${ initial }."
-                                                                                                                                            else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
-                                                                                                                                        expected =
-                                                                                                                                            if builtins.typeOf expected == "string" then
-                                                                                                                                                if builtins.pathExists expected then expected
-                                                                                                                                                else builtins.throw "there is no path for ${ expected }."
-                                                                                                                                            else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
-                                                                                                                                        permissions =
-                                                                                                                                            _visitor
+                                                                                                                            generator =
+                                                                                                                                index :
+                                                                                                                                    let
+                                                                                                                                        mapper =
+                                                                                                                                            name : { expected , initial ? null } :
                                                                                                                                                 {
-                                                                                                                                                    int =
-                                                                                                                                                        path : value :
-                                                                                                                                                            [
-                                                                                                                                                                (
-                                                                                                                                                                    "chmod ${ builtins.toString value } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "/build" "mounts" name ] ( builtins.map builtins.toString path ) ] ) }"
-                                                                                                                                                                )
-                                                                                                                                                            ] ;
-                                                                                                                                                }
-                                                                                                                                                {
-                                                                                                                                                    list = path : list : builtins.concatLists list ;
-                                                                                                                                                    set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
-                                                                                                                                                }
-                                                                                                                                                permissions ;
-                                                                                                                                    } ;
-                                                                                                                            in builtins.mapAttrs mapper mounts
+                                                                                                                                                    initial =
+                                                                                                                                                        if builtins.typeOf initial == "null" then initial
+                                                                                                                                                        else if builtins.typeOf initial == "string" then
+                                                                                                                                                            if builtins.pathExists initial then initial
+                                                                                                                                                            else builtins.throw "there is no path for ${ initial }."
+                                                                                                                                                        else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
+                                                                                                                                                    expected =
+                                                                                                                                                        if builtins.typeOf expected == "string" then
+                                                                                                                                                            if builtins.pathExists expected then expected
+                                                                                                                                                            else builtins.throw "there is no path for ${ expected }."
+                                                                                                                                                        else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
+                                                                                                                                                    name = name ;
+                                                                                                                                                } ;
+                                                                                                                                        mount = builtins.elemAt index ( builtins.attrValues ( builtins.mapAttrs mapper mount ) ) ;
+                                                                                                                                        in
+                                                                                                                                            {
+                                                                                                                                                bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
+                                                                                                                                            } ;
+                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                                                                                 pipe =
                                                                                                                     if builtins.typeOf pipe == "null" then [ ]
