@@ -115,6 +115,7 @@
                                                                                                                                         in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/test/user-environment"
                                                                                                                                 )
                                                                                                                             ]
+                                                                                                                            # ( builtins.concatLists ( builtins.map ( mount : mount.wrap ) secondary.mounts ) )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                             ]
@@ -185,6 +186,13 @@
                                                                                                                                             {
                                                                                                                                                 bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
                                                                                                                                                 create = "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }" ;
+                                                                                                                                                wrap =
+                                                                                                                                                    if builtins.typeOf mount.initial == "null" then [ ]
+                                                                                                                                                    else
+                                                                                                                                                        [
+                                                                                                                                                            "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.initial } ${ environment-variable "OUT" }/test/mount.${ builtins.toString index }.sh"
+                                                                                                                                                            "makeWrapper ${ environment-variable "OUT" }/test/mount.${ builtins.toString index }.sh ${ environment-variable "OUT" }/test/mount.${ builtins.toString index } --set MOUNT ${ environment-variable "MOUNT_${ builtins.toString index }" }"
+                                                                                                                                                        ] ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
