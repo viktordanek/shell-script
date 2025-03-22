@@ -94,35 +94,12 @@
                                                                                                         installPhase =
                                                                                                             let
                                                                                                                 constructors =
-                                                                                                                    _visitor
-                                                                                                                        {
-                                                                                                                            lambda =
-                                                                                                                                path : value :
-                                                                                                                                    [
-                                                                                                                                    ] ;
-                                                                                                                            null = path : value : [ ] ;
-                                                                                                                        }
-                                                                                                                        {
-                                                                                                                            list =
-                                                                                                                                path : list :
-                                                                                                                                    builtins.concatLists
-                                                                                                                                        [
-                                                                                                                                            [
-                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" "test" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                                            ]
-                                                                                                                                            ( builtins.concatLists list )
-                                                                                                                                        ] ;
-                                                                                                                            set =
-                                                                                                                                path : set :
-                                                                                                                                    builtins.concatLists
-                                                                                                                                        [
-                                                                                                                                            [
-                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" "test" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                                                            ]
-                                                                                                                                            ( builtins.concatLists ( builtins.attrValues set ) )
-                                                                                                                                        ] ;
-                                                                                                                        }
-                                                                                                                        secondary.tests ;
+                                                                                                                    builtins.concatLists
+                                                                                                                        [
+                                                                                                                            [
+                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
+                                                                                                                            ]
+                                                                                                                        ] ;
                                                                                                                 in
                                                                                                                 ''
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
@@ -132,6 +109,7 @@
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
+                                                                                                        nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                                                                         src = ./. ;
                                                                                                     } ;
                                                                                             secondary =
