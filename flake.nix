@@ -96,6 +96,7 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
+                                                                                                                            ( builtins.map ( mount : mount.create ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
@@ -183,6 +184,7 @@
                                                                                                                                         in
                                                                                                                                             {
                                                                                                                                                 bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
+                                                                                                                                                create = "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }" ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
