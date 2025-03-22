@@ -181,14 +181,14 @@
                                                                                                                                                         else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
                                                                                                                                                     name = name ;
                                                                                                                                                 } ;
-                                                                                                                                        mount = builtins.elemAt index ( builtins.attrValues ( builtins.mapAttrs mapper mount ) ) ;
+                                                                                                                                        mount = builtins.elemAt index ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) ) ;
                                                                                                                                         in
                                                                                                                                             {
                                                                                                                                                 bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
                                                                                                                                                 create =
                                                                                                                                                     [
                                                                                                                                                         "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }"
-                                                                                                                                                        "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
+                                                                                                                                                        # "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
                                                                                                                                                     ] ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
