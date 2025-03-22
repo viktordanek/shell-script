@@ -96,7 +96,7 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
-                                                                                                                            ( builtins.concatLists ( builtins.map ( mount : mount.create ) secondary.mounts ) )
+                                                                                                                            ( builtins.map ( { index , ... } : "export MOUNT_${ index }=/build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
@@ -107,7 +107,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( mount : mount.bind ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind ${ _environment-variable "MOUNTS_${ index }" } ${ name }" ) secondary.mounts ;
                                                                                                                                                     name = "user-environment" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
                                                                                                                                                     targetPkgs = targetPkgs : [ ( shell-script "candidate" ) ] ;
@@ -164,32 +164,39 @@
                                                                                                                             generator =
                                                                                                                                 index :
                                                                                                                                     let
-                                                                                                                                        mapper =
-                                                                                                                                            name : { expected , initial ? null , is-file ? true} :
-                                                                                                                                                {
-                                                                                                                                                    initial =
-                                                                                                                                                        if builtins.typeOf initial == "null" then initial
-                                                                                                                                                        else if builtins.typeOf initial == "string" then
-                                                                                                                                                            if builtins.pathExists initial then initial
-                                                                                                                                                            else builtins.throw "there is no path for ${ initial }."
-                                                                                                                                                        else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
-                                                                                                                                                    is-file = is-file ;
-                                                                                                                                                    expected =
-                                                                                                                                                        if builtins.typeOf expected == "string" then
-                                                                                                                                                            if builtins.pathExists expected then expected
-                                                                                                                                                            else builtins.throw "there is no path for ${ expected }."
-                                                                                                                                                        else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
-                                                                                                                                                    name = name ;
-                                                                                                                                                } ;
-                                                                                                                                        mount = builtins.elemAt index ( builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts ) ) ;
+                                                                                                                                        elem = builtins.elemAt list index ;
+                                                                                                                                        list =
+                                                                                                                                            let
+                                                                                                                                                set =
+                                                                                                                                                    let
+                                                                                                                                                        mapper =
+                                                                                                                                                            name : { expected , initial ? null , is-file ? true} :
+                                                                                                                                                                {
+                                                                                                                                                                    initial =
+                                                                                                                                                                        if builtins.typeOf initial == "null" then initial
+                                                                                                                                                                        else if builtins.typeOf initial == "string" then
+                                                                                                                                                                            if builtins.pathExists initial then initial
+                                                                                                                                                                            else builtins.throw "there is no path for ${ initial }."
+                                                                                                                                                                        else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
+                                                                                                                                                                    is-file =
+                                                                                                                                                                        if builtins.typeOf is-file == "bool" then is-file
+                                                                                                                                                                        else builtins.throw "is-file is not bool but ${ builtins.typeOf is-file }." ;
+                                                                                                                                                                    expected =
+                                                                                                                                                                        if builtins.typeOf expected == "string" then
+                                                                                                                                                                            if builtins.pathExists expected then expected
+                                                                                                                                                                            else builtins.throw "there is no path for ${ expected }."
+                                                                                                                                                                        else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
+                                                                                                                                                                    name = name ;
+                                                                                                                                                                } ;
+                                                                                                                                                        in builtins.mapAttrs mapper mounts ;
+                                                                                                                                                in builtins.attrValues set ;
                                                                                                                                         in
                                                                                                                                             {
-                                                                                                                                                bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
-                                                                                                                                                create =
-                                                                                                                                                    [
-                                                                                                                                                        "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }"
-                                                                                                                                                        # "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
-                                                                                                                                                    ] ;
+                                                                                                                                                index = builtins.toString index ;
+                                                                                                                                                initial = elem.initial ;
+                                                                                                                                                is-file = elem.is-file ;
+                                                                                                                                                expected = elem.expected ;
+                                                                                                                                                name = elem.name ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
