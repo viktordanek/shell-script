@@ -186,7 +186,7 @@
                                                                                                 in identity ( value null ) ;
                                                                                             in
                                                                                                 [
-                                                                                                    # "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "LN" } --symbolic ${ self + "/scripts/foobar.sh" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
