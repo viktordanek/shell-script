@@ -93,7 +93,8 @@
                                                                                                     {
                                                                                                         installPhase =
                                                                                                             ''
-                                                                                                                ${ pkgs.coreutils }/bin/touch $out
+                                                                                                                ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                                                                    ${ pkgs.coreutils }/bin/mkdir $out/bin
                                                                                                             '' ;
                                                                                                         name = "test" ;
                                                                                                         src = ./. ;
