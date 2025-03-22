@@ -188,7 +188,7 @@
                                                                                                                                                 create =
                                                                                                                                                     [
                                                                                                                                                         "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }"
-                                                                                                                                                        # "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
+                                                                                                                                                        "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
                                                                                                                                                     ] ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
