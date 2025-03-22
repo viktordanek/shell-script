@@ -127,7 +127,7 @@
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
