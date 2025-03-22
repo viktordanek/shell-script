@@ -88,18 +88,18 @@
                                                                                 lambda =
                                                                                     path : value :
                                                                                         let
+                                                                                            derivation =
+                                                                                                pkgs.stdenv.mkDerivation
+                                                                                                    {
+                                                                                                        installPhase =
+                                                                                                            ''
+                                                                                                                ${ pkgs.coreutils }/bin/touch $out
+                                                                                                            '' ;
+                                                                                                        name = "test" ;
+                                                                                                        src = ./. ;
+                                                                                                    } ;
                                                                                             secondary =
                                                                                                 let
-                                                                                                    derivation =
-                                                                                                        pkgs.stdenv.mkDerivation
-                                                                                                            {
-                                                                                                                installPhase =
-                                                                                                                    ''
-                                                                                                                        ${ pkgs.coreutils }/bin/touch $out
-                                                                                                                    '' ;
-                                                                                                                name = "test" ;
-                                                                                                                src = ./. ;
-                                                                                                            } ;
                                                                                                     identity =
                                                                                                         {
                                                                                                             arguments ? [ ] ,
@@ -186,7 +186,7 @@
                                                                                                 in identity ( value null ) ;
                                                                                             in
                                                                                                 [
-                                                                                                    "${ _environment-variable "LN" } --symbolic ${ self + "/scripts/foobar.sh" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "test" derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
@@ -196,7 +196,7 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists list )
                                                                                             ] ;
@@ -205,7 +205,7 @@
                                                                                         builtins.concatLists
                                                                                             [
                                                                                                 [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ "$out" "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                 ]
                                                                                                 ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                             ] ;
@@ -215,9 +215,8 @@
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                 ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                ${ pkgs.coreutils }/bin/cat ${ builtins.toFile "constructor" ( builtins.concatStringsSep " &&\n\t" constructors ) } > $out/bin/constructors.sh &&
-                                                                                ${ pkgs.coreutils }/bin/chmod 0555 $out/bin/constructors.sh &&
-                                                                                makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir &&
+                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors.sh" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
+                                                                                makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 # --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set EXPECTED $out/expected --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OBSERVED $out/observed --set RM ${ pkgs.coreutils }/bin/rm --set TEST $out/test &&
                                                                                 $out/bin/constructors
                                                                         '';
