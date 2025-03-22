@@ -96,7 +96,7 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
-                                                                                                                            ( builtins.map ( mount : mount.create ) secondary.mounts )
+                                                                                                                            # ( builtins.concatLists ( builtins.map ( mount : mount.create ) secondary.mounts ) )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
@@ -115,7 +115,6 @@
                                                                                                                                         in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/test/user-environment"
                                                                                                                                 )
                                                                                                                             ]
-                                                                                                                            # ( builtins.concatLists ( builtins.map ( mount : mount.wrap ) secondary.mounts ) )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                             ]
@@ -166,7 +165,7 @@
                                                                                                                                 index :
                                                                                                                                     let
                                                                                                                                         mapper =
-                                                                                                                                            name : { expected , initial ? null } :
+                                                                                                                                            name : { expected , initial ? null , is-file ? true} :
                                                                                                                                                 {
                                                                                                                                                     initial =
                                                                                                                                                         if builtins.typeOf initial == "null" then initial
@@ -174,6 +173,7 @@
                                                                                                                                                             if builtins.pathExists initial then initial
                                                                                                                                                             else builtins.throw "there is no path for ${ initial }."
                                                                                                                                                         else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
+                                                                                                                                                    is-file = is-file ;
                                                                                                                                                     expected =
                                                                                                                                                         if builtins.typeOf expected == "string" then
                                                                                                                                                             if builtins.pathExists expected then expected
@@ -185,14 +185,11 @@
                                                                                                                                         in
                                                                                                                                             {
                                                                                                                                                 bind = "--bind ${ _environment-variable "MOUNT_${ builtins.toString index }" } /${ name }" ;
-                                                                                                                                                create = "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }" ;
-                                                                                                                                                wrap =
-                                                                                                                                                    if builtins.typeOf mount.initial == "null" then [ ]
-                                                                                                                                                    else
-                                                                                                                                                        [
-                                                                                                                                                            "${ pkgs.coreutils }/bin/ln --symbolic ${ mount.initial } ${ environment-variable "OUT" }/test/mount.${ builtins.toString index }.sh"
-                                                                                                                                                            "makeWrapper ${ environment-variable "OUT" }/test/mount.${ builtins.toString index }.sh ${ environment-variable "OUT" }/test/mount.${ builtins.toString index } --set MOUNT ${ environment-variable "MOUNT_${ builtins.toString index }" }"
-                                                                                                                                                        ] ;
+                                                                                                                                                create =
+                                                                                                                                                    [
+                                                                                                                                                        "export MOUNT_${ builtins.toString index }=/build/mounts.${ builtins.toString index }"
+                                                                                                                                                        "${ _environment-variable ( if mount.is-file then "TOUCH" else "MKDIR" ) } ${ _environment-variable "MOUNT_${ builtins.toString index }" }"
+                                                                                                                                                    ] ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
@@ -317,10 +314,6 @@
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
                                                                                                                 initial = self + "/mounts/initial" ;
-                                                                                                                permissions =
-                                                                                                                    {
-                                                                                                                        file = 777 ;
-                                                                                                                    } ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
@@ -336,10 +329,6 @@
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
                                                                                                                 initial = self + "/mounts/initial" ;
-                                                                                                                permissions =
-                                                                                                                    {
-                                                                                                                        file = 777 ;
-                                                                                                                    } ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
