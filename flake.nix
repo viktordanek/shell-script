@@ -96,6 +96,11 @@
                                                                                                                 constructors =
                                                                                                                     _visitor
                                                                                                                         {
+                                                                                                                            lambda =
+                                                                                                                                path : value :
+                                                                                                                                    [
+                                                                                                                                    ] ;
+                                                                                                                            null = path : value : [ ] ;
                                                                                                                         }
                                                                                                                         {
                                                                                                                             list =
@@ -103,16 +108,28 @@
                                                                                                                                     builtins.concatLists
                                                                                                                                         [
                                                                                                                                             [
-                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" "test" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                                                             ]
                                                                                                                                             ( builtins.concatLists list )
+                                                                                                                                        ] ;
+                                                                                                                            set =
+                                                                                                                                path : set :
+                                                                                                                                    builtins.concatLists
+                                                                                                                                        [
+                                                                                                                                            [
+                                                                                                                                                "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" "test" ) ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                                                            ]
+                                                                                                                                            ( builtins.concatLists ( builtins.attrValues set ) )
                                                                                                                                         ] ;
                                                                                                                         }
                                                                                                                         secondary.tests ;
                                                                                                                 in
                                                                                                                 ''
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                                                        ${ pkgs.coreutils }/bin/mkdir $out/bin
+                                                                                                                        ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                                                                        ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                        $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
                                                                                                         src = ./. ;
