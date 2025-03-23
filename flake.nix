@@ -117,7 +117,7 @@
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) } ${ _environment-variable "OUT" }/test/run-script.sh"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }"
+                                                                                                                                "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
                                                                                                                                 (
                                                                                                                                     let
                                                                                                                                         user-environment =
@@ -126,7 +126,6 @@
                                                                                                                                                     extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
                                                                                                                                                     name = "user-environment" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
-                                                                                                                                                    targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
                                                                                                                                                 } ;
                                                                                                                                         in "${ user-environment }/bin/user-environment"
                                                                                                                                 )
@@ -330,7 +329,7 @@
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 96 ;
-                                                                                                test = "echo ${ _environment-variable "PATH" }" ;
+                                                                                                test = "candidate" ;
                                                                                             } ;
                                                                                     null =
                                                                                         ignore :
@@ -346,7 +345,7 @@
                                                                                                 standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
                                                                                                 standard-output = "standard-output 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060";
                                                                                                 status = 96 ;
-                                                                                                test = "candidate 3d07e12405ad366c8295e2d1da6b2cdc9952e972da1ecb1f6910c014730d73b0b344099c5898d8935d3e7d22ce6962d3008ebb78105b9034020ac9b326b02464" ;
+                                                                                                test = "echo" ;
                                                                                             } ;
                                                                                 } ;
                                                                         } ;
