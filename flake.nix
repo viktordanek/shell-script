@@ -148,13 +148,20 @@
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ secondary.standard-output } ${ _environment-variable "OUT" }/expected/standard-output"
                                                                                                                             ]
+                                                                                                                            (
+                                                                                                                                let
+                                                                                                                                    mapper =
+                                                                                                                                        { index , ... } :
+                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } >> ${ _environment-variable "OUT" }/debug" ;
+                                                                                                                                    in builtins.map mapper secondary.mounts
+                                                                                                                            )
                                                                                                                         ] ;
                                                                                                                 in
                                                                                                                 ''
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
@@ -274,7 +281,7 @@
                                                                                 ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors.sh" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
-                                                                                # --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set EXPECTED $out/expected --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OBSERVED $out/observed --set RM ${ pkgs.coreutils }/bin/rm --set TEST $out/test &&
+                                                                                # --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set EXPECTED $out/expected --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OBSERVED $out/observed --set RM ${ pkgs.coreutils }/bin/rm --set TEST $out/test &&
                                                                                 $out/bin/constructors
                                                                         '';
                                                             name = "tests" ;
