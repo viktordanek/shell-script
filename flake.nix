@@ -128,7 +128,7 @@
                                                                                                                                                 in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/mount.${ index }.sh" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
-                                                                                                                            ( builtins.map ( { index , name , ... } : "${ _environment-variable "ECHO" } ${ _environment-variable "OUT" }/test/mount.${ index }.sh > ${ _environment-variable "OUT" }/test/mount.${ index }.out 2> ${ _environment-variable "OUT" }/test/mount.${ index }.err" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh > ${ _environment-variable "OUT" }/test/mount.${ index }.out 2> ${ _environment-variable "OUT" }/test/mount.${ index }.err" ) secondary.mounts )
                                                                                                                             # ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -342,7 +342,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "chmod 0777 /srv/mount. && stat /srv/mount && echo hi > /srv/mount" ;
+                                                                                                                initial = "chmod 0777 /srv/mount && stat /srv/mount" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
