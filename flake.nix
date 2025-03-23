@@ -110,6 +110,8 @@
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "${ _environment-variable "LN" } --symbolic ${ initial } ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index } --set PATH ${ pkgs.coreutils }/bin" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "${ _environment-variable "ECHO" } initial > ${ _environment-variable "OUT" }/test/_initial.${ index }.sh" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/_initial.${ index }.sh ${ _environment-variable "OUT" }/test/_initial.${ index } --set PATH ${ pkgs.coreutils }/bin:${ pkgs.writeShellScriptBin "initial" initial }" ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -339,7 +341,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "stat /mounts." ;
+                                                                                                                initial = "echo hi PIPE /mounts." ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
