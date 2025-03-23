@@ -109,7 +109,7 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBrwapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
+                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = initial ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
