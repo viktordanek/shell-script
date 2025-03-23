@@ -334,7 +334,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "stat /mount" ;
+                                                                                                                initial = "echo hi && ${ pkgs.mount }/bin/mount | ${ pkgs.gnugrep }/bin/grep /mount && ls -lah /mount && cat /mount && ${ pkgs.mount }/bin/mount -o remount,rw /mount" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
