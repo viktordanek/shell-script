@@ -97,6 +97,9 @@
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            [
+                                                                                                                                "echo BEFORE >> ${ _environment-variable "OUT" }/debug"
+                                                                                                                            ]
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -113,6 +116,9 @@
                                                                                                                                                 in "${ user-environment }/bin/initial" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
+                                                                                                                            [
+                                                                                                                                "echo AFTER >> ${ _environment-variable "OUT" }/debug"
+                                                                                                                            ]
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) } ${ _environment-variable "OUT" }/test/run-script.sh"
