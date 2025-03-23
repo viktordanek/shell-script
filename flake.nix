@@ -186,13 +186,14 @@
                                                                                                                                                 set =
                                                                                                                                                     let
                                                                                                                                                         mapper =
-                                                                                                                                                            name : { expected , initial ? null , is-file ? true} :
+                                                                                                                                                            name : { expected , initial ? "" , is-file ? true} :
                                                                                                                                                                 {
                                                                                                                                                                     initial =
-                                                                                                                                                                        if builtins.typeOf initial == "null" then initial
-                                                                                                                                                                        else if builtins.typeOf initial == "string" then
-                                                                                                                                                                            if builtins.pathExists initial then initial
-                                                                                                                                                                            else builtins.throw "there is no path for ${ initial }."
+                                                                                                                                                                        if builtins.typeOf initial == "string" then
+                                                                                                                                                                            if builtins.match "^/.*" initial == null then initial
+                                                                                                                                                                            else
+                                                                                                                                                                                if builtins.pathExists initial then initial
+                                                                                                                                                                                else builtins.throw "there is no path for ${ initial }."
                                                                                                                                                                         else builtins.throw "initial is not null, string but ${ builtins.typeOf initial }." ;
                                                                                                                                                                     is-file =
                                                                                                                                                                         if builtins.typeOf is-file == "bool" then is-file
@@ -336,7 +337,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = self + "/mounts/initial" ;
+                                                                                                                initial = "echo c5fdb1985596db6f5d2b689b55db378786dc6c7156c673a948f6be92969754f3d1a72ee78de6482389fa4a5bc767ac0ad0e4dbaaff8ed5e3749ac5e6a04fedab > /mount" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
@@ -351,7 +352,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = self + "/mounts/initial" ;
+                                                                                                                initial = "echo 206fd6379f5fb0c734207018710c1fa00d9298da57bf8a3562f903ed9916d3810a9b03c078cceee2489c98abd600df956895f18d7f18fec25ad0b3a72814a788 > /mount" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
