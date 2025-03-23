@@ -330,7 +330,7 @@
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 96 ;
-                                                                                                test = "candidate 4aaed181bbc157116d59d71db872bc0a9c48f0edce67a99cdf952357b9b5c5517f30eba4f5434eda0a0695aa27f604c32f322200d0b42720210711f6ebb301ea" ;
+                                                                                                test = "echo ${ _environment-variable "PATH" }" ;
                                                                                             } ;
                                                                                     null =
                                                                                         ignore :
