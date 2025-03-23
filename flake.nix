@@ -115,7 +115,7 @@
                                                                                                                             )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
+                                                                                                                                "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) }"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                 "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }"
                                                                                                                                 (
@@ -154,27 +154,14 @@
                                                                                                 let
                                                                                                     identity =
                                                                                                         {
-                                                                                                            arguments ? [ ] ,
-                                                                                                            file ? null ,
                                                                                                             mounts ? { } ,
-                                                                                                            pipe ? null ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
-                                                                                                            status ? 0
+                                                                                                            status ? 0 ,
+                                                                                                            test
                                                                                                         } :
                                                                                                             {
-                                                                                                                arguments =
-                                                                                                                    if builtins.typeOf arguments == "list" then
-                                                                                                                        builtins.map ( a : if builtins.typeOf a == "string" then a else builtins.throw "argument is not string but ${ builtins.typeOf a }." ) arguments
-                                                                                                                    else builtins.throw "arguments is not list but ${ builtins.typeOf arguments }." ;
-                                                                                                                file =
-                                                                                                                    if builtins.typeOf file == "null" then [ ]
-                                                                                                                    else if builtins.typeOf file == "string" then
-                                                                                                                        let
-                                                                                                                            eval = builtins.toFile "file" file ;
-                                                                                                                            in if eval.success == true then [ "<" eval.value ] else builtins.throw "file (${ file }) is not a string that can be filed"
-                                                                                                                    else builtins.throw "file is not null, string but ${ builtins.typeOf file }." ;
-                                                                                                                mounts =
+                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         let
                                                                                                                             generator =
@@ -217,13 +204,6 @@
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
-                                                                                                                pipe =
-                                                                                                                    if builtins.typeOf pipe == "null" then [ ]
-                                                                                                                    else if builtins.typeOf pipe == "string" then
-                                                                                                                        let
-                                                                                                                            eval = builtins.toFile "pipe" pipe ;
-                                                                                                                            in if eval.success == true then [ "cat" eval.value "|" ] else builtins.throw "pipe (${ pipe }) is not a string that be filed."
-                                                                                                                    else builtins.throw "pipe is not null, string but ${ builtins.typeOf pipe }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
                                                                                                                         if builtins.match "^/.*" standard-error != null then
@@ -241,6 +221,13 @@
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
+                                                                                                                test =
+                                                                                                                    if builtins.typeOf test == "string" then [ test ]
+                                                                                                                    else if builtins.typeOf test == "list" then
+                                                                                                                        let
+                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
+                                                                                                                            in builtins.map mapper test
+                                                                                                                    else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
@@ -343,6 +330,7 @@
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 96 ;
+                                                                                                test = "candidate 4aaed181bbc157116d59d71db872bc0a9c48f0edce67a99cdf952357b9b5c5517f30eba4f5434eda0a0695aa27f604c32f322200d0b42720210711f6ebb301ea" ;
                                                                                             } ;
                                                                                     null =
                                                                                         ignore :
@@ -358,6 +346,7 @@
                                                                                                 standard-error = "standard-error 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060" ;
                                                                                                 standard-output = "standard-output 6641672962c2fdb4d4a3686c119c74dd89164f7e489a75008b514b668347b004de670b3e4ad7d5010599a103743c7febb4d767901e78298933a42d16642c7060";
                                                                                                 status = 96 ;
+                                                                                                test = "candidate 3d07e12405ad366c8295e2d1da6b2cdc9952e972da1ecb1f6910c014730d73b0b344099c5898d8935d3e7d22ce6962d3008ebb78105b9034020ac9b326b02464" ;
                                                                                             } ;
                                                                                 } ;
                                                                         } ;
