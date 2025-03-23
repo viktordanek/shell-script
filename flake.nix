@@ -128,7 +128,7 @@
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
                                                                                                                                                     targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
                                                                                                                                                 } ;
-                                                                                                                                        in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/test/user-environment"
+                                                                                                                                        in " ${ user-environment } ${ _environment-variable "OUT" }/test/user-environment"
                                                                                                                                 )
                                                                                                                             ]
                                                                                                                             [
