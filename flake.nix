@@ -111,7 +111,8 @@
                                                                                                                             ( builtins.map ( { index , initial , ... } : "${ _environment-variable "LN" } --symbolic ${ initial } ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index } --set PATH ${ pkgs.coreutils }/bin" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "${ _environment-variable "ECHO" } initial > ${ _environment-variable "OUT" }/test/_initial.${ index }.sh" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/_initial.${ index }.sh ${ _environment-variable "OUT" }/test/_initial.${ index } --set PATH ${ pkgs.coreutils }/bin:${ pkgs.writeShellScriptBin "initial" initial }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "${ _environment-variable "CHMOD" } 0555 ${ _environment-variable "OUT" }/test/_initial.${ index }.sh" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/_initial.${ index }.sh ${ _environment-variable "OUT" }/test/_initial.${ index } --set PATH ${ pkgs.coreutils }/bin:${ pkgs.writeShellScriptBin "initial" initial }:${ pkgs.makeWrapper }" ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -341,7 +342,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "chmod 0777 /mounts. && stat /mounts. && echo hi > /mounts" ;
+                                                                                                                initial = "chmod 0777 /mounts. && stat /mounts." ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
