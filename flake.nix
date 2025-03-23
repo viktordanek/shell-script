@@ -97,6 +97,22 @@
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            (
+                                                                                                                                let
+                                                                                                                                    mapper =
+                                                                                                                                        { index , initial , name , ... } :
+                                                                                                                                            let
+                                                                                                                                                user-environment =
+                                                                                                                                                    pkgs.buildFHSUserEnv
+                                                                                                                                                        {
+                                                                                                                                                            extraBrwapArgs = [ "--bind /build/mounts.${ index } ${ name }" ] ;
+                                                                                                                                                            name = "initial" ;
+                                                                                                                                                            runScript = initial ;
+                                                                                                                                                            targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                                                                                        } ;
+                                                                                                                                                in "${ user-environment }/bin/initial" ;
+                                                                                                                                    in builtins.map mapper secondary.mounts
+                                                                                                                            )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " " ( builtins.concatLists [ secondary.pipe [ "candidate" ] secondary.arguments secondary.file ] ) ) } ${ _environment-variable "OUT" }/test/run-script.sh"
@@ -110,7 +126,7 @@
                                                                                                                                                     extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind ${ _environment-variable "MOUNTS_${ index }" } ${ name }" ) secondary.mounts ;
                                                                                                                                                     name = "user-environment" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
-                                                                                                                                                    targetPkgs = targetPkgs : [ ( shell-script "candidate" ) ] ;
+                                                                                                                                                    targetPkgs = pkgs : [ ( shell-script "candidate" ) ] ;
                                                                                                                                                 } ;
                                                                                                                                         in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/test/user-environment"
                                                                                                                                 )
