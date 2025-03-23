@@ -97,6 +97,7 @@
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CHMOD" } 0777 /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "echo BEFORE >> ${ _environment-variable "OUT" }/debug"
                                                                                                                             ]
@@ -114,7 +115,7 @@
                                                                                                                                                             runScript = pkgs.writeShellScript "initial" initial ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "( echo ${ pkgs.writeShellScript "initial" initial } == ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
+                                                                                                                                                in "( ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
@@ -152,7 +153,7 @@
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
