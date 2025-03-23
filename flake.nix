@@ -127,7 +127,7 @@
                                                                                                                                                 in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/mount.${ index }.sh" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
-                                                                                                                            ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh > ${ _environment-variable "OUT" }/test/mount.${ index }.out 2> ${ _environment-variable "OUT" }/test/mount.${ index }.err" ) secondary.mounts )
                                                                                                                             # ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -341,7 +341,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "echo hi PIPE /mounts." ;
+                                                                                                                initial = "stat /mounts." ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
