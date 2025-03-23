@@ -108,6 +108,8 @@
                                                                                                                                 "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "${ _environment-variable "ECHO" } ${ initial } > ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -118,7 +120,7 @@
                                                                                                                                                         {
                                                                                                                                                             extraBwrapArgs = [ "--bind /build/mounts.${ index } /mounts." ] ;
                                                                                                                                                             name = "initial" ;
-                                                                                                                                                            runScript = pkgs.writeShellScript "initial" initial ;
+                                                                                                                                                            runScript = "${ _environment-variable "OUT" }/test/initial.${ index }" ;
                                                                                                                                                         } ;
                                                                                                                                                 in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/mount.${ index }.sh" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
