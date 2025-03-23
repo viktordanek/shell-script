@@ -114,7 +114,7 @@
                                                                                                                                                             runScript = initial ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1" ;
+                                                                                                                                                in "( ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
