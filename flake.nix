@@ -103,10 +103,6 @@
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CHMOD" } 0777 /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            # ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "ECHO" } hi | tee /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            [
-                                                                                                                                "echo BEFORE >> ${ _environment-variable "OUT" }/debug"
-                                                                                                                            ]
                                                                                                                             ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n$( stat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
@@ -124,9 +120,6 @@
                                                                                                                                                 in "( ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
-                                                                                                                            [
-                                                                                                                                "echo AFTER >> ${ _environment-variable "OUT" }/debug"
-                                                                                                                            ]
                                                                                                                             ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
