@@ -341,7 +341,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "chmod 0777 /mounts. && stat /mounts." ;
+                                                                                                                initial = "chmod 0777 /mounts. && stat /mounts. && echo hi > /mounts" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
