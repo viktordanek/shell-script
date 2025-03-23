@@ -14,6 +14,7 @@
                         let
                             lib =
                                 {
+                                    champion ? null ,
                                     environment ? x : [ ] ,
                                     extensions ? [ ] ,
                                     name ,
@@ -23,6 +24,10 @@
                                     let
                                         primary =
                                             {
+                                                champion =
+                                                    if builtins.typeOf champion == "null" then champion
+                                                    else if builtins.typeOf champion == "string" then champion
+                                                    else builtins.throw "champion is not null, string but ${ builtins.typeOf champion }." ;
                                                 environment =
                                                     if builtins.typeOf environment == "lambda" then
                                                         if builtins.typeOf environment primary.extensions == "list" then
@@ -114,7 +119,7 @@
                                                                                                                                                             extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = pkgs.writeShellScript "initial" initial ;
-                                                                                                                                                            targetPkgs = pkgs : [ pkgs.coreutils ] ;
+
                                                                                                                                                         } ;
                                                                                                                                                 in "( ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
