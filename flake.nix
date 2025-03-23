@@ -125,10 +125,7 @@
                                                                                                                                                 in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/mount.${ index }.sh" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
-                                                                                                                            ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
-
-
-
+                                                                                                                            # ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
