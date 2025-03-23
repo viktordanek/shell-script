@@ -100,6 +100,7 @@
                                                                                                                             [
                                                                                                                                 "echo BEFORE >> ${ _environment-variable "OUT" }/debug"
                                                                                                                             ]
+                                                                                                                            ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -108,17 +109,18 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBrwapArgs = [ "--bind /build/mounts.${ index } ${ name }" ] ;
+                                                                                                                                                            extraBrwapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = initial ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "${ user-environment }/bin/initial" ;
+                                                                                                                                                in "${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
                                                                                                                                 "echo AFTER >> ${ _environment-variable "OUT" }/debug"
                                                                                                                             ]
+                                                                                                                            ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) } ${ _environment-variable "OUT" }/test/run-script.sh"
