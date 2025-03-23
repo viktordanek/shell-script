@@ -113,7 +113,6 @@
                                                                                                                                                             extraBwrapArgs = [ "--bind /build/mounts.${ index } /mounts." ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = pkgs.writeShellScript "initial" initial ;
-
                                                                                                                                                         } ;
                                                                                                                                                 in "${ user-environment }/bin/initial" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
