@@ -102,7 +102,6 @@
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CHMOD" } 0777 /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n$( stat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
