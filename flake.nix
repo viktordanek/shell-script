@@ -110,12 +110,12 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
+                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mounts." ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = pkgs.writeShellScript "initial" initial ;
 
                                                                                                                                                         } ;
-                                                                                                                                                in "( ${ user-environment }/bin/initial >> ${ _environment-variable "OUT" }/debug 2>&1 || true )" ;
+                                                                                                                                                in "${ user-environment }/bin/initial" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             ( builtins.map ( { index , name , ... } : ''echo -en "\n\n${ name }\n$( cat /build/mounts.${ index } )\n" >> ${ _environment-variable "OUT" }/debug'' ) secondary.mounts )
@@ -337,7 +337,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "echo DURING && cat /mount && stat /mount" ;
+                                                                                                                initial = "stat /mounts." ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
