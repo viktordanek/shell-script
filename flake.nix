@@ -109,7 +109,7 @@
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "${ _environment-variable "LN" } --symbolic ${ initial } ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index } --set PATH ${ pkgs.coreutils }/bin" ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -125,6 +125,7 @@
                                                                                                                                                 in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/mount.${ index }.sh" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
+                                                                                                                            ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
                                                                                                                             # ( builtins.map ( { index , name , ... } : "${ _environment-variable "OUT" }/test/mount.${ index }.sh" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -338,7 +339,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "echo hi > /mounts." ;
+                                                                                                                initial = "stat /mounts." ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
