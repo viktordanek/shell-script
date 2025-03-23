@@ -111,8 +111,9 @@
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "makeWrapper ${ initial } " ) secondary.mounts )
                                                                                                                             (
-                                                                                                                                let
+                                                                                                                                letq
                                                                                                                                     mapper =
                                                                                                                                         { index , initial , name , ... } :
                                                                                                                                             let
