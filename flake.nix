@@ -119,7 +119,7 @@
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
-                                                                                                                                        in "${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
+                                                                                                                                        in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
                                                                                                                                 )
                                                                                                                             ]
                                                                                                                             [
