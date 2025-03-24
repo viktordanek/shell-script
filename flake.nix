@@ -109,6 +109,7 @@
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , initial , ... } : "${ _environment-variable "LN" } ${ initial } --symbolic ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
@@ -132,7 +133,7 @@
                                                                                                                                 let
                                                                                                                                     mapper =
                                                                                                                                         { index , ... } :
-                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } >> ${ _environment-variable "OUT" }/debug" ;
+                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index }" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                         ] ;
@@ -321,7 +322,7 @@
                                                                                                         singleton =
                                                                                                             {
                                                                                                                 expected = self + "/mounts/expected" ;
-                                                                                                                initial = "chmod 0777 /srv/mount && stat /srv/mount" ;
+                                                                                                                initial = "echo hi > /srv/mount " ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
