@@ -125,8 +125,8 @@
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
-                                                                                                                                        { index , ... } :
-                                                                                                                                            "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } ef34884d9f4a87db9efbecbd8b57474998783f9218aa38966e89604dad1b60efbc32a1d147177262662101aa4792778b975e5f6fa80880074ee9f2a91452d584" ;
+                                                                                                                                        { index , uuid , ... } :
+                                                                                                                                            "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } ${ uuid }" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
@@ -148,7 +148,7 @@
                                                                                                                         {
                                                                                                                             installPhase =
                                                                                                                                 ''
-                                                                                                                                    makeWrapper ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum.sh" ) ) } $out --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CUT ${ pkgs.coreutils }/bin/cut --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set STAT ${ pkgs.coreutils }/bin/stat
+                                                                                                                                    makeWrapper ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum.sh" ) ) } $out --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CUT ${ pkgs.coreutils }/bin/cut --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set STAT ${ pkgs.coreutils }/bin/stat --set WC ${ pkgs.coreutils }/bin/wc
                                                                                                                                 '' ;
                                                                                                                             name = "vacuum" ;
                                                                                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -189,7 +189,7 @@
                                                                                                                                                 set =
                                                                                                                                                     let
                                                                                                                                                         mapper =
-                                                                                                                                                            name : { expected , is-file ? true} :
+                                                                                                                                                            name : { expected , is-file ? true , uuid ? "" } :
                                                                                                                                                                 {
                                                                                                                                                                     is-file =
                                                                                                                                                                         if builtins.typeOf is-file == "bool" then is-file
@@ -200,6 +200,9 @@
                                                                                                                                                                             else builtins.throw "there is no path for ${ expected }."
                                                                                                                                                                         else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
                                                                                                                                                                     name = name ;
+                                                                                                                                                                    uuid =
+                                                                                                                                                                        if builtins.typeOf uuid == "string" then builtins.hashString "sha512" uuid
+                                                                                                                                                                        else builtins.throw "uuid is not string but ${ builtins.typeOf uuid }." ;
                                                                                                                                                                 } ;
                                                                                                                                                         in builtins.mapAttrs mapper mounts ;
                                                                                                                                                 in builtins.attrValues set ;
@@ -209,6 +212,7 @@
                                                                                                                                                 is-file = elem.is-file ;
                                                                                                                                                 expected = elem.expected ;
                                                                                                                                                 name = elem.name ;
+                                                                                                                                                uuid = elem.uuid ;
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
