@@ -108,23 +108,6 @@
                                                                                                                                 "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , initial , ... } : "${ _environment-variable "LN" } ${ initial } --symbolic ${ _environment-variable "OUT" }/test/initial.${ index }.sh" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ _environment-variable "OUT" }/test/initial.${ index }.sh ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
-                                                                                                                            (
-                                                                                                                                let
-                                                                                                                                    mapper =
-                                                                                                                                        { index , ... } :
-                                                                                                                                            let
-                                                                                                                                                user-environment =
-                                                                                                                                                    pkgs.buildFHSUserEnv
-                                                                                                                                                        {
-                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
-                                                                                                                                                            name = "initial" ;
-                                                                                                                                                            runScript = "${ _environment-variable "OUT" }/test/initial.${ index }" ;
-                                                                                                                                                        } ;
-                                                                                                                                                in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output.${ index } 2> ${ _environment-variable "OUT" }/test/standard-error.${ index }" ;
-                                                                                                                                    in builtins.map mapper secondary.mounts
-                                                                                                                            )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
