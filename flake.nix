@@ -103,10 +103,9 @@
                                                                                                                         [
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) } ${ _environment-variable "OUT" }/test/run-script.sh"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
-                                                                                                                                "makeWrapper ${ pkgs.writeShellScript "initial" ( builtins.concatStringsSep " &&\n\t" secondary.initial ) } ${ _environment-variable "OUT" }/test/initial --set PATH ${ pkgs.coreutils }"
+                                                                                                                                "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
+                                                                                                                                "makeWrapper ${ secondary.initial } ${ _environment-variable "OUT" }/test/initial --set PATH ${ pkgs.coreutils }"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
@@ -174,11 +173,11 @@
                                                                                                         } :
                                                                                                             {
                                                                                                                 initial =
-                                                                                                                    if builtins.typeOf initial == "string" then [ initial ]
+                                                                                                                    if builtins.typeOf initial == "string" then pkgs.writeShellScript "initial" initial
                                                                                                                     else if builtins.typeOf initial == "list" then
                                                                                                                         let
                                                                                                                             mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.map mapper initial
+                                                                                                                            in pkgs.writeShellScript "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial ) )
                                                                                                                     else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
                                                                                                                  mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
@@ -241,11 +240,11 @@
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
                                                                                                                 test =
-                                                                                                                    if builtins.typeOf test == "string" then [ test ]
+                                                                                                                    if builtins.typeOf test == "string" then pkgs.writeShellScript "test" test
                                                                                                                     else if builtins.typeOf test == "list" then
                                                                                                                         let
                                                                                                                             mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.map mapper test
+                                                                                                                            in builtins.writeShellScript "test" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test ) )
                                                                                                                     else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
