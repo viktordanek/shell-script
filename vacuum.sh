@@ -6,13 +6,13 @@ INPUT=${1} &&
     do
       KEY=${FILE#${INPUT}} &&
         HASH=$( ${ECHO} ${KEY} ${UUID} | ${SHA512SUM} | ${CUT} --bytes -128 ) &&
-        if [ -f ${OUTPUT}/${KEY}.key ]
+        if [ -f ${OUTPUT}/${HASH}.key ]
         then
-          ${ECHO} COLLISION DETECTED >&2 &&
+          ${ECHO} COLLISION DETECTED FOR KEY=${KEY} HASH=${HASH} UUID=${UUID} >&2 &&
             exit 64
         fi &&
-        ${CAT} ${FILE} > ${OUTPUT}/${KEY}.cat &&
-        ${STAT} ${FILE} > ${OUTPUT}/${KEY}.stat &&
-        ${ECHO} ${KEY} > ${OUTPUT}/${KEY}.key
-        ${CHMOD} 0777 ${OUTPUT}/${KEY}.cat ${OUTPUT}/${KEY}.stat ${OUTPUT}/${KEY}.key
+        ${CAT} ${FILE} > ${OUTPUT}/${HASH}.cat &&
+        ${STAT} ${FILE} > ${OUTPUT}/${HASH}.stat &&
+        ${ECHO} ${KEY} > ${OUTPUT}/${HASH}.key
+        ${CHMOD} 0777 ${OUTPUT}/${HASH}.cat ${OUTPUT}/${HASH}.stat ${OUTPUT}/${HASH}.key
     done
