@@ -1,0 +1,8 @@
+  File: /build/mounts.0
+  Size: 139       	Blocks: 8          IO Block: 4096   regular file
+Device: 259,3	Inode: 679051      Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/  nixbld)   Gid: (  100/  nixbld)
+Access: 2025-03-24 12:05:29.679615397 +0000
+Modify: 2025-03-24 12:05:29.670615403 +0000
+Change: 2025-03-24 12:05:29.670615403 +0000
+ Birth: 2025-03-24 12:05:29.648615417 +0000

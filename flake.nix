@@ -345,7 +345,7 @@
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
-                                                                                                status = 96 ;
+                                                                                                status = 0 ;
                                                                                                 test = "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201" ;
                                                                                             } ;
                                                                                 } ;
