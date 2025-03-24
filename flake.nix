@@ -122,6 +122,13 @@
                                                                                                                                 )
                                                                                                                                 "${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status"
                                                                                                                             ]
+                                                                                                                            (
+                                                                                                                                let
+                                                                                                                                    mapper =
+                                                                                                                                        { index , ... } :
+                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index }" ;
+                                                                                                                                    in builtins.map mapper secondary.mounts
+                                                                                                                            )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ secondary.standard-output } ${ _environment-variable "OUT" }/expected/standard-output"
@@ -131,8 +138,8 @@
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
-                                                                                                                                        { index , ... } :
-                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index }" ;
+                                                                                                                                        { expected , index , ... } :
+                                                                                                                                            "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/mounts.${ index }" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                         ] ;
@@ -141,7 +148,7 @@
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
