@@ -98,13 +98,16 @@
                                                                                                     {
                                                                                                         installPhase =
                                                                                                             let
+                                                                                                                candidate =
+                                                                                                                    if builtins.typeOf primary.champion == "null" then shell-script "candidate"
+                                                                                                                    else pkgs.writeShellScriptBin "candidate" primary.champion ;
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
+                                                                                                                                "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ candidate }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
