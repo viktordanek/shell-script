@@ -106,8 +106,22 @@
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "run-script" ( builtins.concatStringsSep " &&\n\t" secondary.test ) } ${ _environment-variable "OUT" }/test/run-script.sh"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                 "makeWrapper ${ _environment-variable "OUT" }/test/run-script.sh ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ shell-script "candidate" }/bin"
+                                                                                                                                "makeWrapper ${ pkgs.writeShellScript "initial" ( builtins.concatStringsSep " &&\n\t" secondary.initial ) } ${ _environment-variable "OUT" }/test/initial --set PATH ${ pkgs.coreutils }"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            [
+                                                                                                                                (
+                                                                                                                                    let
+                                                                                                                                        user-environment =
+                                                                                                                                            pkgs.buildFHSUserEnv
+                                                                                                                                                {
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    name = "initial" ;
+                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/initial" ;
+                                                                                                                                                } ;
+                                                                                                                                        in "${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
+                                                                                                                                )
+                                                                                                                            ]
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
@@ -151,6 +165,7 @@
                                                                                                 let
                                                                                                     identity =
                                                                                                         {
+                                                                                                            initial ? [ ] ,
                                                                                                             mounts ? { } ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
@@ -158,6 +173,13 @@
                                                                                                             test
                                                                                                         } :
                                                                                                             {
+                                                                                                                initial =
+                                                                                                                    if builtins.typeOf initial == "string" then [ initial ]
+                                                                                                                    else if builtins.typeOf initial == "list" then
+                                                                                                                        let
+                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
+                                                                                                                            in builtins.map mapper initial
+                                                                                                                    else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
                                                                                                                  mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         let
@@ -315,6 +337,7 @@
                                                                                     file =
                                                                                         ignore :
                                                                                             {
+                                                                                                initial = "echo hi > /singleton" ;
                                                                                                 mounts =
                                                                                                     {
                                                                                                         singleton =
