@@ -160,7 +160,13 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
                                                                                                                         makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum } &&
-                                                                                                                        $out/bin/constructors
+                                                                                                                        $out/bin/constructors &&
+                                                                                                                        if ${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed > $out/difference
+                                                                                                                        then
+                                                                                                                            ${ pkgs.coreutils }/bin/touch $out/SUCCESS
+                                                                                                                        else
+                                                                                                                            ${ pkgs.coreutils }/bin/touch $out/FAILURE
+                                                                                                                        fi
                                                                                                                 '' ;
                                                                                                         name = "test" ;
                                                                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -324,7 +330,7 @@
                                                                                     string = name : value : "--set ${ name } ${ value }" ;
                                                                                 } ;
                                                                             name = "foobar" ;
-                                                                            script = self + "/scripts/foobar.sh" ;
+                                                                            script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
                                                                                     file =
@@ -334,7 +340,7 @@
                                                                                                     {
                                                                                                         singleton =
                                                                                                             {
-                                                                                                                expected = self + "/mounts/expected" ;
+                                                                                                                expected = self + "/expected/mounts/singleton" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
