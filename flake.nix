@@ -125,6 +125,8 @@
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                 "${ _environment-variable "LN" } --symbolic ${ secondary.standard-output } ${ _environment-variable "OUT" }/expected/standard-output"
+                                                                                                                                "${ _environment-variable "LN" } --symbolic ${ secondary.standard-error } ${ _environment-variable "OUT" }/expected/standard-error"
+                                                                                                                                "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                             ]
                                                                                                                             (
                                                                                                                                 let
