@@ -126,7 +126,7 @@
                                                                                                                                 let
                                                                                                                                     mapper =
                                                                                                                                         { index , ... } :
-                                                                                                                                            "${ _environment-variable "MV" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index }" ;
+                                                                                                                                            "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } ef34884d9f4a87db9efbecbd8b57474998783f9218aa38966e89604dad1b60efbc32a1d147177262662101aa4792778b975e5f6fa80880074ee9f2a91452d584" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
@@ -143,12 +143,23 @@
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                         ] ;
+                                                                                                                vacuum =
+                                                                                                                    pkgs.stdenv.mkDerivation
+                                                                                                                        {
+                                                                                                                            installPhase =
+                                                                                                                                ''
+                                                                                                                                    makeWrapper ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum.sh" ) ) } $out --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CUT ${ pkgs.coreutils }/bin/cut --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set STAT ${ pkgs.coreutils }/bin/stat
+                                                                                                                                '' ;
+                                                                                                                            name = "vacuum" ;
+                                                                                                                            nativeBuildInputs = [ pkgs.makeWrapper ] ;
+                                                                                                                            src = ./. ;
+                                                                                                                        } ;
                                                                                                                 in
                                                                                                                 ''
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                         ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
+                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum } &&
                                                                                                                         $out/bin/constructors
                                                                                                                 '' ;
                                                                                                         name = "test" ;
