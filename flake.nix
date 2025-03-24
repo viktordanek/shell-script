@@ -125,8 +125,8 @@
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
-                                                                                                                                        { index , uuid , ... } :
-                                                                                                                                            "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } ${ uuid }" ;
+                                                                                                                                        { index , name , uuid , ... } :
+                                                                                                                                            "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/observed/mounts.${ index } ${ name } ${ uuid }" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
