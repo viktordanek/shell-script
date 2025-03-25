@@ -126,7 +126,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }.initial" ) secondary.mounts ) ] ;
+                                                                                                                                                    extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ) ] ;
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
@@ -146,7 +146,7 @@
                                                                                                                                                     name = "observe" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/observe" ;
                                                                                                                                                 } ;
-                                                                                                                                        in "${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                        in "# ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                 )
                                                                                                                                 "${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status"
                                                                                                                             ]
@@ -378,7 +378,7 @@
                                                                                                 status = 0 ;
                                                                                                 initial =
                                                                                                     [
-                                                                                                        "echo hi > /singleton.2"
+                                                                                                        "echo hi > /singleton"
                                                                                                     ] ;
                                                                                                 test =
                                                                                                     [
