@@ -99,27 +99,26 @@
                                                                                                                             (
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
+                                                                                                                                        ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/initial.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                            "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin:${ shell-script "champion" }/bin"
-                                                                                                                                            "${ _environment-variable "MKDIR" } /build/mount"
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     user-environment =
                                                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                                                             {
-                                                                                                                                                                extraBwrapArgs = [ "--bind /build/mount /mount" ] ;
+                                                                                                                                                                extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/initial.${ index } ${ name }" ) secondary.mounts ;
                                                                                                                                                                 name = "mount" ;
                                                                                                                                                                 runScript = "initial" ;
                                                                                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils secondary.initial ] ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.standard-output 2> ${ _environment-variable "OUT" }/test/initial.standard-error"
                                                                                                                                             )
-                                                                                                                                            "${ _environment-variable "MV" } /build/mount ${ _environment-variable "OUT" }/test/mount"
                                                                                                                                         ]
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "MV" } /build/initial.${ index } ${ _environment-variable "OUT" }/test/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                         ]
@@ -133,7 +132,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "build" build } $out/bin/build.sh &&
-                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out &&
+                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                             $out/bin/build
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -319,7 +318,7 @@
                                                                                                 status = 0 ;
                                                                                                 initial =
                                                                                                     [
-                                                                                                        "echo hi > /mount/singleton"
+                                                                                                        "echo hi > /singleton"
                                                                                                     ] ;
                                                                                                 test =
                                                                                                     [
