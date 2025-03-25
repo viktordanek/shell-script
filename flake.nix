@@ -14,7 +14,6 @@
                         let
                             lib =
                                 {
-                                    champion ? null ,
                                     environment ? x : [ ] ,
                                     extensions ? [ ] ,
                                     name ,
@@ -24,10 +23,6 @@
                                     let
                                         primary =
                                             {
-                                                champion =
-                                                    if builtins.typeOf champion == "null" then champion
-                                                    else if builtins.typeOf champion == "string" then champion
-                                                    else builtins.throw "champion is not null, string but ${ builtins.typeOf champion }." ;
                                                 environment =
                                                     if builtins.typeOf environment == "lambda" then
                                                         if builtins.typeOf environment primary.extensions == "list" then
@@ -105,7 +100,12 @@
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
                                                                                                                                         [
+                                                                                                                                            "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                                                                        ]
+                                                                                                                                        [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
+                                                                                                                                            "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ pkgs.coreutils }/bin:${ secondary.initial }/bin"
+                                                                                                                                            "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin:${ shell-script "champion" }/bin"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -120,11 +120,11 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "build" build } $out/bin/build.sh &&
-                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
                                                                                                                             $out/bin/build
                                                                                                                     '' ;
                                                                                                         name = "test" ;
-                                                                                                        nativeBuildInputs = [ pkgs.makeWrapper ] ;
+                                                                                                        buildInputs = [ pkgs.makeWrapper ] ;
                                                                                                         src = ./. ;
                                                                                                     } ;
                                                                                             secondary =
