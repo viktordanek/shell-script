@@ -105,7 +105,7 @@
                                                                                                                     builtins.concatLists
                                                                                                                         [
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/initial.${ index }" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "ECHO" } HELLO > /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            # ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "ECHO" } HELLO > /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
@@ -116,14 +116,14 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/initial.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/initial.${ index } ${ name }" ) secondary.mounts ) ] ;
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
                                                                                                                                         in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
                                                                                                                                 )
                                                                                                                             ]
-                                                                                                                            # ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
@@ -131,7 +131,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ) ];
                                                                                                                                                     name = "observe" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/observe" ;
                                                                                                                                                 } ;
