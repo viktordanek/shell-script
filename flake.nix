@@ -115,7 +115,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
