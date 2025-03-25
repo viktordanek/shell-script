@@ -104,7 +104,8 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
-                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/initial.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "ECHO" } HELLO > /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
@@ -115,13 +116,14 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/initial.${ index } ${ name }" ) secondary.mounts ;
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
                                                                                                                                         in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
                                                                                                                                 )
                                                                                                                             ]
+                                                                                                                            # ( builtins.map ( { index , is-file , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
@@ -133,7 +135,7 @@
                                                                                                                                                     name = "observe" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/observe" ;
                                                                                                                                                 } ;
-                                                                                                                                        in "${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                        in "# ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                 )
                                                                                                                                 "${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status"
                                                                                                                             ]
