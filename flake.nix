@@ -99,25 +99,29 @@
                                                                                                                             (
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
-                                                                                                                                        ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/initial.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "MKDIR" } /build/initial.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                            (
-                                                                                                                                                let
-                                                                                                                                                    user-environment =
-                                                                                                                                                        pkgs.buildFHSUserEnv
-                                                                                                                                                            {
-                                                                                                                                                                extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/initial.${ index } ${ name }" ) secondary.mounts ;
-                                                                                                                                                                name = "mount" ;
-                                                                                                                                                                runScript = "initial" ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils secondary.initial ] ;
-                                                                                                                                                            } ;
-                                                                                                                                                    in "${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.standard-output 2> ${ _environment-variable "OUT" }/test/initial.standard-error"
-                                                                                                                                            )
                                                                                                                                         ]
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper =
+                                                                                                                                                    { index , initial , ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--bind /build/initial.${ index } /mount" ] ;
+                                                                                                                                                                        name = "mount" ;
+                                                                                                                                                                        runScript = "initial" ;
+                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils initial ]  ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error" ;
+                                                                                                                                                in builtins.map mapper secondary.mounts
+                                                                                                                                        )
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "MV" } /build/initial.${ index } ${ _environment-variable "OUT" }/test/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -132,7 +136,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "build" build } $out/bin/build.sh &&
-                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
+                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out &&
                                                                                                                             $out/bin/build
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -163,16 +167,20 @@
                                                                                                                                                 set =
                                                                                                                                                     let
                                                                                                                                                         mapper =
-                                                                                                                                                            name : { expected , is-file ? true , uuid ? "" } :
+                                                                                                                                                            name : { expected , initial ? [ ] , uuid ? "" } :
                                                                                                                                                                 {
                                                                                                                                                                     expected =
                                                                                                                                                                         if builtins.typeOf expected == "string" then
                                                                                                                                                                             if builtins.pathExists expected then expected
                                                                                                                                                                             else builtins.throw "there is no path for expected ${ expected }."
                                                                                                                                                                         else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
-                                                                                                                                                                    is-file =
-                                                                                                                                                                        if builtins.typeOf is-file == "bool" then is-file
-                                                                                                                                                                        else builtins.throw "is-file is not bool but ${ builtins.typeOf is-file }." ;
+                                                                                                                                                                    initial =
+                                                                                                                                                                        if builtins.typeOf initial == "string" then pkgs.writeShellScriptBin "initial" initial
+                                                                                                                                                                        else if builtins.typeOf initial == "list" then
+                                                                                                                                                                            let
+                                                                                                                                                                                mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
+                                                                                                                                                                                in pkgs.writeShellScriptBin "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial ) )
+                                                                                                                                                                        else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
                                                                                                                                                                     name = name ;
                                                                                                                                                                     uuid =
                                                                                                                                                                         if builtins.typeOf uuid == "string" then builtins.hashString "sha512" uuid
@@ -183,7 +191,7 @@
                                                                                                                                         in
                                                                                                                                             {
                                                                                                                                                 index = builtins.toString index ;
-                                                                                                                                                is-file = elem.is-file ;
+                                                                                                                                                initial = elem.initial ;
                                                                                                                                                 expected = elem.expected ;
                                                                                                                                                 name = elem.name ;
                                                                                                                                                 uuid = elem.uuid ;
@@ -207,13 +215,6 @@
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
-                                                                                                                initial =
-                                                                                                                    if builtins.typeOf initial == "string" then pkgs.writeShellScriptBin "initial" initial
-                                                                                                                    else if builtins.typeOf initial == "list" then
-                                                                                                                        let
-                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in pkgs.writeShellScriptBin "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial ) )
-                                                                                                                    else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
                                                                                                                 test =
                                                                                                                     if builtins.typeOf test == "string" then pkgs.writeShellScript "test" test
                                                                                                                     else if builtins.typeOf test == "list" then
@@ -311,15 +312,15 @@
                                                                                                         "/singleton" =
                                                                                                             {
                                                                                                                 expected = self + "/expected/mounts/singleton" ;
+                                                                                                                initial =
+                                                                                                                    [
+                                                                                                                        "echo hi > /mount/target"
+                                                                                                                    ] ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 0 ;
-                                                                                                initial =
-                                                                                                    [
-                                                                                                        "echo hi > /singleton"
-                                                                                                    ] ;
                                                                                                 test =
                                                                                                     [
                                                                                                         "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
