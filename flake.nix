@@ -110,9 +110,9 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : let x = "--bind /build/mount.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ) ];
+                                                                                                                                                            extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ];
                                                                                                                                                             name = "test" ;
-                                                                                                                                                            runScript = builtins.trace secondary.test secondary.test ;
+                                                                                                                                                            runScript = secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
                                                                                                                                                         } ;
                                                                                                                                                 in "if ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
@@ -311,7 +311,7 @@
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
                                                                                 else
-                                                                                    ${ pkgs.coreutils }/bin/echo "${ builtins.concatStringsSep ";" ( builtins.map _environment-variable [ "ALL" "SUCCESS" "FAILURE" ] ) }" => $out/FAILURE
+                                                                                    ${ pkgs.coreutils }/bin/touch $out/FAILURE
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
