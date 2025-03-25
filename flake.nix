@@ -125,6 +125,18 @@
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "MV" } /build/initial.${ index }/target ${ _environment-variable "OUT" }/test/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    user-environment =
+                                                                                                                                                        pkgs.buildFHSUserEnv
+                                                                                                                                                            {
+                                                                                                                                                                extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mount.${ index }/target ${ name }" ) secondary.mounts ;
+                                                                                                                                                                name = "test" ;
+                                                                                                                                                                runScript = secondary.test ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in "# ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/standard.output 2> ${ _environment-variable "OUT" }/standard-error"
+                                                                                                                                            )
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
