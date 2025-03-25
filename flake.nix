@@ -107,6 +107,7 @@
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                                                                "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ secondary.initial }/bin"
                                                                                                                                 "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/observe --set PATH ${ candidate }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
@@ -182,6 +183,7 @@
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
                                                                                                             status ? 0 ,
+                                                                                                            initial ? "initial" ,
                                                                                                             test ? "candidate"
                                                                                                         } :
                                                                                                             {
@@ -197,35 +199,13 @@
                                                                                                                                                 set =
                                                                                                                                                     let
                                                                                                                                                         mapper =
-                                                                                                                                                            name : { expected , initial , is-file ? true , uuid ? "" } :
+                                                                                                                                                            name : { expected , is-file ? true , uuid ? "" } :
                                                                                                                                                                 {
                                                                                                                                                                     expected =
                                                                                                                                                                         if builtins.typeOf expected == "string" then
                                                                                                                                                                             if builtins.pathExists expected then expected
                                                                                                                                                                             else builtins.throw "there is no path for expected ${ expected }."
                                                                                                                                                                         else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
-                                                                                                                                                                    initial =
-                                                                                                                                                                        let
-                                                                                                                                                                            i =
-                                                                                                                                                                                if builtins.typeOf initial == "string" then initial
-                                                                                                                                                                                else if builtins.typeOf initial == "initial" then
-                                                                                                                                                                                    let
-                                                                                                                                                                                        mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
-                                                                                                                                                                                        in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial )
-                                                                                                                                                                                else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
-                                                                                                                                                                            in
-                                                                                                                                                                                pkgs.stdenv.mkDerivation
-                                                                                                                                                                                    {
-                                                                                                                                                                                        installPhase =
-                                                                                                                                                                                            ''
-                                                                                                                                                                                                ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                                                                                                                                    ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                                                                                                    makeWrapper ${ pkgs.writeShellScript "initial" i } $out/bin/initial --set PATH ${ pkgs.coreutils }/bin
-                                                                                                                                                                                            '' ;
-                                                                                                                                                                                        name = initial ;
-                                                                                                                                                                                        nativeBuildInputs = [ pkgs.makeWrapper ] ;
-                                                                                                                                                                                        src = ./. ;
-                                                                                                                                                                                    } ;
                                                                                                                                                                     is-file =
                                                                                                                                                                         if builtins.typeOf is-file == "bool" then is-file
                                                                                                                                                                         else builtins.throw "is-file is not bool but ${ builtins.typeOf is-file }." ;
@@ -239,7 +219,6 @@
                                                                                                                                         in
                                                                                                                                             {
                                                                                                                                                 index = builtins.toString index ;
-                                                                                                                                                initial = elem.initial ;
                                                                                                                                                 is-file = elem.is-file ;
                                                                                                                                                 expected = elem.expected ;
                                                                                                                                                 name = elem.name ;
@@ -264,12 +243,19 @@
                                                                                                                 status =
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
+                                                                                                                initial =
+                                                                                                                    if builtins.typeOf initial == "string" then pkgs.writeShellScriptBin "initial" initial
+                                                                                                                    else if builtins.typeOf initial == "list" then
+                                                                                                                        let
+                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
+                                                                                                                            in pkgs.writeShellScriptBin "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial ) )
+                                                                                                                    else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
                                                                                                                 test =
                                                                                                                     if builtins.typeOf test == "string" then pkgs.writeShellScript "test" test
                                                                                                                     else if builtins.typeOf test == "list" then
                                                                                                                         let
                                                                                                                             mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.writeShellScript "test" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test ) )
+                                                                                                                            in pkgs.writeShellScript "test" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test ) )
                                                                                                                     else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
@@ -360,14 +346,20 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                initial = "echo hi ARROW /mount" ;
                                                                                                                 expected = self + "/expected/mounts/singleton" ;
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 0 ;
-                                                                                                test = "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201" ;
+                                                                                                initial =
+                                                                                                    [
+                                                                                                        "echo hi > /singleton"
+                                                                                                    ] ;
+                                                                                                test =
+                                                                                                    [
+                                                                                                        "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                                                    ] ;
                                                                                             } ;
                                                                                 } ;
                                                                         } ;
