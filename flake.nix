@@ -113,7 +113,7 @@
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = [ "--bind /build/mount /mount" ] ;
                                                                                                                                                                 name = "mount" ;
-                                                                                                                                                                runScript = "echo hi" ;
+                                                                                                                                                                runScript = "initial" ;
                                                                                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils secondary.initial ] ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.standard-output 2> ${ _environment-variable "OUT" }/test/initial.standard-error"
