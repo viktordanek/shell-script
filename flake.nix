@@ -116,7 +116,7 @@
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
                                                                                                                                                     extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
-                                                                                                                                                    name = "observe" ;
+                                                                                                                                                    name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/observe" ;
                                                                                                                                                 } ;
                                                                                                                                         in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
