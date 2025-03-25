@@ -102,7 +102,7 @@
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "CP" } --recursive ${ derivation }/test ${ _environment-variable "OUT" }/test"
                                                                                                                                     ]
-                                                                                                                                    ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive ${ _environment-variable "OUT" }/test/initial.${ index } /build/mount.${ index }" ) secondary.mounts )
+                                                                                                                                    ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } ${ _environment-variable "OUT" }/test/initial.${ index } > /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                         (
@@ -115,7 +115,7 @@
                                                                                                                                                             runScript = secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                                in "echo ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                         )
                                                                                                                                     ]
                                                                                                                                 ]
@@ -154,7 +154,7 @@
                                                                                                                                                                                 in "if ${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; fi" ;
                                                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                                                             )
-                                                                                                                                                            ( builtins.map ( { index , ... } : "${ _environment-variable "MV" } /build/initial.${ index }/target ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
+                                                                                                                                                            ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } /build/initial.${ index }/target > ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
                                                                                                                                                         ]
                                                                                                                                                 ) ;
                                                                                                                                     in
@@ -162,7 +162,7 @@
                                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                                                 ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "install" install } $out/bin/install.sh &&
-                                                                                                                                                makeWrapper $out/bin/install.sh $out/bin/install --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out &&
+                                                                                                                                                makeWrapper $out/bin/install.sh $out/bin/install --set CAT ${ pkgs.coreutils }/bin/cat --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
                                                                                                                                                 $out/bin/install
                                                                                                                                         '' ;
                                                                                                                             name = "test" ;
@@ -173,7 +173,7 @@
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CP ${ pkgs.coreutils }/bin/cp --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                                                             $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
