@@ -123,7 +123,7 @@
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = "${ _environment-variable "OUT" }/test/initial.${ index }" ;
                                                                                                                                                         } ;
-                                                                                                                                                in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error" ;
+                                                                                                                                                in "${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error" ;
                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                             )
                                                                                                                             [
@@ -177,8 +177,7 @@
                                                                                                                 ''
                                                                                                                     ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                        ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                                                        makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum } &&
+                                                                                                                        makeWrapper ${ pkgs.writeShellScript "constructors" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum } &&
                                                                                                                         $out/bin/constructors &&
                                                                                                                         if ${ pkgs.diffutils }/bin/diff --recursive $out/expected $out/observed > $out/difference
                                                                                                                         then
@@ -362,7 +361,7 @@
                                                                                                     {
                                                                                                         singleton =
                                                                                                             {
-                                                                                                                initial = "echo hi > /mount" ;
+                                                                                                                initial = "echo hi ARROW /mount" ;
                                                                                                                 expected = self + "/expected/mounts/singleton" ;
                                                                                                             } ;
                                                                                                     } ;
