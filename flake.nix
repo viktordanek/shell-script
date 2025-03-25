@@ -136,6 +136,7 @@
                                                                                                                         (
                                                                                                                             builtins.concatLists
                                                                                                                                 [
+                                                                                                                                    ( builtins.map ( { index , ... } : "while ${ _environment-variable "LSOF" } ${ _environment-variable "OUT" } }/test/initial.${ index } > /dev/null 2>&1 ; do ${ _environment-variable "SLEEP" } 1s ; done" ) secondary.mounts )
                                                                                                                                     ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive --no-preserve=all ${ _environment-variable "OUT" }/test/initial.${ index } /build/mount.${ index}" ) secondary.mounts )
                                                                                                                                     ( builtins.map ( { index , ... } : "${ _environment-variable "ECHO" } > /build/mount2.${ index }" ) secondary.mounts )
                                                                                                                                     [
