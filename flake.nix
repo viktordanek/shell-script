@@ -102,6 +102,7 @@
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "CP" } --recursive ${ derivation }/test ${ _environment-variable "OUT" }/test"
                                                                                                                                     ]
+                                                                                                                                    # ( builtins.map ( { index , ... } : "${ _environment-variable "TOUCH" } /build/2mount.${ index }" ) secondary.mounts )
                                                                                                                                     ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } ${ _environment-variable "OUT" }/test/initial.${ index } > /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -110,12 +111,12 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ];
+                                                                                                                                                            # extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : let x = "--bind /build/mount.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ) ];
                                                                                                                                                             name = "test" ;
-                                                                                                                                                            runScript = secondary.test ;
+                                                                                                                                                            runScript = builtins.trace secondary.test secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "echo ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                                in "if ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                         )
                                                                                                                                     ]
                                                                                                                                 ]
@@ -173,7 +174,7 @@
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
                                                                                                                             $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
