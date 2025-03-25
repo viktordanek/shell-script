@@ -117,7 +117,7 @@
                                                                                                                                                 {
                                                                                                                                                     extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
                                                                                                                                                     name = "initial" ;
-                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/observe" ;
+                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
                                                                                                                                         in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
                                                                                                                                 )
