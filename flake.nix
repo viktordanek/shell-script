@@ -104,8 +104,21 @@
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                            "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ pkgs.coreutils }/bin:${ secondary.initial }/bin"
                                                                                                                                             "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script "candidate" }/bin:${ shell-script "champion" }/bin"
+                                                                                                                                            "${ _environment-variable "MKDIR" } /build/mount"
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    user-environment =
+                                                                                                                                                        pkgs.buildFHSUserEnv
+                                                                                                                                                            {
+                                                                                                                                                                extraBwrapArgs = [ "--bind /build/mount /mount" ] ;
+                                                                                                                                                                name = "mount" ;
+                                                                                                                                                                runScript = "echo hi" ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils secondary.initial ] ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in "${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.standard-output 2> ${ _environment-variable "OUT" }/test/initial.standard-error"
+                                                                                                                                            )
+                                                                                                                                            "${ _environment-variable "MV" } /build/mount ${ _environment-variable "OUT" }/test/mount"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -120,7 +133,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "build" build } $out/bin/build.sh &&
-                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
+                                                                                                                            makeWrapper $out/bin/build.sh $out/bin/build --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out &&
                                                                                                                             $out/bin/build
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -306,7 +319,7 @@
                                                                                                 status = 0 ;
                                                                                                 initial =
                                                                                                     [
-                                                                                                        "echo hi > /singleton"
+                                                                                                        "echo hi > /mount/singleton"
                                                                                                     ] ;
                                                                                                 test =
                                                                                                     [
