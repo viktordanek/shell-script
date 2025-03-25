@@ -149,7 +149,7 @@
                                                                                                                                                             runScript = builtins.trace secondary.test secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "echo ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                                in "${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                         )
                                                                                                                                     ]
                                                                                                                                 ]
