@@ -104,13 +104,24 @@
                                                                                                                 constructors =
                                                                                                                     builtins.concatLists
                                                                                                                         [
+                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                 "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ secondary.initial }/bin"
                                                                                                                                 "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/observe --set PATH ${ candidate }/bin"
+                                                                                                                                (
+                                                                                                                                    let
+                                                                                                                                        user-environment =
+                                                                                                                                            pkgs.buildFHSUserEnv
+                                                                                                                                                {
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
+                                                                                                                                                    name = "observe" ;
+                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/observe" ;
+                                                                                                                                                } ;
+                                                                                                                                        in "# ${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/standard-output 2> ${ _environment-variable "OUT" }/test/standard-error"
+                                                                                                                                )
                                                                                                                             ]
-                                                                                                                            ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
