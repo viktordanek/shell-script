@@ -110,12 +110,12 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                            extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ];
                                                                                                                                                             name = "test" ;
                                                                                                                                                             runScript = secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "echo ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                                in "${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                         )
                                                                                                                                     ]
                                                                                                                                 ]
@@ -146,7 +146,7 @@
                                                                                                                                                                                 user-environment =
                                                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                                                         {
-                                                                                                                                                                                            extraBwrapArgs = [ "--bind /build/initial.${ index } /mount" ] ;
+                                                                                                                                                                                            extraBwrapArgs = [ "--unshare-all" "--bind /build/initial.${ index } /mount" ] ;
                                                                                                                                                                                             name = "mount" ;
                                                                                                                                                                                             runScript = "initial" ;
                                                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils initial ]  ;
