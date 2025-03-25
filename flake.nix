@@ -110,7 +110,7 @@
                                                                                                                                 "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }:${ candidate }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ pkgs.writeShellScript "initial" initial } ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , initial , ... } : "makeWrapper ${ initial } ${ _environment-variable "OUT" }/test/initial.${ index } --set PATH ${ pkgs.coreutils }/bin" ) secondary.mounts )
                                                                                                                             (
                                                                                                                                 let
                                                                                                                                     mapper =
@@ -321,7 +321,6 @@
                                                                                 else
                                                                                     ${ pkgs.coreutils }/bin/echo "${ builtins.concatStringsSep ";" ( builtins.map _environment-variable [ "ALL" "SUCCESS" "FAILURE" ] ) }" => $out/FAILURE
                                                                                 fi
-
                                                                         '';
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -378,9 +377,10 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
                                                                             if [ -f ${ shell-script.tests }/SUCCESS ]
                                                                             then
-                                                                                exit 0
+                                                                                exit 70
                                                                             elif [ -f ${ shell-script.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ shell-script.tests }" >&2 &&
