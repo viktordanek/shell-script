@@ -311,7 +311,7 @@
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
                                                                                 else
-                                                                                    ${ pkgs.coreutils }/bin/touch $out/FAILURE
+                                                                                    ${ pkgs.coreutils }/bin/touch $out/ERROR
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
