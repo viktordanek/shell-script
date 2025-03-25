@@ -183,7 +183,7 @@
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
                                                                                                             status ? 0 ,
-                                                                                                            test
+                                                                                                            test ? "candidate"
                                                                                                         } :
                                                                                                             {
                                                                                                                  mounts =
