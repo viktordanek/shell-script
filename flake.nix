@@ -108,16 +108,17 @@
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ secondary.initial }/bin"
+                                                                                                                                "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial --set PATH ${ secondary.initial }/bin:${ pkgs.flock }/bin"
                                                                                                                                 "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/observe --set PATH ${ candidate }/bin"
                                                                                                                                 "exec 203> /build/mounts.lock"
                                                                                                                                 "${ _environment-variable "FLOCK" } 203"
+                                                                                                                                "${ _environment-variable "FLOCK" } -u 203"
                                                                                                                                 (
                                                                                                                                     let
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.concatLists [ [ "--bind /build/mounts.lock" ] ( builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ) ] ;
                                                                                                                                                     name = "initial" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/initial" ;
                                                                                                                                                 } ;
