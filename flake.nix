@@ -134,6 +134,7 @@
                                                                                                                                 )
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "( ${ _environment-variable "UMOUNT" } /build/mounts.${ index } || true )" ) secondary.mounts )
+                                                                                                                            ( builtins.map ( { index , is-file , name , ... } : "( ${ _environment-variable "UMOUNT" } ${ name } || true )" ) secondary.mounts )
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "cat /build/mounts.${ index } > ${ _environment-variable "OUT" }/test/mt_${ index }" ) secondary.mounts )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
