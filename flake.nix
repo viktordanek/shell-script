@@ -107,28 +107,9 @@
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/run-script --set PATH ${ pkgs.coreutils }/bin:${ candidate }/bin"
+                                                                                                                                "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/test/observe --set PATH ${ candidate }/bin"
                                                                                                                             ]
                                                                                                                             ( builtins.map ( { index , is-file , ... } : "${ _environment-variable ( if is-file then "TOUCH" else "MKDIR" ) } /build/mounts.${ index }" ) secondary.mounts )
-                                                                                                                            (
-                                                                                                                                builtins.map ( { index , initial , ... } : "makeWrapper ${ pkgs.writeShellScript "initial" "initial" } ${ _environment-variable "OUT" }/test/initial.${ index } --set PATH ${ pkgs.coreutils }/bin:${ initial }/bin" ) secondary.mounts
-                                                                                                                            )
-                                                                                                                            (
-                                                                                                                                let
-                                                                                                                                    mapper =
-                                                                                                                                        { index , initial , ... } :
-                                                                                                                                            let
-                                                                                                                                                user-environment =
-                                                                                                                                                    pkgs.buildFHSUserEnv
-                                                                                                                                                        {
-                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
-                                                                                                                                                            name = "initial" ;
-                                                                                                                                                            runScript = "initial" ;
-                                                                                                                                                            targetPkgs = pkgs : [ pkgs.coreutils initial ] ;
-                                                                                                                                                        } ;
-                                                                                                                                                in "${ user-environment }/bin/initial > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error" ;
-                                                                                                                                    in builtins.map mapper secondary.mounts
-                                                                                                                            )
                                                                                                                             [
                                                                                                                                 "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                 (
@@ -138,7 +119,7 @@
                                                                                                                                                 {
                                                                                                                                                     extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
                                                                                                                                                     name = "observe" ;
-                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/run-script" ;
+                                                                                                                                                    runScript = "${ _environment-variable "OUT" }/test/observe" ;
                                                                                                                                                 } ;
                                                                                                                                         in "${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                 )
