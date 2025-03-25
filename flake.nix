@@ -102,7 +102,6 @@
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "CP" } --recursive ${ derivation }/test ${ _environment-variable "OUT" }/test"
                                                                                                                                     ]
-                                                                                                                                    # ( builtins.map ( { index , ... } : "${ _environment-variable "TOUCH" } /build/2mount.${ index }" ) secondary.mounts )
                                                                                                                                     ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } ${ _environment-variable "OUT" }/test/initial.${ index } > /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
@@ -118,6 +117,9 @@
                                                                                                                                                         } ;
                                                                                                                                                 in "if ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                         )
+                                                                                                                                    ]
+                                                                                                                                    [
+                                                                                                                                        "${ _environment-variable "LN" } --symbolic ${ derivation }/expected ${ _environment-variable "OUT" }/expected"
                                                                                                                                     ]
                                                                                                                                 ]
                                                                                                                         ) ;
@@ -156,6 +158,9 @@
                                                                                                                                                                     in builtins.map mapper secondary.mounts
                                                                                                                                                             )
                                                                                                                                                             ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } /build/initial.${ index }/target > ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
+                                                                                                                                                            [
+                                                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
+                                                                                                                                                            ]
                                                                                                                                                         ]
                                                                                                                                                 ) ;
                                                                                                                                     in
@@ -354,7 +359,7 @@
                                                                                                                 expected = self + "/expected/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
-                                                                                                                        "echo hi > /mount/target"
+                                                                                                                        "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
