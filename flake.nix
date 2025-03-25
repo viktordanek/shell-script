@@ -119,7 +119,7 @@
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } mount" ] ;
+                                                                                                                                                            extraBwrapArgs = [ "--bind /build/mounts.${ index } /mount" ] ;
                                                                                                                                                             name = "initial" ;
                                                                                                                                                             runScript = "${ _environment-variable "OUT" }/test/initial.${ index }" ;
                                                                                                                                                         } ;
@@ -133,7 +133,7 @@
                                                                                                                                         user-environment =
                                                                                                                                             pkgs.buildFHSUserEnv
                                                                                                                                                 {
-                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mounts.${ index } ${ name }" ) secondary.mounts ;
+                                                                                                                                                    extraBwrapArgs = builtins.map ( { index , name , ... } : let x = "--bind /build/mounts.${ index } ${ name }" ; in builtins.trace x x ) secondary.mounts ;
                                                                                                                                                     name = "observe" ;
                                                                                                                                                     runScript = "${ _environment-variable "OUT" }/test/run-script" ;
                                                                                                                                                 } ;
@@ -359,7 +359,7 @@
                                                                                             {
                                                                                                 mounts =
                                                                                                     {
-                                                                                                        singleton =
+                                                                                                        "/singleton" =
                                                                                                             {
                                                                                                                 initial = "echo hi ARROW /mount" ;
                                                                                                                 expected = self + "/expected/mounts/singleton" ;
