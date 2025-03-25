@@ -137,18 +137,19 @@
                                                                                                                             builtins.concatLists
                                                                                                                                 [
                                                                                                                                     ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive ${ _environment-variable "OUT" }/test/initial.${ index } /build/mount.${ index}" ) secondary.mounts )
+                                                                                                                                    ( builtins.map ( { index , ... } : "${ _environment-variable "ECHO" } > /build/mount2.${ index }" ) secondary.mounts )
                                                                                                                                     [
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 user-environment =
                                                                                                                                                     pkgs.buildFHSUserEnv
                                                                                                                                                         {
-                                                                                                                                                            extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mount.${ index }/target ${ name }" ) secondary.mounts ;
+                                                                                                                                                            extraBwrapArgs = builtins.map ( { index , name , ... } : "--bind /build/mount2.${ index } ${ name }" ) secondary.mounts ;
                                                                                                                                                             name = "test" ;
                                                                                                                                                             runScript = builtins.trace secondary.test secondary.test ;
                                                                                                                                                             targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
                                                                                                                                                         } ;
-                                                                                                                                                in "echo ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/standard.output 2> ${ _environment-variable "OUT" }/standard-error"
+                                                                                                                                                in "${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                         )
                                                                                                                                     ]
                                                                                                                                 ]
