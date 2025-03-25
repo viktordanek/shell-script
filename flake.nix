@@ -102,6 +102,7 @@
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "LN" } --symbolic ${ derivation }/test ${ _environment-variable "OUT" }/test"
                                                                                                                                     ]
+                                                                                                                                    ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive ${ _environment-variable "OUT" }/test/initial.${ index } /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                     [
                                                                                                                                         "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                     ]
@@ -160,7 +161,7 @@
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
+                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CP ${ pkgs.coreutils }/bin/cp --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                                                             $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
