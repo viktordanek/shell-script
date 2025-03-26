@@ -288,8 +288,6 @@
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCESS" } + ${ _environment-variable "FAILURE" } )) ]
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
-                                                                                else
-                                                                                    ${ pkgs.coreutils }/bin/touch $out/ERROR
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
@@ -352,7 +350,7 @@
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
-                                                                                    file =
+                                                                                    foobar =
                                                                                         ignore :
                                                                                             {
                                                                                                 mounts =
@@ -383,7 +381,7 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
                                                                             if [ -f ${ shell-script.tests }/SUCCESS ]
                                                                             then
-                                                                                exit 70
+                                                                                exit 0
                                                                             elif [ -f ${ shell-script.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ shell-script.tests }" >&2 &&
