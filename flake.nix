@@ -89,7 +89,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( environment primary.extensions ) }
+                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( primary.environment primary.extensions ) }
                                                                     '' ;
                                                         name = name ;
                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
