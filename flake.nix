@@ -34,7 +34,7 @@
                                                                     {
                                                                         environment =
                                                                             if builtins.typeOf environment == "lambda" then
-                                                                                if builtins.typeOf environment primary.extensions == "list" then
+                                                                                if builtins.typeOf ( environment primary.extensions ) == "list" then
                                                                                     builtins.map ( e : if builtins.typeOf e == "string" then e else builtins.throw "environment is not string but ${ builtins.typeOf e }." ) environment primary.extensions
                                                                                 else builtins.throw "champion environments is not list but ${ builtins.typeOf ( environment primary.extension ) }."
                                                                             else builtins.throw "champion environments is not lambda but ${ builtins.typeOf environment }." ;
@@ -81,7 +81,7 @@
                                                                 source =
                                                                     pkgs.stdenv.mkDerivation
                                                                         {
-                                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ script } $out" ;
+                                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ if use-champion then champion.script else script } $out" ;
                                                                             name = "source" ;
                                                                             src = ./. ;
                                                                         } ;
@@ -89,7 +89,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " primary.environment }
+                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( if use-champion  then champion.primary.environment else primary.environment ) }
                                                                     '' ;
                                                         name = name ;
                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
