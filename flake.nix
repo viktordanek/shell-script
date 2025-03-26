@@ -139,7 +139,7 @@
                                                                                                                                                     in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-input 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                             )
                                                                                                                                         ]
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/mount.${ index } ${ _environment-variable "OUT" }/observed/mount.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.map ( { index , name , ... } : "${ _environment-variable "VACUUM" } /build/mount.${ index } ${ _environment-variable "OUT" }/observed/mount.${ index } ${ name }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/expected/standard-output"
@@ -314,6 +314,7 @@
                                                     ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
                                                     ( string "STAT" "${ pkgs.coreutils }/bin/stat" )
                                                     ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
+                                                    ( string "WC" "${ pkgs.coreutils }/bin/wc" )
                                                 ] ;
                                         name = "vacuum" ;
                                         script = self + "/vacuum.sh" ;
