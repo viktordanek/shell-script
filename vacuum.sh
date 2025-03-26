@@ -1,8 +1,4 @@
-INPUT=${1} &&
-  OUTPUT=${2} &&
-  NAME=${3} &&
-  UUID=${4} &&
-  ${MKDIR} ${OUTPUT} &&
+${MKDIR} ${OUTPUT} &&
   ${FIND} ${INPUT} | while read FILE
   do
     KEY=${FILE#${INPUT}} &&

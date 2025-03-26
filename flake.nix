@@ -123,7 +123,7 @@
                                                                                                                                                 in builtins.map mapper secondary.mounts
                                                                                                                                         )
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive ${ _environment-variable "OUT" }/test/initial.${ index } /build/mount.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/test/initial.${ index } ${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                             (
@@ -154,7 +154,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "install" install } $out/bin/install.sh &&
-                                                                                                                            makeWrapper $out/bin/install.sh $out/bin/install --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
+                                                                                                                            makeWrapper $out/bin/install.sh $out/bin/install --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out --set VACUUM ${ vacuum.shell-script } &&
                                                                                                                             $out/bin/install
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -347,6 +347,33 @@
                                                                                                     ] ;
                                                                                             } ;
                                                                                 } ;
+                                                                        } ;
+                                                                vacuum =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "--set ${ name } ${ value }" ;
+                                                                                } ;
+                                                                            environment =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "FIND" "${ pkgs.findutils }/bin/find" )
+                                                                                        ( string "INPUT" ( _environment-variable "1" ) )
+                                                                                        ( string "NAME" ( _environment-variable "3" ) )
+                                                                                        ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
+                                                                                        ( string "OUTPUT" ( _environment-variable "2" ) )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                        ( string "STAT" "${ pkgs.coreutils }/bin/stat" )
+                                                                                        ( string "UUID" "" )
+                                                                                    ] ;
+                                                                            name = "vacuum" ;
+                                                                            script = self + "./vacuum.sh" ;
+                                                                            tests = [ ] ;
                                                                         } ;
                                                                 in
                                                                     ''
