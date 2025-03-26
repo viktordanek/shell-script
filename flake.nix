@@ -394,6 +394,29 @@
                                                         name = "foobar" ;
                                                         src = ./. ;
                                                     } ;
+                                            vacuum =
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            ''
+                                                                ${ pkgs.coreutils }/bin/touch $out &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ vacuum.shell-script } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ vacuum.tests } &&
+                                                                    if [ -f ${ vacuum.tests }/SUCCESS ]
+                                                                    then
+                                                                        exit 0
+                                                                    elif [ -f ${ vacuum.tests }/FAILURE ]
+                                                                    then
+                                                                        ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ vacuum.tests }" >&2 &&
+                                                                            exit 63
+                                                                    else
+                                                                        ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ vacuum.tests }" >&2 &&
+                                                                            exit 62
+                                                                    fi
+                                                            '' ;
+                                                        name = "vacuum" ;
+                                                        src = ./. ;
+                                                    } ;
                                         } ;
                                     lib = lib ;
                                 } ;
