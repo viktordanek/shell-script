@@ -288,8 +288,6 @@
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCESS" } + ${ _environment-variable "FAILURE" } )) ]
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
-                                                                                else
-                                                                                    ${ pkgs.coreutils }/bin/touch $out/ERROR
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
