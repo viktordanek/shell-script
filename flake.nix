@@ -146,6 +146,7 @@
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-error } > ${ _environment-variable "OUT" }/expected/standard-error"
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                                         ]
+                                                                                                                                        ( builtins.map ( { expected , index , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/mount.${ index }" ) secondary.mounts )
                                                                                                                                     ]
                                                                                                                             ) ;
                                                                                                                 in
