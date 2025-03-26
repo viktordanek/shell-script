@@ -142,6 +142,7 @@
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/mount.${ index } ${ _environment-variable "OUT" }/observed/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
+                                                                                                                                            "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/standard-output"
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                                         ]
                                                                                                                                     ]
