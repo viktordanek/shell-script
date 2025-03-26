@@ -12,6 +12,7 @@
                 fun =
                     system :
                         let
+                            _environment-variable = builtins.getAttr system environment-variable.lib ;
                             lib =
                                 {
                                     environment ? x : [ ] ,
@@ -80,7 +81,6 @@
                                                         {
                                                             installPhase =
                                                                 let
-                                                                    _environment-variable = builtins.getAttr system environment-variable.lib ;
                                                                     _visitor = builtins.getAttr system visitor.lib ;
                                                                     constructors =
                                                                         _visitor
@@ -123,7 +123,7 @@
                                                                                                                                                 in builtins.map mapper secondary.mounts
                                                                                                                                         )
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "VACUUM" } /build/mounts.${ index } ${ _environment-variable "OUT" }/test/initial.${ index } ${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                             (
@@ -295,6 +295,30 @@
                                                         } ;
                                             } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
+                            vacuum =
+                                lib
+                                    {
+                                        extensions =
+                                            {
+                                                string = name : value : "--set ${ name } ${ value }" ;
+                                            } ;
+                                        environment =
+                                            { string } :
+                                                [
+                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                    ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                    ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                    ( string "FIND" "${ pkgs.findutils }/bin/find" )
+                                                    ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
+                                                    ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                    ( string "STAT" "${ pkgs.coreutils }/bin/stat" )
+                                                    ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
+                                                ] ;
+                                        name = "vacuum" ;
+                                        script = self + "/vacuum.sh" ;
+                                        tests = [ ] ;
+                                    } ;
                             in
                                 {
                                     checks =
@@ -347,33 +371,6 @@
                                                                                                     ] ;
                                                                                             } ;
                                                                                 } ;
-                                                                        } ;
-                                                                vacuum =
-                                                                    lib
-                                                                        {
-                                                                            extensions =
-                                                                                {
-                                                                                    string = name : value : "--set ${ name } ${ value }" ;
-                                                                                } ;
-                                                                            environment =
-                                                                                { string } :
-                                                                                    [
-                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
-                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
-                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                        ( string "FIND" "${ pkgs.findutils }/bin/find" )
-                                                                                        ( string "INPUT" ( _environment-variable "1" ) )
-                                                                                        ( string "NAME" ( _environment-variable "3" ) )
-                                                                                        ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
-                                                                                        ( string "OUTPUT" ( _environment-variable "2" ) )
-                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                                                        ( string "STAT" "${ pkgs.coreutils }/bin/stat" )
-                                                                                        ( string "UUID" "" )
-                                                                                    ] ;
-                                                                            name = "vacuum" ;
-                                                                            script = self + "./vacuum.sh" ;
-                                                                            tests = [ ] ;
                                                                         } ;
                                                                 in
                                                                     ''

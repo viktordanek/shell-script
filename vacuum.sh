@@ -1,4 +1,7 @@
-${MKDIR} ${OUTPUT} &&
+INPUT=${1} &&
+  OUTPUT=${2} &&
+  NAME=${3} &&
+  ${MKDIR} ${OUTPUT} &&
   ${FIND} ${INPUT} | while read FILE
   do
     KEY=${FILE#${INPUT}} &&
