@@ -48,8 +48,8 @@
                                                     else builtins.throw "champion is not null, set but ${ builtins.typeOf champion }." ;
                                                 environment =
                                                     if builtins.typeOf environment == "lambda" then
-                                                        if builtins.typeOf environment primary.extensions == "list" then
-                                                            builtins.map ( e : if builtins.typeOf e == "string" then e else builtins.throw "environment is not string but ${ builtins.typeOf e }." ) environment primary.extensions
+                                                        if builtins.typeOf ( environment primary.extensions ) == "list" then
+                                                            builtins.map ( e : if builtins.typeOf e == "string" then e else builtins.throw "environment is not string but ${ builtins.typeOf e }." ) ( environment primary.extensions )
                                                         else builtins.throw "environments is not list but ${ builtins.typeOf ( environment primary.extension ) }."
                                                     else builtins.throw "environments is not lambda but ${ builtins.typeOf environment }." ;
                                                 extensions =
@@ -89,7 +89,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( environment primary.extensions ) }
+                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " primary.environment }
                                                                     '' ;
                                                         name = name ;
                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
