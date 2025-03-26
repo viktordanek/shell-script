@@ -73,7 +73,7 @@
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
                                         shell-script =
-                                            name :
+                                            use-champion : name :
                                                 pkgs.stdenv.mkDerivation
                                                     {
                                                         installPhase =
@@ -97,7 +97,7 @@
                                                     } ;
                                         in
                                             {
-                                                shell-script = "${ shell-script primary.name }/bin/${ primary.name }" ;
+                                                shell-script = "${ shell-script false primary.name }/bin/${ primary.name }" ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
@@ -156,7 +156,7 @@
                                                                                                                                                                 extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
                                                                                                                                                                 name = "observe" ;
                                                                                                                                                                 runScript = secondary.test ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script false "candidate" ) ] ;
                                                                                                                                                             } ;
                                                                                                                                                     in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                             )
