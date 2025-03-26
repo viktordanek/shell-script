@@ -54,7 +54,7 @@
                                                     else builtins.throw "environments is not lambda but ${ builtins.typeOf environment }." ;
                                                 extensions =
                                                     if builtins.typeOf extensions == "set" then
-                                                        builtins.mapAttr ( name : value : if builtins.typeOf value == "lambda" then value else builtins.throw "extension is not lambda but ${ builtins.typeOf value }." ) extensions
+                                                        builtins.mapAttrs ( name : value : if builtins.typeOf value == "lambda" then value else builtins.throw "extension is not lambda but ${ builtins.typeOf value }." ) extensions
                                                     else builtins.throw "extensions is not set but ${ builtins.typeOf extensions }." ;
                                                 name =
                                                     if builtins.typeOf name == "string" then
@@ -89,7 +89,7 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( environment extensions ) }
+                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( environment primary.extensions ) }
                                                                     '' ;
                                                         name = name ;
                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
