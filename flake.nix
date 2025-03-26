@@ -15,6 +15,7 @@
                             _environment-variable = builtins.getAttr system environment-variable.lib ;
                             lib =
                                 {
+                                    champion ? null ,
                                     environment ? x : [ ] ,
                                     extensions ? [ ] ,
                                     name ,
@@ -24,6 +25,27 @@
                                     let
                                         primary =
                                             {
+                                                champion =
+                                                    if builtins.typeOf champion == "null" then champion
+                                                    else if builtins.typeOf champion == "set" then
+                                                        let
+                                                            identity =
+                                                                { environment ? x : [ ] , script } :
+                                                                    {
+                                                                        environment =
+                                                                            if builtins.typeOf environment == "lambda" then
+                                                                                if builtins.typeOf environment primary.extensions == "list" then
+                                                                                    builtins.map ( e : if builtins.typeOf e == "string" then e else builtins.throw "environment is not string but ${ builtins.typeOf e }." ) environment primary.extensions
+                                                                                else builtins.throw "champion environments is not list but ${ builtins.typeOf ( environment primary.extension ) }."
+                                                                            else builtins.throw "champion environments is not lambda but ${ builtins.typeOf environment }." ;
+                                                                        script =
+                                                                            if builtins.typeOf script == "string" then
+                                                                                if builtins.pathExists script then script
+                                                                                else builtins.throw "there is no path for champion ${ script }."
+                                                                            else builtins.throw "champion script is not string but ${ builtins.typeOf script }." ;
+                                                                    } ;
+                                                            in identity champion
+                                                    else builtins.throw "champion is not null, set but ${ builtins.typeOf champion }." ;
                                                 environment =
                                                     if builtins.typeOf environment == "lambda" then
                                                         if builtins.typeOf environment primary.extensions == "list" then
