@@ -93,94 +93,48 @@
                                                                                                     {
                                                                                                         installPhase =
                                                                                                             let
-                                                                                                                constructors =
+                                                                                                                install =
                                                                                                                     builtins.concatStringsSep
                                                                                                                         " &&\n\t"
-                                                                                                                        (
-                                                                                                                            builtins.concatLists
-                                                                                                                                [
+                                                                                                                            (
+                                                                                                                                builtins.concatLists
                                                                                                                                     [
-                                                                                                                                        "${ _environment-variable "CP" } --recursive ${ derivation }/test ${ _environment-variable "OUT" }/test"
-                                                                                                                                    ]
-                                                                                                                                    ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } ${ _environment-variable "OUT" }/test/initial.${ index } > /build/mount.${ index }" ) secondary.mounts )
-                                                                                                                                    [
-                                                                                                                                        "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "MKDIR" } /build/initial.${ index }" ) secondary.mounts )
+                                                                                                                                        [
+                                                                                                                                            "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                                                                        ]
+                                                                                                                                        [
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
+                                                                                                                                        ]
                                                                                                                                         (
                                                                                                                                             let
-                                                                                                                                                user-environment =
-                                                                                                                                                    pkgs.buildFHSUserEnv
-                                                                                                                                                        {
-                                                                                                                                                            extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ];
-                                                                                                                                                            name = "test" ;
-                                                                                                                                                            runScript = secondary.test ;
-                                                                                                                                                            targetPkgs = pkgs : [ pkgs.coreutils ( shell-script "candidate" ) ] ;
-                                                                                                                                                        } ;
-                                                                                                                                                in "if ${ user-environment }/bin/test > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
+                                                                                                                                                mapper =
+                                                                                                                                                    { index , initial , ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind /build/initial.${ index } /mount" ] ;
+                                                                                                                                                                        name = "mount" ;
+                                                                                                                                                                        runScript = "initial" ;
+                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils initial ]  ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "if ${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; fi" ;
+                                                                                                                                                in builtins.map mapper secondary.mounts
                                                                                                                                         )
+                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } /build/initial.${ index }/target > ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
+                                                                                                                                        [
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
+                                                                                                                                        ]
                                                                                                                                     ]
-                                                                                                                                    [
-                                                                                                                                        "${ _environment-variable "LN" } --symbolic ${ derivation }/expected ${ _environment-variable "OUT" }/expected"
-                                                                                                                                    ]
-                                                                                                                                ]
-                                                                                                                        ) ;
-                                                                                                                derivation =
-                                                                                                                    pkgs.stdenv.mkDerivation
-                                                                                                                        {
-                                                                                                                            installPhase =
-                                                                                                                                let
-                                                                                                                                    install =
-                                                                                                                                        builtins.concatStringsSep
-                                                                                                                                            " &&\n\t"
-                                                                                                                                                (
-                                                                                                                                                    builtins.concatLists
-                                                                                                                                                        [
-                                                                                                                                                            ( builtins.map ( { index , ... } : "${ _environment-variable "MKDIR" } /build/initial.${ index }" ) secondary.mounts )
-                                                                                                                                                            [
-                                                                                                                                                                "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                                                                                            ]
-                                                                                                                                                            [
-                                                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                                            ]
-                                                                                                                                                            (
-                                                                                                                                                                let
-                                                                                                                                                                    mapper =
-                                                                                                                                                                        { index , initial , ... } :
-                                                                                                                                                                            let
-                                                                                                                                                                                user-environment =
-                                                                                                                                                                                    pkgs.buildFHSUserEnv
-                                                                                                                                                                                        {
-                                                                                                                                                                                            extraBwrapArgs = [ "--unshare-all" "--bind /build/initial.${ index } /mount" ] ;
-                                                                                                                                                                                            name = "mount" ;
-                                                                                                                                                                                            runScript = "initial" ;
-                                                                                                                                                                                            targetPkgs = pkgs : [ pkgs.coreutils initial ]  ;
-                                                                                                                                                                                        } ;
-                                                                                                                                                                                in "if ${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; fi" ;
-                                                                                                                                                                    in builtins.map mapper secondary.mounts
-                                                                                                                                                            )
-                                                                                                                                                            ( builtins.map ( { index , ... } : "${ _environment-variable "CAT" } /build/initial.${ index }/target > ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
-                                                                                                                                                            [
-                                                                                                                                                                "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
-                                                                                                                                                            ]
-                                                                                                                                                        ]
-                                                                                                                                                ) ;
-                                                                                                                                    in
-                                                                                                                                        ''
-                                                                                                                                            ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                                                                                ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "install" install } $out/bin/install.sh &&
-                                                                                                                                                makeWrapper $out/bin/install.sh $out/bin/install --set CAT ${ pkgs.coreutils }/bin/cat --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
-                                                                                                                                                $out/bin/install
-                                                                                                                                        '' ;
-                                                                                                                            name = "test" ;
-                                                                                                                            nativeBuildInputs = [ pkgs.makeWrapper ] ;
-                                                                                                                            src = ./. ;
-                                                                                                                        } ;
+                                                                                                                            ) ;
                                                                                                                 in
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                            makeWrapper ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set ECHO ${ pkgs.coreutils }/bin/echo --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch &&
-                                                                                                                            $out/bin/constructors
+                                                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "install" install } $out/bin/install.sh &&
+                                                                                                                            makeWrapper $out/bin/install.sh $out/bin/install --set CAT ${ pkgs.coreutils }/bin/cat --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out &&
+                                                                                                                            $out/bin/install
                                                                                                                     '' ;
                                                                                                         name = "test" ;
                                                                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
