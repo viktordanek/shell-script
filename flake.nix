@@ -154,9 +154,8 @@
                                                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
-                                                                                                                                                                extraEnv = builtins.trace "HI" secondary.environment ;
                                                                                                                                                                 name = "observe" ;
-                                                                                                                                                                profile = "export FOOBAR=wtf" ;
+                                                                                                                                                                profile = secondary.environment ;
                                                                                                                                                                 runScript = secondary.test ;
                                                                                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils ( shell-script ( builtins.typeOf primary.champion == "set" ) "candidate" ) ] ;
                                                                                                                                                             } ;
@@ -203,7 +202,7 @@
                                                                                                             {
                                                                                                                 environment =
                                                                                                                     if builtins.typeOf environment == "set" then
-                                                                                                                        builtins.mapAttrs ( name : value : if builtins.typeOf value == "string" then value else builtins.throw "environment is not string but ${ builtins.typeOf value }." ) environment
+                                                                                                                        builtins.concatStringsSep " &&\n\t" ( builtins.attrValues ( builtins.mapAttrs ( name : value : if builtins.typeOf value == "string" then "export ${ name }=${ value }" else builtins.throw "environment is not string but ${ builtins.typeOf value }." ) environment ) )
                                                                                                                     else builtins.throw "environment is not list but ${ builtins.typeOf environment }." ;
                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
