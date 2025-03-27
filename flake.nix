@@ -154,6 +154,7 @@
                                                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
+                                                                                                                                                                extraWrapperArgs = secondary.environment ;
                                                                                                                                                                 name = "observe" ;
                                                                                                                                                                 runScript = secondary.test ;
                                                                                                                                                                 targetPkgs = pkgs : [ pkgs.coreutils ( shell-script ( builtins.typeOf primary.champion == "set" ) "candidate" ) ] ;
@@ -190,6 +191,7 @@
                                                                                                 let
                                                                                                     identity =
                                                                                                         {
+                                                                                                            environment ? { } ,
                                                                                                             mounts ? { } ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
@@ -198,7 +200,11 @@
                                                                                                             test ? "candidate"
                                                                                                         } :
                                                                                                             {
-                                                                                                                 mounts =
+                                                                                                                environment =
+                                                                                                                    if builtins.typeOf environment == "set" then
+                                                                                                                        builtins.attrValues ( builtins.mapAttrs ( name : value : if builtins.typeOf value == "string" then "--set ${ name } ${ value }" else builtins.throw "environment is not string but ${ builtins.typeOf value }." ) environment )
+                                                                                                                    else builtins.throw "environment is not list but ${ builtins.typeOf environment }." ;
+                                                                                                                mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         let
                                                                                                                             generator =
@@ -376,6 +382,10 @@
                                                                                     foobar =
                                                                                         ignore :
                                                                                             {
+                                                                                                environment =
+                                                                                                    {
+                                                                                                        FOOBAR = "949d8c13b7f06cdf5d83557864c6efa78bef03c0b0ffecaee3f6f686b79bb9b1e6a893d26b1ca393af1f0ea812358dbf535ff24d3565bb6cc10cef43f7cb225c" ;
+                                                                                                    } ;
                                                                                                 mounts =
                                                                                                     {
                                                                                                         "/singleton" =
