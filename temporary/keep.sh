@@ -1,0 +1,2 @@
+
+  ${RM} ${RESOURCE}/keep &&
