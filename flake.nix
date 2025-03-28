@@ -379,6 +379,32 @@
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
+                                                                                    directory =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                environment =
+                                                                                                    {
+                                                                                                        FOOBAR = "949d8c13b7f06cdf5d83557864c6efa78bef03c0b0ffecaee3f6f686b79bb9b1e6a893d26b1ca393af1f0ea812358dbf535ff24d3565bb6cc10cef43f7cb225c" ;
+                                                                                                    } ;
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/singleton" =
+                                                                                                            {
+                                                                                                                expected = self + "/expected/file/mounts/singleton" ;
+                                                                                                                initial =
+                                                                                                                    [
+                                                                                                                        "mkdir /mount/target"
+                                                                                                                    ] ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                standard-error = self + "/expected/directory/standard-error" ;
+                                                                                                standard-output = self + "/expected/directory/standard-output" ;
+                                                                                                status = 1 ;
+                                                                                                test =
+                                                                                                    [
+                                                                                                        "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                                                    ] ;
+                                                                                            } ;
                                                                                     file =
                                                                                         ignore :
                                                                                             {
@@ -398,7 +424,7 @@
                                                                                                             } ;
                                                                                                     } ;
                                                                                                 standard-error = self + "/expected/file/standard-error" ;
-                                                                                                standard-output = self + "/expected/directory/standard-output" ;
+                                                                                                standard-output = self + "/expected/file/standard-output" ;
                                                                                                 status = 208 ;
                                                                                                 test =
                                                                                                     [
