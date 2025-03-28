@@ -390,7 +390,7 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                expected = self + "/expected/file/mounts/singleton" ;
+                                                                                                                expected = self + "/expected/directory/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
                                                                                                                         "mkdir /mount/target"
