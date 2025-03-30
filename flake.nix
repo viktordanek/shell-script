@@ -142,22 +142,22 @@
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
                                                                                                                                         ]
-                                                                                                                                        # (
-                                                                                                                                        #     let
-                                                                                                                                        #         mapper =
-                                                                                                                                        #             name : { host-path , initial , initial-path , ... } :
-                                                                                                                                        #                 let
-                                                                                                                                        #                     user-environment =
-                                                                                                                                        #                         pkgs.buildFHSUserEnv
-                                                                                                                                        #                             {
-                                                                                                                                        #                                 extraBwrapArgs = [ "--unshare-all" "--bind ${ host-path } ${ name }" ] ;
-                                                                                                                                        #                                 name = "initial" ;
-                                                                                                                                        #                                 runScript = initial ;
-                                                                                                                                        #                                 targetPkgs = pkgs : [ pkgs.coreutils ] ;
-                                                                                                                                        #                             } ;
-                                                                                                                                        #                     in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi" ;
-                                                                                                                                        #         in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                        # )
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper =
+                                                                                                                                                    name : { host-path , initial , initial-path , ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind ${ host-path } ${ name }" ] ;
+                                                                                                                                                                        name = "initial" ;
+                                                                                                                                                                        runScript = initial ;
+                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi" ;
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                        )
                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , host-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ host-path }" ) secondary.mounts ) )
                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) secondary.mounts ) )
                                                                                                                                         # [
