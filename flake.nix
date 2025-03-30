@@ -77,7 +77,7 @@
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
-                                                        profile = profile ;
+                                                        profile = builtins.trace "PROFILE:  ${ profile }" profile ;
                                                         runScript = primary.script ;
                                                     } ;
                                         in
@@ -140,7 +140,7 @@
                                                                                                                                                             {
                                                                                                                                                                 name = "observe" ;
                                                                                                                                                                 runScript = secondary.test ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } ) ] ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = builtins.trace "SECONDARY_PROFILE=${ secondary.profile }" secondary.profile ; } ) ] ;
                                                                                                                                                             } ;
                                                                                                                                                     in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                             )
@@ -176,7 +176,7 @@
                                                                                                     identity =
                                                                                                         {
                                                                                                             mounts ? { } ,
-                                                                                                            profile ? x : [ ] ,
+                                                                                                            profile ? null ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
                                                                                                             status ? 0 ,
@@ -353,6 +353,16 @@
                                                                                             is-read-only = false ;
                                                                                         } ;
                                                                                 } ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                        ( string "DIFF" "${ pkgs.diffutils }/bin/diff" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                    ] ;
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
@@ -370,15 +380,6 @@
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                profile =
-                                                                                                    { string } :
-                                                                                                        [
-                                                                                                            ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                                            ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
-                                                                                                            ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
-                                                                                                            ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                                            ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                                                                        ] ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 168 ;
