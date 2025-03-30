@@ -42,7 +42,7 @@
                                                                             else builtins.throw "champion environments is not lambda but ${ builtins.typeOf environment }." ;
                                                                         script =
                                                                             if builtins.typeOf script == "string" then
-                                                                                if builtins.pathExists script then script
+                                                                                if builtins.pathExists script then pkgs.writeShellScript "script" script
                                                                                 else builtins.throw "there is no path for champion ${ script }."
                                                                             else builtins.throw "champion script is not string but ${ builtins.typeOf script }." ;
                                                                     } ;
@@ -91,7 +91,7 @@
                                                     else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
-                                                        if builtins.pathExists script then script
+                                                        if builtins.pathExists script then pkgs.writeShellScript "script" script
                                                         else builtins.throw "there is no path for ${ script }."
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
@@ -106,7 +106,7 @@
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
-                                                        profile = builtins.trace profile profile ;
+                                                        profile = builtins.trace "PROFILE< ${ profile } >" profile ;
                                                         runScript = builtins.trace primary.script primary.script ;
                                                     } ;
                                         in
@@ -325,9 +325,10 @@
                                     {
                                         extensions =
                                             {
-                                                string = name : value : "export ${ name } ${ value }" ;
+                                                string = name : value : "export ${ name }=${ value }" ;
                                             } ;
-                                        environment =
+                                        name = "vacuum" ;
+                                        profile =
                                             { string } :
                                                 [
                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
@@ -341,7 +342,6 @@
                                                     ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
                                                     ( string "WC" "${ pkgs.coreutils }/bin/wc" )
                                                 ] ;
-                                        name = "vacuum" ;
                                         script = self + "/vacuum.sh" ;
                                         tests = [ ] ;
                                     } ;
@@ -359,7 +359,7 @@
                                                                         {
                                                                             extensions =
                                                                                 {
-                                                                                    string = name : value : "export ${ name } ${ value }" ;
+                                                                                    string = name : value : "export ${ name }=${ value }" ;
                                                                                 } ;
                                                                             name = "foobar" ;
                                                                             mounts =
@@ -395,6 +395,15 @@
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
+                                                                                                profile =
+                                                                                                    { string } :
+                                                                                                        [
+                                                                                                            ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                                            ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                                            ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                                            ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                                            ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                                        ] ;
                                                                                                 standard-error = self + "/expected/standard-error" ;
                                                                                                 standard-output = self + "/expected/standard-output" ;
                                                                                                 status = 168 ;
