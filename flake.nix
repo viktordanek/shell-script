@@ -104,7 +104,7 @@
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
                                                 pkgs.buildFHSUserEnv
                                                     {
-                                                        extraBwrapArgs = mounts ;
+                                                        extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
                                                         profile = profile ;
                                                         runScript = primary.script ;
@@ -135,7 +135,7 @@
                                                                                                                             (
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "MKDIR" } /build/initial.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , ... } : "${ _environment-variable "MKDIR" } ${ host-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
@@ -145,45 +145,33 @@
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
-                                                                                                                                                    { index , initial , ... } :
+                                                                                                                                                    name : { host-path , initial-path , ... } :
                                                                                                                                                         let
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind /build/initial.${ index } /mount" ] ;
-                                                                                                                                                                        name = "mount" ;
-                                                                                                                                                                        runScript = "initial" ;
-                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils initial ]  ;
+                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind ${ host-path } ${ name }" ] ;
+                                                                                                                                                                        name = "initial" ;
+                                                                                                                                                                        runScript = secondary.initial ;
+                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                                     } ;
-                                                                                                                                                            in "if ${ user-environment }/bin/mount > ${ _environment-variable "OUT" }/test/initial.${ index }.standard-output 2> ${ _environment-variable "OUT" }/test/initial.${ index }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/test/initial.${ index }.status ; fi" ;
-                                                                                                                                                in builtins.map mapper secondary.mounts
+                                                                                                                                                            in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi"
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target ${ _environment-variable "OUT" }/test/initial.${ index }" ) secondary.mounts )
-                                                                                                                                        ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target /build/mount.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , mount-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ host-path }" ) )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                             "${ shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
-                                                                                                                                            # (
-                                                                                                                                            #     let
-                                                                                                                                                    # user-environment =
-                                                                                                                                                    #     pkgs.buildFHSUserEnv
-                                                                                                                                                    #         {
-                                                                                                                                                    #             extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
-                                                                                                                                                    #             name = "observe" ;
-                                                                                                                                                    #             runScript = secondary.test ;
-                                                                                                                                                    #             targetPkgs = pkgs : [ pkgs.coreutils ( shell-script ( builtins.typeOf primary.champion == "set" ) "candidate" ) ] ;
-                                                                                                                                                    #         } ;
-                                                                                                                                                    # in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
-                                                                                                                                            # )
                                                                                                                                         ]
-                                                                                                                                        ( builtins.map ( { index , name , ... } : "${ _environment-variable "VACUUM" } /build/mount.${ index } ${ _environment-variable "OUT" }/observed/mount.${ index } ${ name }" ) secondary.mounts )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , observed-path , ... } : "${ _environment-variable "CP" } --recursive ${ host-path } ${ observed-path }" ) ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/expected/standard-output"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-error } > ${ _environment-variable "OUT" }/expected/standard-error"
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                                         ]
-                                                                                                                                        ( builtins.map ( { expected , index , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/mount.${ index }" ) secondary.mounts )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , expected-path } : "${ _environment-variable "CP" } --recursive ${ expected } ${ expected-path }" ) ) )
                                                                                                                                         [
                                                                                                                                             "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "OUT" }/observed > ${ _environment-variable "OUT" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/FAILURE ; fi"
                                                                                                                                         ]
@@ -213,40 +201,67 @@
                                                                                                             initial ? "initial" ,
                                                                                                             test ? "candidate"
                                                                                                         } :
-                                                                                                            {
+                                                                                                            let
                                                                                                                 mounts =
-                                                                                                                profile =
-                                                                                                                    if builtins.typeOf profile == "lambda" then
-                                                                                                                        let
-                                                                                                                            list = profile primary.extensions ;
-                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.map mapper list
-                                                                                                                    else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
-                                                                                                                standard-error =
-                                                                                                                    if builtins.typeOf standard-error == "string" then
-                                                                                                                        if builtins.match "^/.*" standard-error != null then
-                                                                                                                            if builtins.pathExists standard-error then standard-error
-                                                                                                                            else builtins.throw "standard-error is an absolute path but there does not exist a path for ${ standard-error }."
-                                                                                                                        else builtins.toFile "standard-error" standard-error
-                                                                                                                    else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
-                                                                                                                standard-output =
-                                                                                                                    if builtins.typeOf standard-output == "string" then
-                                                                                                                        if builtins.match "^/.*" standard-output != null then
-                                                                                                                            if builtins.pathExists standard-output then standard-output
-                                                                                                                            else builtins.throw "standard-output is an absolute path but there does not exist a path for ${ standard-output }."
-                                                                                                                        else builtins.toFile "standard-output" standard-output
-                                                                                                                    else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
-                                                                                                                status =
-                                                                                                                    if builtins.typeOf status == "int" then builtins.toString status
-                                                                                                                    else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
-                                                                                                                test =
-                                                                                                                    if builtins.typeOf test == "string" then test
-                                                                                                                    else if builtins.typeOf test == "list" then
-                                                                                                                        let
-                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test )
-                                                                                                                    else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
-                                                                                                            } ;
+                                                                                                                    if builtins.typeOf mounts == "set" then
+                                                                                                                        if builtins.sort ( a : b : a < b ) ( builtins.attrNames primary.mounts ) == builtins.sort ( a : b : a < b ) ( builtins.attrNames mounts )
+                                                                                                                        then
+                                                                                                                            let
+                                                                                                                                mapper =
+                                                                                                                                    name : { expected , initial } :
+                                                                                                                                        {
+                                                                                                                                            host-path = "/build/host-path/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            expected =
+                                                                                                                                                if builtins.typeOf expected == "string" then
+                                                                                                                                                    if builtins.pathExists expected then expected
+                                                                                                                                                    else builtins.throw "path does not exist for expected ${ expected }."
+                                                                                                                                                else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
+                                                                                                                                            expected-path = "${ environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            initial =
+                                                                                                                                                if builtins.typeOf initial == "string" then initial
+                                                                                                                                                else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
+                                                                                                                                            initial-path = "${ environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
+                                                                                                                                            observed-path = "${ environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            test-path = "${ environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                        } ;
+                                                                                                                                in builtins.mapAttrs mapper mounts
+                                                                                                                        else builtins.throw "the testing mounts does not have the same sandbox attributes as the primary mounts." ;
+                                                                                                                    else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
+                                                                                                                in
+                                                                                                                    {
+                                                                                                                        profile =
+                                                                                                                            if builtins.typeOf profile == "lambda" then
+                                                                                                                                let
+                                                                                                                                    list = profile primary.extensions ;
+                                                                                                                                    mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                                                                                    in builtins.map mapper list
+                                                                                                                            else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
+                                                                                                                        standard-error =
+                                                                                                                            if builtins.typeOf standard-error == "string" then
+                                                                                                                                if builtins.match "^/.*" standard-error != null then
+                                                                                                                                    if builtins.pathExists standard-error then standard-error
+                                                                                                                                    else builtins.throw "standard-error is an absolute path but there does not exist a path for ${ standard-error }."
+                                                                                                                                else builtins.toFile "standard-error" standard-error
+                                                                                                                            else builtins.throw "standard-error is not string but ${ builtins.typeOf standard-error }." ;
+                                                                                                                        standard-output =
+                                                                                                                            if builtins.typeOf standard-output == "string" then
+                                                                                                                                if builtins.match "^/.*" standard-output != null then
+                                                                                                                                    if builtins.pathExists standard-output then standard-output
+                                                                                                                                    else builtins.throw "standard-output is an absolute path but there does not exist a path for ${ standard-output }."
+                                                                                                                                else builtins.toFile "standard-output" standard-output
+                                                                                                                            else builtins.throw "standard-output is not string but ${ builtins.typeOf standard-output }." ;
+                                                                                                                        status =
+                                                                                                                            if builtins.typeOf status == "int" then builtins.toString status
+                                                                                                                            else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
+                                                                                                                        test =
+                                                                                                                            if builtins.typeOf test == "string" then test
+                                                                                                                            else if builtins.typeOf test == "list" then
+                                                                                                                                let
+                                                                                                                                    mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
+                                                                                                                                    in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test )
+                                                                                                                            else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
+                                                                                                                    } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
                                                                                                 [
