@@ -145,12 +145,12 @@
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
-                                                                                                                                                    name : { host-path , initial , initial-path , ... } :
+                                                                                                                                                    name : { initial , initial-path , ... } :
                                                                                                                                                         let
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind ${ host-path } ${ name }" ] ;
+                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind ${ initial-path } /mount" ] ;
                                                                                                                                                                         name = "initial" ;
                                                                                                                                                                         runScript = initial ;
                                                                                                                                                                         targetPkgs = pkgs : [ pkgs.coreutils ] ;
