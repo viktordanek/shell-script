@@ -135,7 +135,7 @@
                                                                                                                             (
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
-                                                                                                                                        # ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , ... } : "${ _environment-variable "MKDIR" } ${ host-path }" ) secondary.mounts ) )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "${ _environment-variable "MKDIR" } ${ initial-path }" ) secondary.mounts ) )
                                                                                                                                         # [
                                                                                                                                         #     "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         # ]
@@ -210,7 +210,7 @@
                                                                                                                                 mapper =
                                                                                                                                     name : { expected , initial } :
                                                                                                                                         {
-                                                                                                                                            host-path = "/build/host-path/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            host-path = "/build/mount.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             expected =
                                                                                                                                                 if builtins.typeOf expected == "string" then
                                                                                                                                                     if builtins.pathExists expected then expected
@@ -221,10 +221,10 @@
                                                                                                                                                 if builtins.typeOf initial == "list" then builtins.concatStringsSep " &&\n\t" ( builtins.map ( value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ) initial )
                                                                                                                                                 else if builtins.typeOf initial == "string" then initial
                                                                                                                                                 else builtins.throw "initial is not list, string but ${ builtins.typeOf initial }." ;
-                                                                                                                                            initial-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            initial-path = "/build/initial.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
-                                                                                                                                            test-path = "${ _environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            test-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
                                                                                                                         else builtins.throw "the testing mounts does not have the same sandbox attributes as the primary mounts."
