@@ -106,8 +106,8 @@
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
-                                                        profile = profile ;
-                                                        runScript = primary.script ;
+                                                        profile = builtins.trace profile profile ;
+                                                        runScript = builtins.trace primary.script primary.script ;
                                                     } ;
                                         in
                                             {
@@ -162,7 +162,7 @@
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                            "${ shell-script { mounts = secondary.mounts ; name = "candidate" ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                            "${ shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
                                                                                                                                         ]
                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , observed-path , ... } : "${ _environment-variable "CP" } --recursive ${ host-path } ${ observed-path }" ) secondary.mounts ) )
                                                                                                                                         # [
@@ -232,9 +232,15 @@
                                                                                                                 profile =
                                                                                                                     if builtins.typeOf profile == "lambda" then
                                                                                                                         let
-                                                                                                                            list = profile primary.extensions ;
-                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.map mapper list
+                                                                                                                            value = profile primary.extensions ;
+                                                                                                                            in
+                                                                                                                                if builtins.typeOf value == "list" then
+                                                                                                                                    let
+                                                                                                                                        list = value ;
+                                                                                                                                        mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                                                                                        in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
+                                                                                                                                else if builtins.typeOf value == "string" then value
+                                                                                                                                else builtins.throw "profile is not list, string but ${ builtins.typeOf value }."
                                                                                                                     else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
