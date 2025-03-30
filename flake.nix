@@ -259,7 +259,10 @@
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                                                                                 profile =
                                                                                                                     if builtins.typeOf profile == "lambda" then
-
+                                                                                                                        let
+                                                                                                                            list = profile primary.extensions ;
+                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                                                                            in builtins.map mapper list
                                                                                                                     else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
