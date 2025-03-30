@@ -145,14 +145,14 @@
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
-                                                                                                                                                    name : { initial , initial-path , ... } :
+                                                                                                                                                    name : { initial , initial-path , ... } @secondary :
                                                                                                                                                         let
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
                                                                                                                                                                         extraBwrapArgs = [ "--unshare-all" "--bind ${ initial-path } /mount" ] ;
                                                                                                                                                                         name = "initial" ;
-                                                                                                                                                                        runScript = initial ;
+                                                                                                                                                                        runScript = builtins.trace ( builtins.toJSON { initial = initial ; names = builtins.attrNames secondary ; } ) initial ;
                                                                                                                                                                         targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                                     } ;
                                                                                                                                                             in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi" ;
