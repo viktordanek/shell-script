@@ -214,49 +214,7 @@
                                                                                                             test ? "candidate"
                                                                                                         } :
                                                                                                             {
-                                                                                                                 mounts =
-                                                                                                                    if builtins.typeOf mounts == "set" then
-                                                                                                                        let
-                                                                                                                            generator =
-                                                                                                                                index :
-                                                                                                                                    let
-                                                                                                                                        elem = builtins.elemAt list index ;
-                                                                                                                                        list =
-                                                                                                                                            let
-                                                                                                                                                set =
-                                                                                                                                                    let
-                                                                                                                                                        mapper =
-                                                                                                                                                            name : { expected , initial ? [ ] , uuid ? "" } :
-                                                                                                                                                                {
-                                                                                                                                                                    expected =
-                                                                                                                                                                        if builtins.typeOf expected == "string" then
-                                                                                                                                                                            if builtins.pathExists expected then expected
-                                                                                                                                                                            else builtins.throw "there is no path for expected ${ expected }."
-                                                                                                                                                                        else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
-                                                                                                                                                                    initial =
-                                                                                                                                                                        if builtins.typeOf initial == "string" then pkgs.writeShellScriptBin "initial" initial
-                                                                                                                                                                        else if builtins.typeOf initial == "list" then
-                                                                                                                                                                            let
-                                                                                                                                                                                mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ;
-                                                                                                                                                                                in pkgs.writeShellScriptBin "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper initial ) )
-                                                                                                                                                                        else builtins.throw "initial is not string but ${ builtins.typeOf initial }." ;
-                                                                                                                                                                    name = name ;
-                                                                                                                                                                    uuid =
-                                                                                                                                                                        if builtins.typeOf uuid == "string" then builtins.hashString "sha512" uuid
-                                                                                                                                                                        else builtins.throw "uuid is not string but ${ builtins.typeOf uuid }." ;
-                                                                                                                                                                } ;
-                                                                                                                                                        in builtins.mapAttrs mapper mounts ;
-                                                                                                                                                in builtins.attrValues set ;
-                                                                                                                                        in
-                                                                                                                                            {
-                                                                                                                                                index = builtins.toString index ;
-                                                                                                                                                initial = elem.initial ;
-                                                                                                                                                expected = elem.expected ;
-                                                                                                                                                name = elem.name ;
-                                                                                                                                                uuid = elem.uuid ;
-                                                                                                                                            } ;
-                                                                                                                            in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
-                                                                                                                    else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
+                                                                                                                mounts =
                                                                                                                 profile =
                                                                                                                     if builtins.typeOf profile == "lambda" then
                                                                                                                         let
