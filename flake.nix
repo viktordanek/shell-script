@@ -145,14 +145,14 @@
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
-                                                                                                                                                    name : { host-path , initial-path , ... } :
+                                                                                                                                                    name : { host-path , initial , initial-path , ... } :
                                                                                                                                                         let
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
                                                                                                                                                                         extraBwrapArgs = [ "--unshare-all" "--bind ${ host-path } ${ name }" ] ;
                                                                                                                                                                         name = "initial" ;
-                                                                                                                                                                        runScript = secondary.initial ;
+                                                                                                                                                                        runScript = initial ;
                                                                                                                                                                         targetPkgs = pkgs : [ pkgs.coreutils ] ;
                                                                                                                                                                     } ;
                                                                                                                                                             in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi" ;
