@@ -18,7 +18,9 @@
                                     champion ? null ,
                                     environment ? x : [ ] ,
                                     extensions ? [ ] ,
+                                    mounts ? { } ,
                                     name ,
+                                    profile ? x : [ ] ,
                                     script ,
                                     tests ? null
                                 } :
@@ -56,11 +58,37 @@
                                                     if builtins.typeOf extensions == "set" then
                                                         builtins.mapAttrs ( name : value : if builtins.typeOf value == "lambda" then value else builtins.throw "extension is not lambda but ${ builtins.typeOf value }." ) extensions
                                                     else builtins.throw "extensions is not set but ${ builtins.typeOf extensions }." ;
+                                                mounts =
+                                                    if builtins.typeOf mounts == "set" then
+                                                        let
+                                                            mapper =
+                                                                name : { host-path , is-read-only ? true } :
+                                                                    {
+                                                                        host-path =
+                                                                            if builtins.typeOf host-path == "string" then host-path
+                                                                            else builtins.throw "host-path is not string but ${ builtins.typeOf host-path }." ;
+                                                                        is-read-only =
+                                                                            if builtins.typeOf is-read-only == "bool" then is-read-only
+                                                                            else builtins.throw "is-read-only is not bool but ${ builtins.typeOf is-read-only }." ;
+                                                                        sandbox = name ;
+                                                                    } ;
+                                                            in builtins.mapAttrs mapper mounts
+                                                    else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                 name =
                                                     if builtins.typeOf name == "string" then
                                                         if pkgs.lib.strings.match "^[a-zA-Z_][a-zA-Z0-9_-]*$" name != null then name
                                                         else builtins.throw "the name (${ name }) is not suitable for a bash script."
                                                     else builtins.throw "name is not string but ${ builtins.typeOf name }." ;
+                                                profile =
+                                                    if builtins.typeOf profile == "lambda" then
+                                                        let
+                                                            list = profile primary.extensions ;
+                                                            in if builtins.typeOf list == "list" then
+                                                                let
+                                                                    mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                    in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
+                                                            else builtins.throw "profile is not list but ${ builtins.typeOf list }."
+                                                    else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
                                                         if builtins.pathExists script then script
@@ -73,31 +101,17 @@
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
                                             } ;
                                         shell-script =
-                                            use-champion : name :
-                                                pkgs.stdenv.mkDerivation
+                                            { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
+                                                pkgs.buildFHSUserEnv
                                                     {
-                                                        installPhase =
-                                                            let
-                                                                source =
-                                                                    pkgs.stdenv.mkDerivation
-                                                                        {
-                                                                            installPhase = "${ pkgs.coreutils }/bin/install -D --mode 555 ${ if use-champion then champion.script else script } $out" ;
-                                                                            name = "source" ;
-                                                                            src = ./. ;
-                                                                        } ;
-                                                                in
-                                                                    ''
-                                                                        ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                            ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                            makeWrapper ${ source } $out/bin/${ name } ${ builtins.concatStringsSep " " ( if use-champion  then champion.primary.environment else primary.environment ) }
-                                                                    '' ;
+                                                        extraBwrapArgs = mounts ;
                                                         name = name ;
-                                                        nativeBuildInputs = [ pkgs.makeWrapper ] ;
-                                                        src = ./. ;
+                                                        profile = profile ;
+                                                        runScript = primary.script ;
                                                     } ;
                                         in
                                             {
-                                                shell-script = "${ shell-script false primary.name }/bin/${ primary.name }" ;
+                                                shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
@@ -148,18 +162,19 @@
                                                                                                                                         ( builtins.map ( { index , ... } : "${ _environment-variable "CP" } --recursive /build/initial.${ index }/target /build/mount.${ index }" ) secondary.mounts )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                            (
-                                                                                                                                                let
-                                                                                                                                                    user-environment =
-                                                                                                                                                        pkgs.buildFHSUserEnv
-                                                                                                                                                            {
-                                                                                                                                                                extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
-                                                                                                                                                                name = "observe" ;
-                                                                                                                                                                runScript = secondary.test ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script ( builtins.typeOf primary.champion == "set" ) "candidate" ) ] ;
-                                                                                                                                                            } ;
-                                                                                                                                                    in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
-                                                                                                                                            )
+                                                                                                                                            "${ shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                            # (
+                                                                                                                                            #     let
+                                                                                                                                                    # user-environment =
+                                                                                                                                                    #     pkgs.buildFHSUserEnv
+                                                                                                                                                    #         {
+                                                                                                                                                    #             extraBwrapArgs = builtins.concatLists [ [ "--unshare-all" ] ( builtins.map ( { index , name , ... } : "--bind /build/mount.${ index } ${ name }" ) secondary.mounts ) ] ;
+                                                                                                                                                    #             name = "observe" ;
+                                                                                                                                                    #             runScript = secondary.test ;
+                                                                                                                                                    #             targetPkgs = pkgs : [ pkgs.coreutils ( shell-script ( builtins.typeOf primary.champion == "set" ) "candidate" ) ] ;
+                                                                                                                                                    #         } ;
+                                                                                                                                                    # in "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
+                                                                                                                                            # )
                                                                                                                                         ]
                                                                                                                                         ( builtins.map ( { index , name , ... } : "${ _environment-variable "VACUUM" } /build/mount.${ index } ${ _environment-variable "OUT" }/observed/mount.${ index } ${ name }" ) secondary.mounts )
                                                                                                                                         [
@@ -191,6 +206,7 @@
                                                                                                     identity =
                                                                                                         {
                                                                                                             mounts ? { } ,
+                                                                                                            profile ? x : [ ] ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
                                                                                                             status ? 0 ,
@@ -241,6 +257,10 @@
                                                                                                                                             } ;
                                                                                                                             in builtins.genList generator ( builtins.length ( builtins.attrNames mounts ) )
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
+                                                                                                                profile =
+                                                                                                                    if builtins.typeOf profile == "lambda" then
+
+                                                                                                                    else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
                                                                                                                         if builtins.match "^/.*" standard-error != null then
