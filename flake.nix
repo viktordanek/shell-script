@@ -139,9 +139,9 @@
                                                                                                                                         [
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
-                                                                                                                                        # [
-                                                                                                                                        #     "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                        # ]
+                                                                                                                                        [
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
+                                                                                                                                        ]
                                                                                                                                         # (
                                                                                                                                         #     let
                                                                                                                                         #         mapper =
