@@ -62,7 +62,7 @@
                                                     if builtins.typeOf mounts == "set" then
                                                         let
                                                             mapper =
-                                                                name : { host-path , is-read-only ? true } :
+                                                                name : { host-path ? _environment-variable "TMP_DIR" , is-read-only ? true } :
                                                                     {
                                                                         host-path =
                                                                             if builtins.typeOf host-path == "string" then host-path
@@ -364,6 +364,13 @@
                                                                                     string = name : value : "--set ${ name } ${ value }" ;
                                                                                 } ;
                                                                             name = "foobar" ;
+                                                                            mounts =
+                                                                                {
+                                                                                    "/singleton" =
+                                                                                        {
+                                                                                            is-read-only = false ;
+                                                                                        } ;
+                                                                                } ;
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
