@@ -180,7 +180,8 @@
                                                                                                                 in
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                                                            ${ pkgs.coreutils }/bin/mkdir $out/bin
+                                                                                                                            ${ pkgs.coreutils }/bin/mkdir $out/bin &&
+                                                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh
                                                                                                                     '' ;
                                                                                                         name = "test" ;
                                                                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
