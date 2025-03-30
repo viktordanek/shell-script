@@ -253,7 +253,8 @@
                                                                                                                                         in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
                                                                                                                                 else if builtins.typeOf value == "string" then value
                                                                                                                                 else builtins.throw "profile is not list, string but ${ builtins.typeOf value }."
-                                                                                                                    else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
+                                                                                                                    else if builtins.typeOf profile == "null" then primary.profile
+                                                                                                                    else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
                                                                                                                         if builtins.match "^/.*" standard-error != null then
