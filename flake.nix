@@ -224,7 +224,7 @@
                                                                                                                                             initial-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
-                                                                                                                                            test-path = "${ environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            test-path = "${ _environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
                                                                                                                         else builtins.throw "the testing mounts does not have the same sandbox attributes as the primary mounts."
