@@ -357,18 +357,9 @@
                                                                 shell-script =
                                                                     lib
                                                                         {
-                                                                            environment =
-                                                                                { string } :
-                                                                                    [
-                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
-                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
-                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                                                    ] ;
                                                                             extensions =
                                                                                 {
-                                                                                    string = name : value : "--set ${ name } ${ value }" ;
+                                                                                    string = name : value : "export ${ name } ${ value }" ;
                                                                                 } ;
                                                                             name = "foobar" ;
                                                                             mounts =
@@ -378,6 +369,15 @@
                                                                                             is-read-only = false ;
                                                                                         } ;
                                                                                 } ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                    ] ;
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
