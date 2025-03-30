@@ -181,7 +181,9 @@
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh
+                                                                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh &&
+                                                                                                                            makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set DIFF ${ pkgs.diffutils }/bin/diff --set ECHO ${ pkgs.coreutils }/bin/echo --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum.shell-script } &&
+                                                                                                                            $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
                                                                                                         nativeBuildInputs = [ pkgs.makeWrapper ] ;
@@ -317,7 +319,7 @@
                                     {
                                         extensions =
                                             {
-                                                string = name : value : "--set ${ name } ${ value }" ;
+                                                string = name : value : "export ${ name } ${ value }" ;
                                             } ;
                                         environment =
                                             { string } :
