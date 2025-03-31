@@ -122,6 +122,17 @@
                                                             installPhase =
                                                                 let
                                                                     _visitor = builtins.getAttr system visitor.lib ;
+                                                                    all =
+                                                                        _visitor
+                                                                            {
+                                                                                lambda = path : value : 1 ;
+                                                                                null = path : value : 0 ;
+                                                                            }
+                                                                            {
+                                                                                list = path : list : builtins.foldl' ( previous : current : previous + current ) 0 list ;
+                                                                                set = path : set : builtins.foldl' ( previous : current : previous + current ) 0 ( builtins.attrValues set ) ;
+                                                                            }
+                                                                            tests ;
                                                                     constructors =
                                                                         _visitor
                                                                             {
@@ -324,8 +335,7 @@
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 $out/bin/constructors &&
                                                                                 ${ pkgs.coreutils }/bin/echo "ALL=$( ${ pkgs.gnugrep }/bin/grep symbolic $out/bin/constructors.sh | ${ pkgs.coreutils }/bin/wc --lines )" &&
-                                                                                # ALL=$( ${ pkgs.gnugrep }/bin/grep symbolic $out/bin/constructors.sh | ${ pkgs.coreutils }/bin/wc --lines ) &&
-                                                                                ALL=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l | ${ pkgs.coreutils }/bin/wc --lines ) &&
+                                                                                ALL=${ builtins.toString all } &&
                                                                                 SUCCESS=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name SUCCESS | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 FAILURE=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 if [ ${ _environment-variable "ALL" } == ${ _environment-variable "SUCCESS" } ] && [ ${ _environment-variable "FAILURE" } == 0 ]
