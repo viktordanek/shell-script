@@ -423,19 +423,19 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                expected = self + "/expected/file/mounts/singleton" ;
+                                                                                                                expected = self + "/expected/directory/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
                                                                                                                         "mkdir /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                standard-error = self + "/expected/file/standard-error" ;
-                                                                                                standard-output = self + "/expected/file/standard-output" ;
+                                                                                                standard-error = self + "/expected/directory/standard-error" ;
+                                                                                                standard-output = self + "/expected/directory/standard-output" ;
                                                                                                 status = 168 ;
                                                                                                 test =
                                                                                                     [
-                                                                                                        "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                                                        "candidate f30f8072a080c2e76d53e790954f9ac516ee6fdfec424db97021bf267119429247279d2dcdd5a1c18a8c1c8b0282099d1c88ce2471b9d4f00c22663911f1e541"
                                                                                                     ] ;
                                                                                             } ;
                                                                                     file =
