@@ -341,9 +341,11 @@
                                                                                 if [ ${ _environment-variable "ALL" } == ${ _environment-variable "SUCCESS" } ] && [ ${ _environment-variable "FAILURE" } == 0 ]
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "SUCCESS" } > $out/SUCCESS
-                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCESS" } + ${ _environment-variable "FAILURE" } )) ]
+                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "FAILURE" } )) ]
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
+                                                                                else
+                                                                                    ${ pkgs.coreutils }/bin/echo "{ ALL : ${ _environment-variable "ALL" } , SUCCESS : ${ _environment-variable "SUCCESS" } , FAILURE : ${ _environment-variable "FAILURE" } }" > $out/ERROR
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
@@ -424,7 +426,7 @@
                                                                                                                 expected = self + "/expected/file/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
-                                                                                                                        "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
+                                                                                                                        "mkdir /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
