@@ -477,7 +477,7 @@
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
                                                                                     exit 62
-                                                                            fi
+                                                                            fi && exit 10
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
@@ -492,7 +492,7 @@
                                                                     ${ pkgs.coreutils }/bin/echo ${ vacuum.tests } &&
                                                                     if [ -f ${ vacuum.tests }/SUCCESS ]
                                                                     then
-                                                                        exit 0
+                                                                        ${ pkgs.coreutils }/bin/echo "There was success in ${ vacuum.tests }."
                                                                     elif [ -f ${ vacuum.tests }/FAILURE ]
                                                                     then
                                                                         ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ vacuum.tests }" >&2 &&
