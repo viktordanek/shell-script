@@ -445,7 +445,7 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
                                                                             if [ -f ${ shell-script.tests }/SUCCESS ]
                                                                             then
-                                                                                exit 10
+                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ shell-script.tests }."
                                                                             elif [ -f ${ shell-script.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ shell-script.tests }" >&2 &&
