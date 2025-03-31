@@ -20,7 +20,7 @@
                                     extensions ? [ ] ,
                                     mounts ? { } ,
                                     name ,
-                                    profile ? x : [ ] ,
+                                    profile ? null ,
                                     script ,
                                     tests ? null
                                 } :
@@ -82,13 +82,17 @@
                                                 profile =
                                                     if builtins.typeOf profile == "lambda" then
                                                         let
-                                                            list = profile primary.extensions ;
-                                                            in if builtins.typeOf list == "list" then
-                                                                let
-                                                                    mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
-                                                                    in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
-                                                            else builtins.throw "profile is not list but ${ builtins.typeOf list }."
-                                                    else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
+                                                            value = profile primary.extensions ;
+                                                            in
+                                                                if builtins.typeOf value == "list" then
+                                                                    let
+                                                                        list = value ;
+                                                                        mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                        in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
+                                                                else if builtins.typeOf value == "string" then value
+                                                                else builtins.throw "profile is not list, string but ${ builtins.typeOf value }."
+                                                    else if builtins.typeOf profile == "null" then ""
+                                                    else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
                                                         if builtins.pathExists script then script
@@ -106,7 +110,7 @@
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
-                                                        # profile = profile ;
+                                                        profile = profile ;
                                                         runScript = primary.script ;
                                                     } ;
                                         in
@@ -194,7 +198,7 @@
                                                                                                     identity =
                                                                                                         {
                                                                                                             mounts ? { } ,
-                                                                                                            profile ? x : [ ] ,
+                                                                                                            profile ? null ,
                                                                                                             standard-error ? "" ,
                                                                                                             standard-output ? "" ,
                                                                                                             status ? 0 ,
@@ -232,9 +236,17 @@
                                                                                                                 profile =
                                                                                                                     if builtins.typeOf profile == "lambda" then
                                                                                                                         let
-                                                                                                                            list = profile primary.extensions ;
-                                                                                                                            mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.map mapper list
+                                                                                                                            value = profile primary.extensions ;
+                                                                                                                            in
+                                                                                                                                if builtins.typeOf value == "list"
+                                                                                                                                then
+                                                                                                                                    let
+                                                                                                                                        list = value ;
+                                                                                                                                        mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
+                                                                                                                                        in builtins.map mapper list
+                                                                                                                                else if builtins.typeOf value == "string" then value
+                                                                                                                                else builtins.throw "profile is not list, string but ${ builtins.typeOf value }."
+                                                                                                                    else if builtins.typeOf profile == "null" then primary.profile
                                                                                                                     else builtins.throw "profile is not lambda but ${ builtins.typeOf profile }." ;
                                                                                                                 standard-error =
                                                                                                                     if builtins.typeOf standard-error == "string" then
