@@ -478,7 +478,8 @@
                                                                     ${ pkgs.coreutils }/bin/echo ${ vacuum.tests } &&
                                                                     if [ -f ${ vacuum.tests }/SUCCESS ]
                                                                     then
-                                                                        exit 0
+                                                                        ${ pkgs.coreutils }/bin/echo "There was success in ${ vacuum.tests }" &&
+                                                                            exit 10
                                                                     elif [ -f ${ vacuum.tests }/FAILURE ]
                                                                     then
                                                                         ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ vacuum.tests }" >&2 &&
