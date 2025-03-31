@@ -386,7 +386,7 @@
                                                     {
                                                         installPhase =
                                                             let
-                                                                file =
+                                                                foobar =
                                                                     lib
                                                                         {
                                                                             extensions =
@@ -414,7 +414,7 @@
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
-                                                                                    foobar =
+                                                                                    file =
                                                                                         ignore :
                                                                                             {
                                                                                                 mounts =
@@ -441,17 +441,17 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ file.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ file.tests } &&
-                                                                            if [ -f ${ file.tests }/SUCCESS ]
+                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.shell-script } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests } &&
+                                                                            if [ -f ${ foobar.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ file.tests }."
-                                                                            elif [ -f ${ file.tests }/FAILURE ]
+                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ foobar.tests }."
+                                                                            elif [ -f ${ foobar.tests }/FAILURE ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ file.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ foobar.tests }" >&2 &&
                                                                                     exit 63
                                                                             else
-                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ file.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
                                                                                     exit 62
                                                                             fi
                                                                     '' ;
