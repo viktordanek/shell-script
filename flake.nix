@@ -333,7 +333,8 @@
                                             {
                                                 string = name : value : "export ${ name }=${ value }" ;
                                             } ;
-                                        environment =
+                                        name = "vacuum" ;
+                                        profile =
                                             { string } :
                                                 [
                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
@@ -347,7 +348,6 @@
                                                     ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
                                                     ( string "WC" "${ pkgs.coreutils }/bin/wc" )
                                                 ] ;
-                                        name = "vacuum" ;
                                         script = self + "/vacuum.sh" ;
                                         tests = [ ] ;
                                     } ;
