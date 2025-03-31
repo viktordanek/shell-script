@@ -323,6 +323,8 @@
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors.sh" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 $out/bin/constructors &&
+                                                                                ${ pkgs.coreutils }/bin/cat $out/bin/constructors.sh > $out/debug &&
+                                                                                # ALL=$( ${ pkgs.gnugrep }/bin/grep symbolic $out/bin/constructors.sh | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 ALL=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 SUCCESS=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name SUCCESS | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 FAILURE=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE | ${ pkgs.coreutils }/bin/wc --lines ) &&
@@ -433,7 +435,7 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
                                                                             if [ -f ${ shell-script.tests }/SUCCESS ]
                                                                             then
-                                                                                exit 0
+                                                                                exit 10
                                                                             elif [ -f ${ shell-script.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ shell-script.tests }" >&2 &&
