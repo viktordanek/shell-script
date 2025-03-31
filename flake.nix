@@ -411,9 +411,7 @@
                                                                                         ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
                                                                                         ( string "DIFF" "${ pkgs.diffutils }/bin/diff" )
                                                                                         ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                        ( string "RM" "${ pkgs.coreutils }/bin/rm" )
                                                                                         ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                                                        ( string "UMOUNT" "${ pkgs.umount }/bin/umount" )
                                                                                     ] ;
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
