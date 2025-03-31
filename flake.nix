@@ -386,7 +386,7 @@
                                                     {
                                                         installPhase =
                                                             let
-                                                                shell-script =
+                                                                file =
                                                                     lib
                                                                         {
                                                                             extensions =
@@ -441,17 +441,17 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ shell-script.tests } &&
-                                                                            if [ -f ${ shell-script.tests }/SUCCESS ]
+                                                                            ${ pkgs.coreutils }/bin/echo ${ file.shell-script } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ file.tests } &&
+                                                                            if [ -f ${ file.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ shell-script.tests }."
-                                                                            elif [ -f ${ shell-script.tests }/FAILURE ]
+                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ file.tests }."
+                                                                            elif [ -f ${ file.tests }/FAILURE ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ shell-script.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ file.tests }" >&2 &&
                                                                                     exit 63
                                                                             else
-                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ shell-script.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ file.tests }" >&2 &&
                                                                                     exit 62
                                                                             fi
                                                                     '' ;
