@@ -479,7 +479,7 @@
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
                                                                                     exit 62
-                                                                            fi && exit 10
+                                                                            fi
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
