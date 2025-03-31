@@ -344,6 +344,58 @@
                                                     {
                                                         installPhase =
                                                             let
+                                                                directory =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "export ${ name }=${ value }" ;
+                                                                                } ;
+                                                                            name = "foobar" ;
+                                                                            mounts =
+                                                                                {
+                                                                                    "/singleton" =
+                                                                                        {
+                                                                                            is-read-only = false ;
+                                                                                        } ;
+                                                                                } ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
+                                                                                        ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                                                        ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
+                                                                                        ( string "DIFF" "${ pkgs.diffutils }/bin/diff" )
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
+                                                                                    ] ;
+                                                                            script = self + "/foobar.sh" ;
+                                                                            tests =
+                                                                                {
+                                                                                    foobar =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/singleton" =
+                                                                                                            {
+                                                                                                                expected = self + "/expected/directory/mounts/singleton" ;
+                                                                                                                initial =
+                                                                                                                    [
+                                                                                                                        "mkdir /mount/target"
+                                                                                                                    ] ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                standard-error = self + "/expected/directory/standard-error" ;
+                                                                                                standard-output = self + "/expected/directory/standard-output" ;
+                                                                                                status = 168 ;
+                                                                                                test =
+                                                                                                    [
+                                                                                                        "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                                                    ] ;
+                                                                                            } ;
+                                                                                } ;
+                                                                        } ;
                                                                 file =
                                                                     lib
                                                                         {
@@ -379,15 +431,15 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                expected = self + "/expected/mounts/singleton" ;
+                                                                                                                expected = self + "/expected/file/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
                                                                                                                         "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                standard-error = self + "/expected/standard-error" ;
-                                                                                                standard-output = self + "/expected/standard-output" ;
+                                                                                                standard-error = self + "/expected/file/standard-error" ;
+                                                                                                standard-output = self + "/expected/file/standard-output" ;
                                                                                                 status = 168 ;
                                                                                                 test =
                                                                                                     [
