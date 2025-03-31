@@ -106,7 +106,7 @@
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
-                                                        profile = profile ;
+                                                        # profile = profile ;
                                                         runScript = primary.script ;
                                                     } ;
                                         in
@@ -162,7 +162,7 @@
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                            "${ shell-script { mounts = secondary.mounts ; name = "candidate" ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error"
+                                                                                                                                            "if ${ shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } }/bin/candidate > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                         ]
                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , observed-path , ... } : "${ _environment-variable "CP" } --recursive ${ host-path } ${ observed-path }" ) secondary.mounts ) )
                                                                                                                                         # [
