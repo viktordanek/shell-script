@@ -95,7 +95,7 @@
                                                     else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
-                                                        if builtins.pathExists script then script
+                                                        if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
                                                         else builtins.throw "there is no path for ${ script }."
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
