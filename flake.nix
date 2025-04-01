@@ -450,15 +450,15 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                expected = self + "/expected/directory/mounts/singleton" ;
+                                                                                                                expected = self + "/expected/foobar/directory/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
                                                                                                                         "mkdir /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                standard-error = self + "/expected/directory/standard-error" ;
-                                                                                                standard-output = self + "/expected/directory/standard-output" ;
+                                                                                                standard-error = self + "/expected/foobar/directory/standard-error" ;
+                                                                                                standard-output = self + "/expected/foobar/directory/standard-output" ;
                                                                                                 status = 9 ;
                                                                                                 test =
                                                                                                     [
@@ -472,15 +472,15 @@
                                                                                                     {
                                                                                                         "/singleton" =
                                                                                                             {
-                                                                                                                expected = self + "/expected/file/mounts/singleton" ;
+                                                                                                                expected = self + "/expected/foobar/file/mounts/singleton" ;
                                                                                                                 initial =
                                                                                                                     [
                                                                                                                         "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
                                                                                                                     ] ;
                                                                                                             } ;
                                                                                                     } ;
-                                                                                                standard-error = self + "/expected/file/standard-error" ;
-                                                                                                standard-output = self + "/expected/file/standard-output" ;
+                                                                                                standard-error = self + "/expected/foobar/file/standard-error" ;
+                                                                                                standard-output = self + "/expected/foobar/file/standard-output" ;
                                                                                                 status = 168 ;
                                                                                                 test =
                                                                                                     [
