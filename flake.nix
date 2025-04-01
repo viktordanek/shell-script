@@ -20,7 +20,11 @@
                                     name ,
                                     profile ? null ,
                                     script ,
-                                    tests ? null
+                                    tests ? null ,
+                                    over-initialized-target-error-code ? 66 ,
+                                    over-initialized-target-error-message ? "Over Initizialized Target" ,
+                                    uninitialized-target-error-code ? 67 ,
+                                    uninitialized-target-error-message ? "Uninitizialized Target"
                                 } :
                                     let
                                         primary =
@@ -74,6 +78,18 @@
                                                     else if builtins.typeOf tests == "list" then tests
                                                     else if builtins.typeOf tests == "set" then tests
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
+                                                over-initialized-target-error-code =
+                                                    if builtins.typeOf over-initialized-target-error-code == "int" then builtins.toString over-initialized-target-error-code
+                                                    else builtins.throw "over-initialized-target-error-code is not int but ${ builtins.typeOf over-initialized-target-error-code }." ;
+                                                over-initialized-target-error-message =
+                                                    if builtins.typeOf over-initialized-target-error-message == "string" then over-initialized-target-error-message
+                                                    else builtins.throw "over-initialized-target-error-message is not string but ${ builtins.typeOf over-initialized-target-error-message }." ;
+                                                uninitialized-target-error-code =
+                                                    if builtins.typeOf uninitialized-target-error-code == "int" then builtins.toString uninitialized-target-error-code
+                                                    else builtins.throw "uninitialized-target-error-code is not init but ${ builtins.typeOf uninitialized-target-error-code }." ;
+                                                uninitialized-target-error-message =
+                                                    if builtins.typeOf uninitialized-target-error-message == "string" then uninitialized-target-error-message
+                                                    else builtins.throw "uninitialized-target-error-message is not string but ${ builtins.typeOf uninitialized-target-error-message }." ;
                                             } ;
                                         shell-script =
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
@@ -144,6 +160,8 @@
                                                                                                                                                             in "if ${ user-environment }/bin/initial > ${ initial-path }/standard-output 2> ${ initial-path }/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ initial-path }/status ; fi" ;
                                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "if [ ! -e ${ initial-path }/target ] ; then ${ _environment-variable "ECHO" } ${ primary.uninitialized-target-error-message } >&2 && exit ${ primary.uninitialized-target-error-code } ; fi" ) secondary.mounts ) )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "if [ $( ${ _environment-variable "FIND" } ${ initial-path } -mindepth 1 -maxdepth 1 | ${ _environment-variable "WC" } --lines ) != 1 ; then ${ _environment-variable "ECHO" } ${ primary.over-initialized-target-error-message } >&2 && exit ${ primary.over-initialized-target-error-code } ; fi" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , host-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ host-path }" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) secondary.mounts ) )
                                                                                                                                         [
@@ -161,7 +179,7 @@
                                                                                                                                                         "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
                                                                                                                                             )
                                                                                                                                         ]
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , vacuum-path , ... } : "if [ -e ${ host-path } ] ; then ${ _environment-variable "VACUUM" } ${ host-path } ${ vacuum-path } ${ name } ; fi" ) secondary.mounts ) )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , vacuum-path , ... } : "if [ -e ${ host-path } ] ; then ${ _environment-variable "MKDIR" } ${ vacuum-path } && INPUT=${ host-path } OUTPUT=${ vacuum-path } ${ _environment-variable "VACUUM" } ; fi" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { observed-path , vacuum-path , ... } : "if [ -d ${ vacuum-path } ] ; then ${ _environment-variable "CP" } --recursive ${ vacuum-path } ${ observed-path } ; fi" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
@@ -333,7 +351,20 @@
                                     {
                                         extensions =
                                             {
-                                                string = name : value : "export ${ name }=${ value }" ;
+                                                string = name : value : "export ${ name }=${ builtins.toString value }" ;
+                                            } ;
+                                        mounts =
+                                            {
+                                                input =
+                                                    {
+                                                        host-path = _environment-variable "INPUT" ;
+                                                        is-read-only = true ;
+                                                    } ;
+                                                output =
+                                                    {
+                                                        host-path = _environment-variable "OUTPUT" ;
+                                                        is-read-only = false ;
+                                                    } ;
                                             } ;
                                         name = "vacuum" ;
                                         profile =
@@ -351,7 +382,29 @@
                                                     ( string "WC" "${ pkgs.coreutils }/bin/wc" )
                                                 ] ;
                                         script = self + "/vacuum.sh" ;
-                                        tests = [ ] ;
+                                        tests =
+                                            ignore :
+                                                {
+                                                    mounts =
+                                                        {
+                                                            input =
+                                                                {
+                                                                    expected = self + "/expected/vacuum/mounts/input" ;
+                                                                    initial =
+                                                                        [
+                                                                            "echo 3275d3d7a12620ea996ca571c341cd66258f413f11796a3a596de316fbd4477b34b1251a10a38044b98e1f757343102f4848e77961aae44e916ef0b2b1c2070c > /mount/target"
+                                                                        ] ;
+                                                                } ;
+                                                            output =
+                                                                {
+                                                                    expected = self + "/expected/vacuum/mounts/output" ;
+                                                                    initial =
+                                                                        [
+                                                                            "mkdir /mount/target"
+                                                                        ] ;
+                                                                } ;
+                                                        } ;
+                                                } ;
                                     } ;
                             in
                                 {
