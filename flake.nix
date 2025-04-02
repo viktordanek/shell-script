@@ -247,7 +247,7 @@
                                                                                                                                             vacuum-path = "/build/vacuum.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
-                                                                                                                        else builtins.throw "the testing mounts does not have the same sandbox attributes as the primary mounts."
+                                                                                                                        else builtins.throw "the testing mounts (${ builtins.toJSON ( builtins.attrNames mounts ) }) does not have the same sandbox attributes as the primary mounts (${ builtins.toJSON ( builtins.attrNames primary.mounts ) })."
                                                                                                                     else builtins.throw "mounts is not set but ${ builtins.typeOf mounts }." ;
                                                                                                                 profile =
                                                                                                                     if builtins.typeOf profile == "lambda" then
