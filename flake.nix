@@ -412,63 +412,6 @@
                                 {
                                     checks =
                                         {
-                                            simple =
-                                                pkgs.stdenv.mkDerivation
-                                                    {
-                                                        installPhase =
-                                                            let
-                                                                simple =
-                                                                    lib
-                                                                        {
-                                                                            extensions =
-                                                                                {
-                                                                                    string = name : value : "export ${ name }=${ builtins.toString value }" ;
-                                                                                } ;
-                                                                            name = "simple" ;
-                                                                            profile =
-                                                                                { string } :
-                                                                                    [
-                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                                                        ( string "STANDARD_ERROR" "00008455e9b8b7515abcdf5ad30c1bc81abb412e8410b9cfdb90f4e2d47d876a7ffb0a2953fa06cd6a521371182296770b5e12b9b2676cfece23f78370050f93" )
-                                                                                        ( string "STANDARD_OUTPUT" "e832ac101647d4cd5bf2229c53f6174b42c68d841d390562de6dad9006d59b9c3ae7e358792de18b405fd28d9276d31e4610a4340a70f949ce6b2caa0ed1e263" )
-                                                                                        ( string "STATUS" 102 )
-                                                                                    ] ;
-                                                                            script =
-                                                                                ''
-                                                                                    ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_OUTPUT" } &&
-                                                                                        ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_ERROR" } >&2 &&
-                                                                                        exit ${ _environment-variable "STATUS" }
-                                                                                '';
-                                                                            tests =
-                                                                                ignore :
-                                                                                    {
-                                                                                        standard-error = "00008455e9b8b7515abcdf5ad30c1bc81abb412e8410b9cfdb90f4e2d47d876a7ffb0a2953fa06cd6a521371182296770b5e12b9b2676cfece23f78370050f93" ;
-                                                                                        standard-output = "e832ac101647d4cd5bf2229c53f6174b42c68d841d390562de6dad9006d59b9c3ae7e358792de18b405fd28d9276d31e4610a4340a70f949ce6b2caa0ed1e263" ;
-                                                                                        status = 102 ;
-                                                                                    } ;
-                                                                        } ;
-                                                                in
-                                                                    ''
-                                                                        ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.shell-script } &&
-                                                                            if [ -f ${ simple.tests }/SUCCESS ]
-                                                                            then
-                                                                                ${ pkgs.coreutils }/bin/echo There was success in ${ simple.tests }.
-                                                                            elif [ -f ${ simple.tests }/FAILURE ]
-                                                                            then
-                                                                                ${ pkgs.coreutils }/bin/echo There was failure in ${ simple.tests }. >&2 &&
-                                                                                    exit 63
-                                                                            else
-                                                                                ${ pkgs.coreutils }/bin/echo There was error in ${ simple.tests }. >&2 &&
-                                                                                    exit 62
-                                                                            fi
-                                                                    '' ;
-                                                        name = "simple" ;
-                                                        src = ./. ;
-                                                    } ;
-                                        } ;
-                                    checks3 =
-                                        {
                                             foobar =
                                                 pkgs.stdenv.mkDerivation
                                                     {
@@ -566,6 +509,60 @@
                                                                             fi
                                                                     '' ;
                                                         name = "foobar" ;
+                                                        src = ./. ;
+                                                    } ;
+                                            simple =
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            let
+                                                                simple =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "export ${ name }=${ builtins.toString value }" ;
+                                                                                } ;
+                                                                            name = "simple" ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "STANDARD_ERROR" "00008455e9b8b7515abcdf5ad30c1bc81abb412e8410b9cfdb90f4e2d47d876a7ffb0a2953fa06cd6a521371182296770b5e12b9b2676cfece23f78370050f93" )
+                                                                                        ( string "STANDARD_OUTPUT" "e832ac101647d4cd5bf2229c53f6174b42c68d841d390562de6dad9006d59b9c3ae7e358792de18b405fd28d9276d31e4610a4340a70f949ce6b2caa0ed1e263" )
+                                                                                        ( string "STATUS" 102 )
+                                                                                    ] ;
+                                                                            script =
+                                                                                ''
+                                                                                    ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_OUTPUT" } &&
+                                                                                        ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_ERROR" } >&2 &&
+                                                                                        exit ${ _environment-variable "STATUS" }
+                                                                                '';
+                                                                            tests =
+                                                                                ignore :
+                                                                                    {
+                                                                                        standard-error = "00008455e9b8b7515abcdf5ad30c1bc81abb412e8410b9cfdb90f4e2d47d876a7ffb0a2953fa06cd6a521371182296770b5e12b9b2676cfece23f78370050f93" ;
+                                                                                        standard-output = "e832ac101647d4cd5bf2229c53f6174b42c68d841d390562de6dad9006d59b9c3ae7e358792de18b405fd28d9276d31e4610a4340a70f949ce6b2caa0ed1e263" ;
+                                                                                        status = 102 ;
+                                                                                    } ;
+                                                                        } ;
+                                                                in
+                                                                    ''
+                                                                        ${ pkgs.coreutils }/bin/touch $out &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.shell-script } &&
+                                                                            if [ -f ${ simple.tests }/SUCCESS ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo There was success in ${ simple.tests }.
+                                                                            elif [ -f ${ simple.tests }/FAILURE ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo There was failure in ${ simple.tests }. >&2 &&
+                                                                                    exit 63
+                                                                            else
+                                                                                ${ pkgs.coreutils }/bin/echo There was error in ${ simple.tests }. >&2 &&
+                                                                                    exit 62
+                                                                            fi
+                                                                    '' ;
+                                                        name = "simple" ;
                                                         src = ./. ;
                                                     } ;
                                             vacuum =
