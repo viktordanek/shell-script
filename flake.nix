@@ -70,8 +70,10 @@
                                                     else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                 script =
                                                     if builtins.typeOf script == "string" then
-                                                        if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
-                                                        else script
+                                                        if builtins.match "^/.*" script != null then
+                                                            if builtins.pathExists script then script
+                                                            else builtins.throw "script is an absolute path but there does not exist a path for ${ script }."
+                                                        else pkgs.writeShellScript "script" script
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
@@ -431,7 +433,12 @@
                                                                                         ( string "STANDARD_OUTPUT" "e832ac101647d4cd5bf2229c53f6174b42c68d841d390562de6dad9006d59b9c3ae7e358792de18b405fd28d9276d31e4610a4340a70f949ce6b2caa0ed1e263" )
                                                                                         ( string "STATUS" 102 )
                                                                                     ] ;
-                                                                            script = self + "/simple.sh" ;
+                                                                            script =
+                                                                                ''
+                                                                                    ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_OUTPUT" } &&
+                                                                                        ${ _environment-variable "ECHO" } -en ${ _environment-variable "STANDARD_ERROR" } >&2 &&
+                                                                                        exit ${ _environment-variable "STATUS" }
+                                                                                '';
                                                                             tests =
                                                                                 ignore :
                                                                                     {
