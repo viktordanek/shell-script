@@ -71,7 +71,7 @@
                                                 script =
                                                     if builtins.typeOf script == "string" then
                                                         if builtins.match "^/.*" script != null then
-                                                            if builtins.pathExists script then script
+                                                            if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
                                                             else builtins.throw "script is an absolute path but there does not exist a path for ${ script }."
                                                         else pkgs.writeShellScript "script" script
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
