@@ -71,7 +71,7 @@
                                                 script =
                                                     if builtins.typeOf script == "string" then
                                                         if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
-                                                        else builtins.throw "there is no path for ${ script }."
+                                                        else script
                                                     else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
