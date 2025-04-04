@@ -259,7 +259,7 @@
                                                                                                                                     let
                                                                                                                                         list = value ;
                                                                                                                                         mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "profile is not string but ${ builtins.typeOf value }." ;
-                                                                                                                                        in builtins.map mapper list
+                                                                                                                                        in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper list )
                                                                                                                                 else if builtins.typeOf value == "string" then value
                                                                                                                                 else builtins.throw "profile is not list, string but ${ builtins.typeOf value }."
                                                                                                                     else if builtins.typeOf profile == "null" then primary.profile
