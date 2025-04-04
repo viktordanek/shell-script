@@ -590,6 +590,7 @@
                                                     } ;
                                         } ;
                                     lib = lib ;
+                                    vacuum = vacuum ;
                                 } ;
                 in flake-utils.lib.eachDefaultSystem fun ;
 }
