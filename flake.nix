@@ -286,7 +286,7 @@
                                                                                                                     else if builtins.typeOf test == "list" then
                                                                                                                         let
                                                                                                                             mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
-                                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test )
+                                                                                                                            in pkgs.writeShellScript "tests" ( builtins.concatStringsSep " &&\n\t" ( builtins.map mapper test ) )
                                                                                                                     else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
