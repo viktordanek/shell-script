@@ -154,7 +154,7 @@
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--unshare-all" "--bind ${ initial-path } /mount" ] ;
+                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ initial-path } /mount" ] ;
                                                                                                                                                                         name = "initial" ;
                                                                                                                                                                         runScript = initial ;
                                                                                                                                                                         targetPkgs = pkgs : [ pkgs.coreutils ] ;
