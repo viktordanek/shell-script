@@ -451,6 +451,13 @@
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
+                                                                                    delayed =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                delayed = true ;
+                                                                                                status = 99 ;
+                                                                                                test = [ "exit 99" ] ;
+                                                                                            } ;
                                                                                     directory =
                                                                                         ignore :
                                                                                             {
@@ -512,7 +519,8 @@
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
                                                                                     exit 62
-                                                                            fi
+                                                                            fi &&
+                                                                            exit 61
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
