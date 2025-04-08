@@ -454,9 +454,22 @@
                                                                                     delayed =
                                                                                         ignore :
                                                                                             {
-                                                                                                delayed = true ;
-                                                                                                status = 99 ;
-                                                                                                test = [ "exit 99" ] ;
+                                                                                                delayed = false ;
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/singleton" =
+                                                                                                            {
+                                                                                                                expected = self + "/expected/foobar/delayed/mounts/singleton" ;
+                                                                                                                initial =
+                                                                                                                    [
+                                                                                                                        "mkdir /mount/target"
+                                                                                                                    ] ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                standard-error = self + "/expected/foobar/delayed/standard-error" ;
+                                                                                                standard-output = self + "/expected/foobar/delayed/standard-output" ;
+                                                                                                status = 9 ;
+                                                                                                test = [ "candidate ed898183cb008aa3df749d0e4a8cfeaa64cd62ba7774e1b83901dc84a0714c757ace55e940bea344852ed74f81f5476b9b657270429d24f2b76746267b80bb26" ] ;
                                                                                             } ;
                                                                                     directory =
                                                                                         ignore :
