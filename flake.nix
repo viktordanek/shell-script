@@ -212,6 +212,7 @@
                                                                                                 let
                                                                                                     identity =
                                                                                                         {
+                                                                                                            delayed ? false ,
                                                                                                             mounts ? { } ,
                                                                                                             profile ? null ,
                                                                                                             standard-error ? "" ,
@@ -221,6 +222,9 @@
                                                                                                             test ? "candidate"
                                                                                                         } :
                                                                                                             {
+                                                                                                                delayed =
+                                                                                                                    if builtins.typeOf delayed == "bool" then delayed
+                                                                                                                    else builtins.throw "delayed is not bool but ${ builtins.typeOf delayed }." ;
                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         if builtins.sort ( a : b : a < b ) ( builtins.attrNames primary.mounts ) == builtins.sort ( a : b : a < b ) ( builtins.attrNames mounts )
@@ -291,10 +295,12 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
-                                                                                                [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
-                                                                                                ] ;
+                                                                                                if secondary.delayed then [ ]
+                                                                                                else
+                                                                                                    [
+                                                                                                        "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                        "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
+                                                                                                    ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
                                                                             {
