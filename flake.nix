@@ -114,7 +114,7 @@
                                                                     all =
                                                                         _visitor
                                                                             {
-                                                                                lambda = path : value : 1 ;
+                                                                                lambda = path : value : if builtins.hasAttr "delayed" ( value null ) && builtins.getAttr "delayed" ( value null ) then 0 else 1 ;
                                                                                 null = path : value : 0 ;
                                                                             }
                                                                             {
@@ -454,7 +454,7 @@
                                                                                     delayed =
                                                                                         ignore :
                                                                                             {
-                                                                                                delayed = false ;
+                                                                                                delayed = true ;
                                                                                                 mounts =
                                                                                                     {
                                                                                                         "/singleton" =
