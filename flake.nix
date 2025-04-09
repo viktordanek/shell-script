@@ -243,13 +243,13 @@
                                                                                                                                 mapper =
                                                                                                                                     name : { expected , initial } :
                                                                                                                                         {
-                                                                                                                                            host-path = "/build/mount.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             expected =
                                                                                                                                                 if builtins.typeOf expected == "string" then
                                                                                                                                                     if builtins.pathExists expected then expected
                                                                                                                                                     else builtins.throw "path does not exist for expected ${ expected }."
                                                                                                                                                 else builtins.throw "expected is not string but ${ builtins.typeOf expected }." ;
                                                                                                                                             expected-path = "${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            host-path = "/build/mount.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             initial =
                                                                                                                                                 if builtins.typeOf initial == "list" then pkgs.writeShellScript "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map ( value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ) initial ) )
                                                                                                                                                 else if builtins.typeOf initial == "string" then initial
@@ -258,6 +258,7 @@
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             test-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            temporary-path = "${ _environment-variable "TEMP" }/test/initial.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             vacuum-path = "/build/vacuum.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
@@ -371,7 +372,12 @@
                                                     pkgs.writeShellScript
                                                         "post-tests"
                                                         ''
-                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED
+                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED -exec ${ pkgs.coreutils }/bin/dirname {} \; | while read DELAYED
+                                                            do
+                                                                TEMP=$( ${ pkgs.coreutils }/bin/mktemp --dry-run ) &&
+                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" } ${ _environment-variable "TEMP" } &&
+                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" }
+                                                            done
                                                         '' ;
                                                 tests = tests_ ;
                                             } ;
