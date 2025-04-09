@@ -185,8 +185,16 @@
                                                                                                                                             "if ${ _environment-variable "OUT" }/test/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
 
                                                                                                                                         ]
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , vacuum-path , ... } : "if [ -e ${ host-path } ] ; then ${ _environment-variable "MKDIR" } ${ vacuum-path } && INPUT=${ host-path } OUTPUT=${ vacuum-path } ${ _environment-variable "VACUUM" } ; fi" ) secondary.mounts ) )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { observed-path , vacuum-path , ... } : "if [ -d ${ vacuum-path } ] ; then ${ _environment-variable "CP" } --recursive ${ vacuum-path } ${ observed-path } ; fi" ) secondary.mounts ) )
+                                                                                                                                        ( if secondary.delayed then [ "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/DELAYED" ] else [ ] )
+                                                                                                                                        (
+                                                                                                                                            if secondary.delayed then [ ]
+                                                                                                                                            else builtins.attrValues ( builtins.mapAttrs ( name : { host-path , vacuum-path , ... } : "if [ -e ${ host-path } ] ; then ${ _environment-variable "MKDIR" } ${ vacuum-path } && INPUT=${ host-path } OUTPUT=${ vacuum-path } ${ _environment-variable "VACUUM" } ; fi" ) secondary.mounts )
+                                                                                                                                        )
+
+                                                                                                                                        (
+                                                                                                                                            if secondary.delayed then [ ]
+                                                                                                                                            else builtins.attrValues ( builtins.mapAttrs ( name : { observed-path , vacuum-path , ... } : "if [ -d ${ vacuum-path } ] ; then ${ _environment-variable "CP" } --recursive ${ vacuum-path } ${ observed-path } ; fi" ) secondary.mounts )
+                                                                                                                                        )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/expected/standard-output"
@@ -195,9 +203,10 @@
                                                                                                                                         ]
                                                                                                                                         ##FIXME
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , expected-path , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ expected-path }" ) secondary.mounts ) )
-                                                                                                                                        [
-                                                                                                                                            "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "OUT" }/observed > ${ _environment-variable "OUT" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/FAILURE ; fi"
-                                                                                                                                        ]
+                                                                                                                                        (
+                                                                                                                                            if secondary.delayed then [ ]
+                                                                                                                                            else [ "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "OUT" }/observed > ${ _environment-variable "OUT" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/FAILURE ; fi" ]
+                                                                                                                                        )
                                                                                                                                     ]
                                                                                                                             ) ;
                                                                                                                 in
@@ -340,16 +349,20 @@
                                                                                 then
                                                                                     ${ pkgs.coreutils }/bin/mkdir $out/links
                                                                                 fi &&
+                                                                                DELAYED=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 SUCCESS=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name SUCCESS | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 FAILURE=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE | ${ pkgs.coreutils }/bin/wc --lines ) &&
                                                                                 if [ ${ _environment-variable "ALL" } == ${ _environment-variable "SUCCESS" } ] && [ ${ _environment-variable "FAILURE" } == 0 ]
                                                                                 then
-                                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "SUCCESS" } > $out/SUCCESS
-                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "FAILURE" } )) ]
+                                                                                    ${ pkgs.coreutils }/bin/touch $out/SUCCESS
+                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } )) ]
                                                                                 then
-                                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
+                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/ $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED > $out/DELAYED
+                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } + ${ _environment-variable "FAILURE" } )) ]
+                                                                                then
+                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/ $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE > $out/FAILURE
                                                                                 else
-                                                                                    ${ pkgs.coreutils }/bin/echo "{ ALL : ${ _environment-variable "ALL" } , SUCCESS : ${ _environment-variable "SUCCESS" } , FAILURE : ${ _environment-variable "FAILURE" } }" > $out/ERROR
+                                                                                    ${ pkgs.coreutils }/bin/echo "{ ALL : ${ _environment-variable "ALL" } , DELAYED : ${ _environment-variable "DELAYED" } , SUCCESS : ${ _environment-variable "SUCCESS" } , FAILURE : ${ _environment-variable "FAILURE" } }" > $out/ERROR
                                                                                 fi
                                                                         '';
                                                             name = "tests" ;
