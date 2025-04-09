@@ -543,8 +543,9 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests } &&
+                                                                            ${ pkgs.coreutils }/bin/echo The script is ${ foobar.shell-script }. &&
+                                                                            ${ pkgs.coreutils }/bin/echo The tests are ${ foobar.tests }. &&
+                                                                            ${ pkgs.coreutils }/bin/echo The post-tests are ${ foobar.post-tests }. &&
                                                                             if [ -f ${ foobar.tests }/SUCCESS ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was success in ${ foobar.tests }.
@@ -602,9 +603,9 @@
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.shell-script } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.tests } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.post-tests }
+                                                                            ${ pkgs.coreutils }/bin/echo The script is ${ simple.shell-script }. &&
+                                                                            ${ pkgs.coreutils }/bin/echo The tests are ${ simple.tests }. &&
+                                                                            ${ pkgs.coreutils }/bin/echo The post-tests are ${ simple.post-tests }. &&
                                                                             if [ -f ${ simple.tests }/SUCCESS ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was success in ${ simple.tests }.
