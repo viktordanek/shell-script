@@ -371,7 +371,7 @@
                                                     pkgs.writeShellScript
                                                         "post-tests"
                                                         ''
-                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \;
+                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED
                                                         '' ;
                                                 tests = tests_ ;
                                             } ;
