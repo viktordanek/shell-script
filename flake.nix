@@ -355,7 +355,7 @@
                                                                                     ${ pkgs.coreutils }/bin/touch $out/SUCCESS
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } )) ]
                                                                                 then
-                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED > $out/DELAYED
+                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED | ${ pkgs.coreutils }/bin/dirname $( ${ pkgs.coreutils }/bin/tee ) > $out/DELAYED
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } + ${ _environment-variable "FAILURE" } )) ]
                                                                                 then
                                                                                     ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE > $out/FAILURE
