@@ -275,7 +275,7 @@
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             test-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
-                                                                                                                                            temporary-path = "${ _environment-variable "TEMP" }/test/initial.${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            temporary-path = "${ _environment-variable "TEMP" }/observed/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             vacuum-path = "/build/vacuum.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
@@ -395,7 +395,11 @@
                                                                     ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" } ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/chmod --recursive 0777 ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -type f -name "initial.*" ! -name "*.standard-error" ! -name "*.status" ! -name "*.standard-output" -exec ${ pkgs.coreutils }/bin/cp {} ${ _environment-variable "TEMP" }/observed \; &&
+                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -type f -name "initial.*" ! -name "*.standard-error" ! -name "*.status" ! -name "*.standard-output" | while read FILE
+                                                                    do
+                                                                        HASH=${ _environment-variable "FILE##${ _environment-variable "TEMP" }/test/initial." } &&
+                                                                            ${ pkgs.coreutils }/bin/cat ${ _environment-variable "FILE" } > ${ _environment-variable "TEMP" }/observed/${ _environment-variable "HASH" }
+                                                                    done &&
                                                                     if ${ _environment-variable "TEMP" }/test/delay > ${ _environment-variable "TEMP" }/observed/standard-output 2> ${ _environment-variable "TEMP" }/observed/standard-error
                                                                     then
                                                                         ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
