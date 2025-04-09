@@ -105,6 +105,11 @@
                                         in
                                             {
                                                 shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
+                                                post-tests =
+                                                    pkgs.writeShellScript
+                                                        "post-tests"
+                                                        ''
+                                                        '' ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
                                                         {
@@ -598,6 +603,8 @@
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ simple.shell-script } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.tests } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ simple.post-tests }
                                                                             if [ -f ${ simple.tests }/SUCCESS ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was success in ${ simple.tests }.
