@@ -395,6 +395,7 @@
                                                                     ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" } ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/chmod --recursive 0777 ${ _environment-variable "TEMP" } &&
+                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -type f -name "initial.*" ! -name "*.standard-error" ! -name "*.status" ! -name "*.standard-output" -exec ${ pkgs.coreutils }/bin/cp {} ${ _environment-variable "TEMP" }/observed \; &&
                                                                     if ${ _environment-variable "TEMP" }/test/delay > ${ _environment-variable "TEMP" }/observed/standard-output 2> ${ _environment-variable "TEMP" }/observed/standard-error
                                                                     then
                                                                         ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
