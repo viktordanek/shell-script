@@ -275,7 +275,7 @@
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             test-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
-                                                                                                                                            temporary-path = "${ _environment-variable "TEMP" }/observed/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                            temporary-path = "${ _environment-variable "TEMP" }/mounts/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             vacuum-path = "/build/vacuum.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
@@ -391,14 +391,17 @@
                                                         ''
                                                             ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED -exec ${ pkgs.coreutils }/bin/dirname {} \; | while read DELAYED
                                                             do
-                                                                export TEMP=$( ${ pkgs.coreutils }/bin/mktemp --dry-run ) &&
-                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" } ${ _environment-variable "TEMP" } &&
+                                                                export TEMP=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
+                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/expected ${ _environment-variable "TEMP" } &&
+                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/observed ${ _environment-variable "TEMP" } &&
+                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/test ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" } &&
                                                                     ${ pkgs.coreutils }/bin/chmod --recursive 0777 ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -type f -name "initial.*" ! -name "*.standard-error" ! -name "*.status" ! -name "*.standard-output" | while read FILE
+                                                                    ${ pkgs.coreutils }/bin/mkdir ${ _environment-variable "TEMP" }/mounts &&
+                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -name "initial.*" ! -name "initial.*.standard-error" ! -name "initial.*.standard-output" ! -name "initial.*.status" | while read FILE
                                                                     do
-                                                                        HASH=${ _environment-variable "FILE##${ _environment-variable "TEMP" }/test/initial." } &&
-                                                                            ${ pkgs.coreutils }/bin/cat ${ _environment-variable "FILE" } > ${ _environment-variable "TEMP" }/observed/${ _environment-variable "HASH" }
+                                                                        HASH=${ _environment-variable "FILE#${ _environment-variable "TEMP" }/test/initial." } &&
+                                                                            ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "FILE" } ${ _environment-variable "TEMP" }/mounts/${ _environment-variable "HASH" }
                                                                     done &&
                                                                     if ${ _environment-variable "TEMP" }/test/delay > ${ _environment-variable "TEMP" }/observed/standard-output 2> ${ _environment-variable "TEMP" }/observed/standard-error
                                                                     then
@@ -406,7 +409,13 @@
                                                                     else
                                                                         ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
                                                                     fi &&
-                                                                    ${ pkgs.diffutils }/bin/diff ${ _environment-variable "TEMP" }/expected ${ _environment-variable "TEMP" }/observed > ${ _environment-variable "TEMP" }/diff &&
+                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/mounts -mindepth 1 -maxdepth 1 | while read FILE
+                                                                    do
+                                                                        export INPUT=${ _environment-variable "FILE" } &&
+                                                                            export OUTPUT=${ _environment-variable "TEMP" }/observed &&
+                                                                            ${ vacuum.shell-script }
+                                                                    done &&
+                                                                    ${ pkgs.diffutils }/bin/diff --recursive ${ _environment-variable "TEMP" }/expected ${ _environment-variable "TEMP" }/observed > ${ _environment-variable "TEMP" }/diff &&
                                                                     if [ -z "$( ${ pkgs.coreutils }/bin/cat ${ _environment-variable "TEMP" }/diff )" ]
                                                                     then
                                                                         ${ pkgs.coreutils }/bin/touch ${ _environment-variable "TEMP" }/SUCCESS
