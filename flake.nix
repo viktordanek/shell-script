@@ -102,15 +102,7 @@
                                                         profile = profile ;
                                                         runScript = primary.script ;
                                                     } ;
-                                        in
-                                            {
-                                                shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
-                                                post-tests =
-                                                    pkgs.writeShellScript
-                                                        "post-tests"
-                                                        ''
-                                                        '' ;
-                                                tests =
+                                                tests_ =
                                                     pkgs.stdenv.mkDerivation
                                                         {
                                                             installPhase =
@@ -372,6 +364,16 @@
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
                                                         } ;
+                                        in
+                                            {
+                                                shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
+                                                post-tests =
+                                                    pkgs.writeShellScript
+                                                        "post-tests"
+                                                        ''
+                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \;
+                                                        '' ;
+                                                tests = tests_ ;
                                             } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
                             vacuum =
