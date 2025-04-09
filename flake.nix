@@ -176,6 +176,18 @@
                                                                                                                                                     in
                                                                                                                                                         "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/test/observe"
                                                                                                                                             )
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    user-environment =
+                                                                                                                                                        pkgs.buildFHSUserEnv
+                                                                                                                                                            {
+                                                                                                                                                                name = "delay" ;
+                                                                                                                                                                runScript = secondary.test ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } ) ] ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in
+                                                                                                                                                        "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/delay ${ _environment-variable "OUT" }/test/delay"
+                                                                                                                                            )
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
