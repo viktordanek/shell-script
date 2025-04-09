@@ -183,7 +183,7 @@
                                                                                                                                                             {
                                                                                                                                                                 name = "delay" ;
                                                                                                                                                                 runScript = secondary.test ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } ) ] ;
+                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = builtins.mapAttrs ( name : { host-path , is-read-only , temporary-path , ... } : { host-path = temporary-path ; is-read-only = is-read-only ; } ) secondary.mounts ; name = "candidate" ; profile = builtins.trace ( builtins.toJSON secondary.profile ) secondary.profile ; } ) ] ;
                                                                                                                                                             } ;
                                                                                                                                                     in
                                                                                                                                                         "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/delay ${ _environment-variable "OUT" }/test/delay"
@@ -191,9 +191,14 @@
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                            "if ${ _environment-variable "OUT" }/test/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
-
                                                                                                                                         ]
+                                                                                                                                        (
+                                                                                                                                            if secondary.delayed then [ ]
+                                                                                                                                            else
+                                                                                                                                                [
+                                                                                                                                                    "if ${ _environment-variable "OUT" }/test/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
+                                                                                                                                                ]
+                                                                                                                                        )
                                                                                                                                         ( if secondary.delayed then [ "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/DELAYED" ] else [ ] )
                                                                                                                                         (
                                                                                                                                             if secondary.delayed then [ ]
@@ -386,9 +391,16 @@
                                                         ''
                                                             ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED -exec ${ pkgs.coreutils }/bin/dirname {} \; | while read DELAYED
                                                             do
-                                                                TEMP=$( ${ pkgs.coreutils }/bin/mktemp --dry-run ) &&
+                                                                export TEMP=$( ${ pkgs.coreutils }/bin/mktemp --dry-run ) &&
                                                                     ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" } ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" }
+                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" } &&
+                                                                    ${ pkgs.coreutils }/bin/chmod --recursive 0777 ${ _environment-variable "TEMP" } &&
+                                                                    if ${ _environment-variable "TEMP" }/test/delay > ${ _environment-variable "TEMP" }/observed/standard-output 2> ${ _environment-variable "TEMP" }/observed/standard-error
+                                                                    then
+                                                                        ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
+                                                                    else
+                                                                        ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
+                                                                    fi
                                                             done
                                                         '' ;
                                                 tests = tests_ ;
