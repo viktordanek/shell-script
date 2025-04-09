@@ -308,12 +308,10 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
-                                                                                                if secondary.delayed then [ ]
-                                                                                                else
-                                                                                                    [
-                                                                                                        "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                        "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
-                                                                                                    ] ;
+                                                                                                [
+                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
+                                                                                                    "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
+                                                                                                ] ;
                                                                                 null = path : value : [ ] ;
                                                                             }
                                                                             {
@@ -357,10 +355,10 @@
                                                                                     ${ pkgs.coreutils }/bin/touch $out/SUCCESS
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } )) ]
                                                                                 then
-                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/ $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED > $out/DELAYED
+                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED > $out/DELAYED
                                                                                 elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } + ${ _environment-variable "FAILURE" } )) ]
                                                                                 then
-                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/ $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE > $out/FAILURE
+                                                                                    ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE > $out/FAILURE
                                                                                 else
                                                                                     ${ pkgs.coreutils }/bin/echo "{ ALL : ${ _environment-variable "ALL" } , DELAYED : ${ _environment-variable "DELAYED" } , SUCCESS : ${ _environment-variable "SUCCESS" } , FAILURE : ${ _environment-variable "FAILURE" } }" > $out/ERROR
                                                                                 fi
@@ -471,6 +469,7 @@
                                                                                     delayed =
                                                                                         ignore :
                                                                                             {
+                                                                                                delayed = true ;
                                                                                                 mounts =
                                                                                                     {
                                                                                                         "/singleton" =
@@ -543,13 +542,16 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ foobar.tests } &&
                                                                             if [ -f ${ foobar.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ foobar.tests }."
+                                                                                ${ pkgs.coreutils }/bin/echo There was success in ${ foobar.tests }.
+                                                                            elif [ -f ${ foobar.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo There was delay in ${ foobar.tests }.
                                                                             elif [ -f ${ foobar.tests }/FAILURE ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ foobar.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo There was a predicted failure in ${ foobar.tests } >&2 &&
                                                                                     exit 63
                                                                             else
-                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
+                                                                                ${ pkgs.coreutils }/bin/echo There was an unpredicted failure in ${ foobar.tests } >&2 &&
                                                                                     exit 62
                                                                             fi &&
                                                                             exit 61
