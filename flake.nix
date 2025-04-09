@@ -405,6 +405,13 @@
                                                                         ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
                                                                     else
                                                                         ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
+                                                                    fi &&
+                                                                    ${ pkgs.diffutils }/bin/diff ${ _environment-variable "TEMP" }/expected ${ _environment-variable "TEMP" }/observed > ${ _environment-variable "TEMP" }/diff &&
+                                                                    if [ -z "$( ${ pkgs.coreutils }/bin/cat ${ _environment-variable "TEMP" }/diff )" ]
+                                                                    then
+                                                                        ${ pkgs.coreutils }/bin/touch ${ _environment-variable "TEMP" }/SUCCESS
+                                                                    else
+                                                                        ${ pkgs.coreutils }/bin/touch ${ _environment-variable "TEMP" }/FAILURE
                                                                     fi
                                                             done
                                                         '' ;
