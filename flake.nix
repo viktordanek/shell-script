@@ -199,6 +199,14 @@
                                                                                                                                                                                         in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                                                                 )
                                                                                                                                                                                 [
+                                                                                                                                                                                    "${ _environment-variable "MKDIR" } /out/initial"
+                                                                                                                                                                                ]
+                                                                                                                                                                                (
+                                                                                                                                                                                    let
+                                                                                                                                                                                        mapper = name : { ... } : "${ _environment-variable "CP" } --recursive /work/${ builtins.hashString "sha512" name } /out/initial/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                                                                        in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                                                                )
+                                                                                                                                                                                [
                                                                                                                                                                                 ]
                                                                                                                                                                             ]
                                                                                                                                                                     )
