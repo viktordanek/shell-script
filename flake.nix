@@ -184,6 +184,9 @@
                                                                                                                                                                     (
                                                                                                                                                                         builtins.concatLists
                                                                                                                                                                             [
+                                                                                                                                                                                [
+                                                                                                                                                                                    "${ _environment-variable "MKDIR" } /out/observed"
+                                                                                                                                                                                ]
                                                                                                                                                                                 (
                                                                                                                                                                                     let
                                                                                                                                                                                         mapper =
@@ -208,7 +211,7 @@
                                                                                                                                                                                 )
                                                                                                                                                                                 [
                                                                                                                                                                                     "${ _environment-variable "MKDIR" } /work/test"
-                                                                                                                                                                                    "if /out/bin/test > /work/test/standard-output 2> /work/test/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /work/test/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /work/test/status ; fi"
+                                                                                                                                                                                    "if /out/bin/test > /out/observed/standard-output 2> /out/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/observed/status ; fi"
                                                                                                                                                                                 ]
                                                                                                                                                                             ]
                                                                                                                                                                     )
