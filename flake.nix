@@ -142,6 +142,7 @@
                                                                                                                                             "export WORK=/build/work"
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                                                                            "exit 0"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
@@ -241,7 +242,7 @@
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh &&
                                                                                                                             makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CP ${ pkgs.coreutils }/bin/cp --set DIFF ${ pkgs.diffutils }/bin/diff --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out --set RM ${ pkgs.coreutils }/bin/rm --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum.shell-script } --set WC ${ pkgs.coreutils }/bin/wc &&
-                                                                                                                            # $out/bin/constructors
+                                                                                                                            $out/bin/constructors
                                                                                                                             true
                                                                                                                     '' ;
                                                                                                         name = "test" ;
