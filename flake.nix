@@ -136,6 +136,11 @@
                                                                                                                             (
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
+                                                                                                                                        [
+                                                                                                                                            "export WORK=/build/work"
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }/mounts"
+                                                                                                                                        ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "${ _environment-variable "MKDIR" } ${ initial-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
