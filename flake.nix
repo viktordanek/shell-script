@@ -171,7 +171,7 @@
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" } /work" "--bind ${ _environment-variable "OUT" } /out" ] ;
                                                                                                                                                                 name = "observe" ;
-                                                                                                                                                                runScript = "ls /out" ;
+                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/script" ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe"
                                                                                                                                             )
