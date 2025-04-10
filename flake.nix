@@ -139,6 +139,7 @@
                                                                                                                                         [
                                                                                                                                             "cleanup ( ) { if [ ! -r ${ _environment-variable "OUT" }/SUCCESS ] && [ ! -e ${ _environment-variable "OUT" }/FAILURE ] && [ ! -e ${ _environment-variable "OUT" }/DELAYED ] ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/ERROR ; fi }"
                                                                                                                                             "trap cleanup EXIT"
+                                                                                                                                            "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
@@ -148,6 +149,18 @@
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                         [
+                                                                                                                                            "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set PATH ${ pkgs.coreutils }/bin"
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    user-environment =
+                                                                                                                                                        pkgs.buildFHSUserEnv
+                                                                                                                                                            {
+                                                                                                                                                                mounts = [ "--bind ${ _environment-variable "WORK" } /work" "--bind ${ _environment-variable "OUT" } /out" ] ;
+                                                                                                                                                                name = "observe" ;
+                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/test" ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/bin/observe"
+                                                                                                                                            )
                                                                                                                                         ]
                                                                                                                                     ]
                                                                                                                             ) ;
