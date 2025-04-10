@@ -140,6 +140,8 @@
                                                                                                                                             "cleanup ( ) { if [ ! -r ${ _environment-variable "OUT" }/SUCCESS ] && [ ! -e ${ _environment-variable "OUT" }/FAILURE ] && [ ! -e ${ _environment-variable "OUT" }/DELAYED ] ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/ERROR ; fi }"
                                                                                                                                             "trap cleanup EXIT"
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                                                                            "export WORK=/build/work"
+                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
@@ -167,15 +169,15 @@
                                                                                                                                                     user-environment =
                                                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                                                             {
-                                                                                                                                                                mounts = [ "--bind ${ _environment-variable "WORK" } /work" "--bind ${ _environment-variable "OUT" } /out" ] ;
+                                                                                                                                                                extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" } /work" "--bind ${ _environment-variable "OUT" } /out" ] ;
                                                                                                                                                                 name = "observe" ;
-                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/script" ;
+                                                                                                                                                                runScript = "ls /out" ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe"
                                                                                                                                             )
                                                                                                                                         ]
                                                                                                                                         [
-                                                                                                                                            "${ _environment-variable "OUT" }/bin/observe"
+                                                                                                                                            "${ _environment-variable "OUT" }/bin/observe > ${ _environment-variable "OUT" }/debug"
                                                                                                                                         ]
                                                                                                                                     ]
                                                                                                                             ) ;
