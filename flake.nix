@@ -150,6 +150,11 @@
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper = name : { initial , ... } : "makeWrapper ${ pkgs.writeShellScript "initial" initial } ${ _environment-variable "OUT" }/${ builtins.hashString "sha512" name }" ;
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                        )
                                                                                                                                         [
                                                                                                                                             (
                                                                                                                                                 let
