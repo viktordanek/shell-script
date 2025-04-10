@@ -151,6 +151,22 @@
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
+                                                                                                                                                    name : { initial , ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" }/mounts/${ builtins.hashString "sha512" name } /mount" ] ;
+                                                                                                                                                                        name = "initial" ;
+                                                                                                                                                                        runScript = initial ;
+                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/initial ${ _environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }.sh" ;
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                        )
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper =
                                                                                                                                                     name : { initial , test-path , ... } :
                                                                                                                                                         let
                                                                                                                                                             user-environment =
