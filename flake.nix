@@ -148,13 +148,8 @@
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial , ... } : "makeWrapper ${ pkgs.writeShellScript "initial" initial } ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.sh" ) secondary.mounts ) )
                                                                                                                                         [
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/mounts"
+                                                                                                                                            "makeWrapper ${ pkgs.writeShellScript "observe" observe } ${ _environment-variable "OUT" }/bin/observe --set MKDIR ${ _environment-variable "MKDIR" } --set OUT ${ _environment-variable "OUT" }"
                                                                                                                                         ]
-                                                                                                                                        [
-                                                                                                                                            "export WORK=/build/work"
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
-                                                                                                                                        ]
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial , ... } : "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                         (
                                                                                                                                             let
                                                                                                                                                 mapper =
@@ -176,72 +171,18 @@
                                                                                                                                                     mapper = name : { is-read-only , ... } : { host-path = "${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
                                                                                                                                                 in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set OUT ${ _environment-variable "OUT" } --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }"
                                                                                                                                             )
-                                                                                                                                            (
-                                                                                                                                                let
-                                                                                                                                                    script =
-                                                                                                                                                        pkgs.writeShellScript
-                                                                                                                                                            "script"
-                                                                                                                                                            (
-                                                                                                                                                                builtins.concatStringsSep
-                                                                                                                                                                    " &&\n\t"
-                                                                                                                                                                    (
-                                                                                                                                                                        builtins.concatLists
-                                                                                                                                                                            [
-                                                                                                                                                                                (
-                                                                                                                                                                                    let
-                                                                                                                                                                                        mapper =
-                                                                                                                                                                                            name : { ... } :
-                                                                                                                                                                                                "if /out/bin/${ builtins.hashString "sha512" name } > /out/mounts/${ builtins.hashString "sha512" name }.standard-output 2> /out/mounts/${ builtins.hashString "sha512" name }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/mounts/${ builtins.hashString "sha512" name }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/mounts/${ builtins.hashString "sha512" name }.status ; fi" ;
-                                                                                                                                                                                        in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                                                                )
-                                                                                                                                                                                (
-                                                                                                                                                                                    let
-                                                                                                                                                                                        mapper =
-                                                                                                                                                                                            name : { ... } :
-                                                                                                                                                                                                ''if [ $( ${ _environment-variable "CAT" } /out/mounts/${ builtins.hashString "sha512" name }.status ) != 0 ] ; then ${ _environment-variable "ECHO" } error status with ${ name } >> /out/ERROR ; elif [ ! -z "$( ${ _environment-variable "CAT" } /out/mounts/${ builtins.hashString "sha512" name }.standard-error )" ] ; then ${ _environment-variable "ECHO" } error output with ${ name } >> /out/ERROR ; elif [ ! -e /out/mounts/${ builtins.hashString "sha512" name }/target ] ; then ${ _environment-variable "ECHO" } missing target in ${ name } >> /out/ERROR ; elif [ $( ${ _environment-variable "FIND" } /out/mounts/${ builtins.hashString "sha512" name } -mindepth 1 -maxdepth 1 | ${ _environment-variable "WC" } --lines ) != 1 ] ; then ${ _environment-variable "ECHO" } wrong in ${ name } >> /out/ERROR ; fi'' ;
-                                                                                                                                                                                        in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                                                                )
-                                                                                                                                                                                (
-                                                                                                                                                                                    let
-                                                                                                                                                                                        mapper = name : { ... } : "${ _environment-variable "CP" } --recursive /build/work/${ builtins.hashString "sha512" name }/target /out/initial/${ builtins.hashString "sha512" name }" ;
-                                                                                                                                                                                        in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                                                                )
-                                                                                                                                                                                [
-                                                                                                                                                                                   "if /out/bin/test > /out/observed/standard-output 2> /out/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /out/observed/status ; fi"
-                                                                                                                                                                                ]
-                                                                                                                                                                            ]
-                                                                                                                                                                    )
-                                                                                                                                                            ) ;
-                                                                                                                                                    in "makeWrapper ${ script } ${ _environment-variable "OUT" }/bin/script"
-                                                                                                                                            )
-                                                                                                                                            (
-                                                                                                                                                let
-                                                                                                                                                    user-environment =
-                                                                                                                                                        pkgs.buildFHSUserEnv
-                                                                                                                                                            {
-                                                                                                                                                                extraBwrapArgs = [ "--bind ${ _environment-variable "OUT" } /out" ] ;
-                                                                                                                                                                name = "observe" ;
-                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/script" ;
-                                                                                                                                                            } ;
-                                                                                                                                                    in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe"
-                                                                                                                                            )
                                                                                                                                         ]
-                                                                                                                                        [
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/initial"
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                        ]
-                                                                                                                                        (
-                                                                                                                                            if secondary.delayed then
-                                                                                                                                                [
-                                                                                                                                                    "${ _environment-variable "LN" } --symbolic ${ _environment-variable "OUT" }/bin/observe ${ _environment-variable "OUT" }/DELAYED"
-                                                                                                                                                ]
-                                                                                                                                            else
-                                                                                                                                                [
-                                                                                                                                                    "${ _environment-variable "OUT" }/bin/observe"
-                                                                                                                                                ]
-                                                                                                                                        )
                                                                                                                                     ]
                                                                                                                             ) ;
+                                                                                                                observe =
+                                                                                                                    builtins.concatStringsSep
+                                                                                                                        " &&\n\t"
+                                                                                                                        (
+                                                                                                                            builtins.concatLists
+                                                                                                                                [
+                                                                                                                                    # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" ${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                ]
+                                                                                                                        ) ;
                                                                                                                 in
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
