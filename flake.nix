@@ -227,7 +227,6 @@
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/initial"
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                             "if ${ _environment-variable "OUT" }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
-                                                                                                                                            "exit 0"
                                                                                                                                         ]
                                                                                                                                         (
                                                                                                                                             let
