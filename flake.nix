@@ -137,6 +137,10 @@
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
                                                                                                                                         [
+                                                                                                                                            "cleanup ( ) { if [ ! -r ${ _environment-variable "OUT" }/SUCCESS ] && [ ! -e ${ _environment-variable "OUT" }/FAILURE ] && [ ! -e ${ _environment-variable "OUT" }/DELAYED ] ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/ERROR ; fi }"
+                                                                                                                                            "trap cleanup EXIT"
+                                                                                                                                        ]
+                                                                                                                                        [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/expected"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/expected/standard-output"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-error } > ${ _environment-variable "OUT" }/expected/standard-error"
