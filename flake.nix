@@ -156,15 +156,26 @@
                                                                                                                                             )
                                                                                                                                             (
                                                                                                                                                 let
+                                                                                                                                                    script =
+                                                                                                                                                        pkgs.writeShellScript
+                                                                                                                                                            "script"
+                                                                                                                                                            "ls /out" ;
+                                                                                                                                                    in "makeWrapper ${ script } ${ _environment-variable "OUT" }/bin/script"
+                                                                                                                                            )
+                                                                                                                                            (
+                                                                                                                                                let
                                                                                                                                                     user-environment =
                                                                                                                                                         pkgs.buildFHSUserEnv
                                                                                                                                                             {
                                                                                                                                                                 mounts = [ "--bind ${ _environment-variable "WORK" } /work" "--bind ${ _environment-variable "OUT" } /out" ] ;
                                                                                                                                                                 name = "observe" ;
-                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/test" ;
+                                                                                                                                                                runScript = "${ _environment-variable "OUT" }/bin/script" ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe"
                                                                                                                                             )
+                                                                                                                                        ]
+                                                                                                                                        [
+                                                                                                                                            "${ _environment-variable "OUT" }/bin/observe"
                                                                                                                                         ]
                                                                                                                                     ]
                                                                                                                             ) ;
