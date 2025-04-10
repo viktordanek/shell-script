@@ -169,14 +169,6 @@
                                                                                                                                                 mapper =
                                                                                                                                                     name : { initial , test-path , ... } :
                                                                                                                                                         let
-                                                                                                                                                            user-environment =
-                                                                                                                                                                pkgs.buildFHSUserEnv
-                                                                                                                                                                    {
-                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" }/mounts/${ builtins.hashString "sha512" name } /mount" ] ;
-                                                                                                                                                                        name = "initial" ;
-                                                                                                                                                                        runScript = initial ;
-                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
-                                                                                                                                                                    } ;
                                                                                                                                                             in "if ${ _environment-variable "OUT" }/test/${ builtins.hashString "sha512" name }.sh > ${ test-path }.standard-output 2> ${ test-path }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ test-path }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ test-path }.status ; fi" ;
                                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
