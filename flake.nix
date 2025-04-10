@@ -146,9 +146,9 @@
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-error } > ${ _environment-variable "OUT" }/expected/standard-error"
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
                                                                                                                                         ]
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                         ]
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , expected-path , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ expected-path }" ) secondary.mounts ) )
                                                                                                                                     ]
                                                                                                                             ) ;
                                                                                                                 in
