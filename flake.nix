@@ -149,7 +149,11 @@
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                         [
-                                                                                                                                            "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set PATH ${ pkgs.coreutils }/bin"
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    mapper = name : { is-read-only , ... } : { host-path = "${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
+                                                                                                                                                in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }"
+                                                                                                                                            )
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     user-environment =
@@ -159,7 +163,7 @@
                                                                                                                                                                 name = "observe" ;
                                                                                                                                                                 runScript = "${ _environment-variable "OUT" }/bin/test" ;
                                                                                                                                                             } ;
-                                                                                                                                                    in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/bin/observe"
+                                                                                                                                                    in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe"
                                                                                                                                             )
                                                                                                                                         ]
                                                                                                                                     ]
