@@ -173,8 +173,6 @@
                                                                                                                                                     mapper = name : { is-read-only , ... } : { host-path = "${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
                                                                                                                                                 in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }"
                                                                                                                                             )
-                                                                                                                                            "exit 0"
-
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     script =
@@ -226,6 +224,7 @@
                                                                                                                                             )
                                                                                                                                         ]
                                                                                                                                         [
+                                                                                                                                            "exit 0"
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/initial"
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
                                                                                                                                             "if ${ _environment-variable "OUT" }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
