@@ -161,7 +161,17 @@
                                                                                                                                                     script =
                                                                                                                                                         pkgs.writeShellScript
                                                                                                                                                             "script"
-                                                                                                                                                            "ls /out" ;
+                                                                                                                                                            (
+                                                                                                                                                                builtins.concatStringsSep
+                                                                                                                                                                    " &&\n\n\t"
+                                                                                                                                                                    (
+                                                                                                                                                                        builtins.concatLists
+                                                                                                                                                                            [
+                                                                                                                                                                                [
+                                                                                                                                                                                ]
+                                                                                                                                                                            ]
+                                                                                                                                                                    )
+                                                                                                                                                            ) ;
                                                                                                                                                     in "makeWrapper ${ script } ${ _environment-variable "OUT" }/bin/script"
                                                                                                                                             )
                                                                                                                                             (
