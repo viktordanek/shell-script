@@ -180,7 +180,7 @@
                                                                                                                         (
                                                                                                                             builtins.concatLists
                                                                                                                                 [
-                                                                                                                                    # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" ${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                    ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                 ]
                                                                                                                         ) ;
                                                                                                                 in
