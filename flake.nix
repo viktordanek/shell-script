@@ -148,7 +148,6 @@
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-output } > ${ _environment-variable "OUT" }/expected/standard-output"
                                                                                                                                             "${ _environment-variable "CAT" } ${ secondary.standard-error } > ${ _environment-variable "OUT" }/expected/standard-error"
                                                                                                                                             "${ _environment-variable "ECHO" } ${ secondary.status } > ${ _environment-variable "OUT" }/expected/status"
-                                                                                                                                            "exit 0"
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { expected , ... } : "${ _environment-variable "CP" } --recursive ${ expected } ${ _environment-variable "OUT" }/expected/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial , ... } : "makeWrapper ${ pkgs.writeShellScript "initial" initial } ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.sh" ) secondary.mounts ) )
@@ -174,6 +173,8 @@
                                                                                                                                                     mapper = name : { is-read-only , ... } : { host-path = "${ _environment-variable "WORK" }/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
                                                                                                                                                 in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }"
                                                                                                                                             )
+                                                                                                                                            "exit 0"
+
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     script =
