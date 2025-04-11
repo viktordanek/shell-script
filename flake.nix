@@ -210,6 +210,10 @@
                                                                                                                                     ]
                                                                                                                                     ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /mount/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                     ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
+                                                                                                                                    [
+                                                                                                                                        "${ _environment-variable "MKDIR" } /mount/initial"
+                                                                                                                                    ]
+                                                                                                                                    ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "CP" } --recursive /mount/mounts/${ builtins.hashString "sha512" name } /mount/initial/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                 ]
                                                                                                                         ) ;
                                                                                                                 in
