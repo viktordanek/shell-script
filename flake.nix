@@ -215,7 +215,7 @@
                                                                                                                                     ]
                                                                                                                                     ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "CP" } --recursive /mount/mounts/${ builtins.hashString "sha512" name } /mount/initial/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                     [
-                                                                                                                                        "${ _environment-variable "OUT" }/bin/test.wrapped.sh"
+                                                                                                                                        "if ${ _environment-variable "OUT" }/bin/test.wrapped.sh > /mount/mounts/standard-output 2> /mount/mounts/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /mount/mounts/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > /mount/mounts/status ; fi"
                                                                                                                                     ]
                                                                                                                                 ]
                                                                                                                         ) ;
