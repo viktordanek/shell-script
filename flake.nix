@@ -180,8 +180,8 @@
                                                                                                                                         [
                                                                                                                                             (
                                                                                                                                                 let
-                                                                                                                                                    mapper = name : { is-read-only , ... } : { host-path = "${ _environment-variable "WORK" }/mounts/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
-                                                                                                                                                in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test --set OUT ${ _environment-variable "OUT" } --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }/bin --set WORK ${ _environment-variable "WORK" }"
+                                                                                                                                                    mapper = name : { is-read-only , ... } : { host-path = "/work/mounts/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ;
+                                                                                                                                                in "makeWrapper ${ secondary.test } ${ _environment-variable "OUT" }/bin/test.wrapped.sh --set OUT ${ _environment-variable "OUT" } --set PATH ${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.mapAttrs mapper primary.mounts ; } }/bin --set WORK ${ _environment-variable "WORK" }"
                                                                                                                                             )
                                                                                                                                         ]
                                                                                                                                         (
@@ -214,6 +214,9 @@
                                                                                                                                         "${ _environment-variable "MKDIR" } /mount/initial"
                                                                                                                                     ]
                                                                                                                                     ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "CP" } --recursive /mount/mounts/${ builtins.hashString "sha512" name } /mount/initial/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                    [
+                                                                                                                                        "${ _environment-variable "OUT" }/bin/test.wrapped.sh"
+                                                                                                                                    ]
                                                                                                                                 ]
                                                                                                                         ) ;
                                                                                                                 in
