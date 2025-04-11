@@ -156,7 +156,7 @@
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" }/mounts/${ builtins.hashString "sha512" name } /mount" ] ;
+                                                                                                                                                                        extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name } /mount" ] ;
                                                                                                                                                                         name = "initial" ;
                                                                                                                                                                         runScript = "${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.guarded.sh" ;
                                                                                                                                                                     } ;
@@ -205,6 +205,11 @@
                                                                                                                         (
                                                                                                                             builtins.concatLists
                                                                                                                                 [
+                                                                                                                                    [
+                                                                                                                                        "${ _environment-variable "MKDIR" } /mount/mounts"
+                                                                                                                                    ]
+                                                                                                                                    ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /mount/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                    # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
                                                                                                                                 ]
                                                                                                                         ) ;
                                                                                                                 in
