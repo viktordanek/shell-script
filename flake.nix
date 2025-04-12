@@ -556,7 +556,7 @@
                                                                                         standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
                                                                                     } ;
                                                                         } ;
-                                                                over =
+                                                                b =
                                                                     lib
                                                                         {
                                                                             extensions =
@@ -568,16 +568,7 @@
                                                                                 { string } :
                                                                                     [
                                                                                     ] ;
-                                                                            script =
-                                                                                let
-                                                                                    user-environment =
-                                                                                        pkgs.buildFHSUserEnv
-                                                                                            {
-                                                                                                mounts = [ "--bind /build /mount/build" ] ;
-                                                                                                name = "over" ;
-                                                                                                runScript = "ls /mount/over" ;
-                                                                                            } ;
-                                                                                    in "ls ${ user-environment }/bin/over" ;
+                                                                            script = a.shell-script ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
