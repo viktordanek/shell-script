@@ -535,6 +535,27 @@
                                                     {
                                                         installPhase =
                                                             let
+                                                                a =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "export ${ name }=${ builtins.toString value }" ;
+                                                                                } ;
+                                                                            name = "over" ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
+                                                                                        ( string "UUID" "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" )
+                                                                                    ] ;
+                                                                            script = "${ _environment-variable "ECHO" } -en ${ _environment-variable "UUID" }" ;
+                                                                            tests =
+                                                                                ignore :
+                                                                                    {
+                                                                                        standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
+                                                                                    } ;
+                                                                        } ;
                                                                 over =
                                                                     lib
                                                                         {
@@ -556,30 +577,30 @@
                                                                                                 name = "over" ;
                                                                                                 runScript = "ls /mount/over" ;
                                                                                             } ;
-                                                                                    in "12${ user-environment }/bin/over" ;
+                                                                                    in "ls ${ user-environment }/bin/over" ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
-
+                                                                                        status = 101 ;
                                                                                     } ;
                                                                         } ;
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ over.tests } &&
-                                                                            if [ -e ${ over.tests }/SUCCESS ]
+                                                                            ${ pkgs.coreutils }/bin/echo ${ a.tests } &&
+                                                                            if [ -e ${ a.tests }/SUCCESS ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo SUCCESS >&2 &&
                                                                                     exit 63
-                                                                            elif [ -e ${ over.tests }/DELAYED ]
+                                                                            elif [ -e ${ a.tests }/DELAYED ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo DELAYED >&2 &&
                                                                                     exit 62
-                                                                            elif [ -e ${ over.tests }/FAILURE ]
+                                                                            elif [ -e ${ a.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo FAILURE >&2 &&
                                                                                     exit 61
-                                                                            elif [ -e ${ over.tests }/ERROR ]
+                                                                            elif [ -e ${ a.tests }/ERROR ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
                                                                                     exit 60
