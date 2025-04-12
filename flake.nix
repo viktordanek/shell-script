@@ -558,8 +558,7 @@
                                                                         } ;
                                                                 in
                                                                     ''
-                                                                        ${ pkgs.coreutils }/bin/touch $out &&
-                                                                            exit 63
+                                                                        ${ pkgs.coreutils }/bin/touch $out
                                                                     '' ;
                                                         name = "over" ;
                                                         src = ./. ;
