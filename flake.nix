@@ -277,6 +277,7 @@
                                                                                                                                             host-path = "/build/mount.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             initial =
                                                                                                                                                 if builtins.typeOf initial == "list" then pkgs.writeShellScript "initial" ( builtins.concatStringsSep " &&\n\t" ( builtins.map ( value : if builtins.typeOf value == "string" then value else builtins.throw "initial is not string but ${ builtins.typeOf value }." ) initial ) )
+                                                                                                                                                else if builtins.typeOf initial == "string" then pkgs.writeShellScript "initial" initial
                                                                                                                                                 else builtins.throw "initial is not list, string but ${ builtins.typeOf initial }." ;
                                                                                                                                             is-read-only = builtins.getAttr "is-read-only" ( builtins.getAttr name primary.mounts ) ;
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
@@ -583,15 +584,13 @@
                                                                             profile =
                                                                                 { string } :
                                                                                     [
+                                                                                        ( string "A" a.shell-script )
                                                                                     ] ;
-                                                                            script =
-                                                                                ''
-                                                                                    ls ${ a.shell-script }
-                                                                                '' ;
+                                                                            script = "SINGLETON=/build ${ _environment-variable "A" }" ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
-                                                                                        status = 101 ;
+                                                                                        standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
                                                                                     } ;
                                                                         } ;
                                                                 in
