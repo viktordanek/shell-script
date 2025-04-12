@@ -521,6 +521,7 @@
                                                                                     exit 61
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo There was an unpredicted failure in ${ foobar.tests } >&2 &&
+
                                                                                     exit 60
                                                                             fi
                                                                     '' ;
