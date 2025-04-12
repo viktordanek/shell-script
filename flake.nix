@@ -510,19 +510,19 @@
                                                                             ${ pkgs.coreutils }/bin/echo The post-tests are ${ foobar.post-tests }. &&
                                                                             if [ -f ${ foobar.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo There was success in ${ foobar.tests }.
+                                                                                ${ pkgs.coreutils }/bin/echo There was success in ${ foobar.tests }. >&2 &&
+                                                                                    exit 63
                                                                             elif [ -f ${ foobar.tests }/DELAYED ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was delay in ${ foobar.tests }.
                                                                             elif [ -f ${ foobar.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was a predicted failure in ${ foobar.tests } >&2 &&
-                                                                                    exit 63
+                                                                                    exit 61
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo There was an unpredicted failure in ${ foobar.tests } >&2 &&
-                                                                                    exit 62
-                                                                            fi &&
-                                                                            exit 61
+                                                                                    exit 60
+                                                                            fi
                                                                     '' ;
                                                         name = "foobar" ;
                                                         src = ./. ;
@@ -571,13 +571,17 @@
                                                                             if [ -f ${ simple.tests }/SUCCESS ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was success in ${ simple.tests }.
+                                                                            elif [ -f ${ simple.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo There was delay in ${ simple.tests }. >&2 &&
+                                                                                    exit 62
                                                                             elif [ -f ${ simple.tests }/FAILURE ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo There was failure in ${ simple.tests }. >&2 &&
-                                                                                    exit 63
+                                                                                    exit 61
                                                                             else
                                                                                 ${ pkgs.coreutils }/bin/echo There was error in ${ simple.tests }. >&2 &&
-                                                                                    exit 62
+                                                                                    exit 60
                                                                             fi
                                                                     '' ;
                                                         name = "simple" ;
