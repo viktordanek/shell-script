@@ -165,7 +165,7 @@
                                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
                                                                                                                                         [
-                                                                                                                                            "makeWrapper ${ pkgs.writeShellScript "observe" observe } ${ _environment-variable "OUT" }/bin/observe.wrapped.sh --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set CP ${ _environment-variable "CP" } --set DIFF ${ _environment-variable "DIFF" } --set ECHO ${ _environment-variable "ECHO" } --set MKDIR ${ _environment-variable "MKDIR" } --set OUT $out --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" }"
+                                                                                                                                            "makeWrapper ${ pkgs.writeShellScript "observe" observe } ${ _environment-variable "OUT" }/bin/observe.wrapped.sh --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set CP ${ _environment-variable "CP" } --set DIFF ${ _environment-variable "DIFF" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ pkgs.findutils }/bin/find --set MKDIR ${ _environment-variable "MKDIR" } --set OUT $out --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" }"
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     user-environment =
@@ -256,7 +256,9 @@
                                                                                                         } :
                                                                                                             {
                                                                                                                 delayed =
-                                                                                                                    if builtins.typeOf delayed == "bool" then delayed
+                                                                                                                    if builtins.typeOf delayed == "bool" then
+                                                                                                                        if delayed then builtins.trace "delayed is not implemented yet" delayed
+                                                                                                                        else delayed
                                                                                                                     else builtins.throw "delayed is not bool but ${ builtins.typeOf delayed }." ;
                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
