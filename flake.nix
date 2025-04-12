@@ -593,6 +593,26 @@
                                                                                         standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
                                                                                     } ;
                                                                         } ;
+                                                                c =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "export ${ name }=${ builtins.toString value }" ;
+                                                                                } ;
+                                                                            name = "c" ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                        ( string "B" b.shell-script )
+                                                                                    ] ;
+                                                                            script = "SINGLETON=/build ${ _environment-variable "B" }" ;
+                                                                            tests =
+                                                                                ignore :
+                                                                                    {
+                                                                                        standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
+                                                                                    } ;
+                                                                        } ;                                                                        
                                                                 in
                                                                     ''
                                                                         ${ pkgs.coreutils }/bin/touch $out &&
@@ -626,6 +646,23 @@
                                                                                 ${ pkgs.coreutils }/bin/echo FAILURE >&2 &&
                                                                                     exit 61
                                                                             elif [ -e ${ b.tests }/ERROR ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
+                                                                                    exit 60
+                                                                            fi &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ c.tests } &&
+                                                                            if [ -e ${ c.tests }/SUCCESS ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo SUCCESS >&2
+                                                                            elif [ -e ${ c.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo DELAYED >&2 &&
+                                                                                    exit 62
+                                                                            elif [ -e ${ c.tests }/FAILURE ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo FAILURE >&2 &&
+                                                                                    exit 61
+                                                                            elif [ -e ${ c.tests }/ERROR ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
                                                                                     exit 60
