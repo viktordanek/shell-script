@@ -188,7 +188,7 @@
                                                                                                                                         (
                                                                                                                                             if secondary.delayed then
                                                                                                                                                 [
-                                                                                                                                                    "${ _environment-variable "LN" } --symbolic ${ _environment-variable "OUT" }/bin/observe.shelled.sh ${ _environment-variable "OUT" }/DELAYED"
+                                                                                                                                                    "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/DELAYED"
                                                                                                                                                 ]
                                                                                                                                             else
                                                                                                                                                 [
