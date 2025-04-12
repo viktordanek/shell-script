@@ -530,6 +530,40 @@
                                                         name = "foobar" ;
                                                         src = ./. ;
                                                     } ;
+                                            over =
+                                                pkgs.stdenv.mkDerivation
+                                                    {
+                                                        installPhase =
+                                                            let
+                                                                over =
+                                                                    lib
+                                                                        {
+                                                                            extensions =
+                                                                                {
+                                                                                    string = name : value : "export ${ name }=${ builtins.toString value }" ;
+                                                                                } ;
+                                                                            name = "over" ;
+                                                                            profile =
+                                                                                { string } :
+                                                                                    [
+                                                                                    ] ;
+                                                                            script =
+                                                                                ''
+                                                                                '' ;
+                                                                            tests =
+                                                                                ignore :
+                                                                                    {
+
+                                                                                    } ;
+                                                                        } ;
+                                                                in
+                                                                    ''
+                                                                        ${ pkgs.coreutils }/bin/touch $out &&
+                                                                            exit 63
+                                                                    '' ;
+                                                        name = "over" ;
+                                                        src = ./. ;
+                                                    } ;
                                             simple =
                                                 pkgs.stdenv.mkDerivation
                                                     {
