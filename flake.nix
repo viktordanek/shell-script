@@ -556,7 +556,7 @@
                                                                                                 name = "over" ;
                                                                                                 runScript = "ls /mount/over" ;
                                                                                             } ;
-                                                                                    in "${ user-environment }/bin/over" ;
+                                                                                    in "12${ user-environment }/bin/over" ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
@@ -565,7 +565,28 @@
                                                                         } ;
                                                                 in
                                                                     ''
-                                                                        ${ pkgs.coreutils }/bin/touch $out
+                                                                        ${ pkgs.coreutils }/bin/touch $out &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ over.tests } &&
+                                                                            if [ -e ${ over.tests }/SUCCESS ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo SUCCESS >&2 &&
+                                                                                    exit 63
+                                                                            elif [ -e ${ over.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo DELAYED >&2 &&
+                                                                                    exit 62
+                                                                            elif [ -e ${ over.tests }/FAILURE ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo FAILURE >&2 &&
+                                                                                    exit 61
+                                                                            elif [ -e ${ over.tests }/ERROR ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
+                                                                                    exit 60
+                                                                            else
+                                                                                ${ pkgs.coreutils }/bin/echo OTHER >&2 &&
+                                                                                    exit 59
+                                                                            fi
                                                                     '' ;
                                                         name = "over" ;
                                                         src = ./. ;
