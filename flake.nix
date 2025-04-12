@@ -222,9 +222,9 @@
                                                                                                                                         "${ _environment-variable "MKDIR" } /mount/observed/mounts"
                                                                                                                                     ]
                                                                                                                                     ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /mount/observed/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
-                                                                                                                                    ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "FIND" } /mount/mounts -mindepth 1 | while read FILE ; do UUID=$( ${ _environment-variable "ECHO" } ${ _environment-variable "FILE" } | ${ _environment-variable "SHA512SUM" } | ${ _environment-variable "CUT" } --bytes -128 ) && ${ _environment-variable "ECHO" } ${ _environment-variable "FILE" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.key && ${ _environment-variable "STAT" } --format %A ${ _environment-variable "FILE" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.stat && if [ -f ${ _environment-variable "FILE" } ] ; then ${ _environment-variable "CAT" } ${ _environment-variable "FILE" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.cat ; fi ; done" ) secondary.mounts ) )
+                                                                                                                                    ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "FIND" } /mount/mounts/${ builtins.hashString "sha512" name }/target -mindepth 1 | while read FILE ; do UUID=$( ${ _environment-variable "ECHO" } ${ _environment-variable "FILE#/mount/mounts/${ builtins.hashString "sha512" name }/target" } | ${ _environment-variable "SHA512SUM" } | ${ _environment-variable "CUT" } --bytes -128 ) && ${ _environment-variable "ECHO" } ${ name }-${ _environment-variable "FILE#/mount/mounts/${ builtins.hashString "sha512" name }/target" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.key && ${ _environment-variable "STAT" } --format %A ${ _environment-variable "FILE" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.stat && if [ -f ${ _environment-variable "FILE" } ] ; then ${ _environment-variable "CAT" } ${ _environment-variable "FILE" } > /mount/observed/mounts/${ builtins.hashString "sha512" name }/${ _environment-variable "UUID" }.cat ; fi ; done" ) secondary.mounts ) )
                                                                                                                                     [
-                                                                                                                                         "${ _environment-variable "CHMOD" } -R 0777 /mount/observed/*"
+                                                                                                                                        "${ _environment-variable "CHMOD" } -R 0777 /mount/observed/*"
                                                                                                                                         "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected /mount/observed > /mount/DIFF ; then ${ _environment-variable "TOUCH" } /mount/SUCCESS ; else ${ _environment-variable "TOUCH" } /mount/FAILURE ; fi"
                                                                                                                                     ]
                                                                                                                                 ]
@@ -234,7 +234,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh &&
-                                                                                                                            makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set CUT ${ pkgs.coreutils }/bin/cut --set DIFF ${ pkgs.diffutils }/bin/diff --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out --set RM ${ pkgs.coreutils }/bin/rm --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set STAT ${ pkgs.coreutils }/bin/stat --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum.shell-script } --set WC ${ pkgs.coreutils }/bin/wc &&
+                                                                                                                            makeWrapper $out/bin/constructors.sh $out/bin/constructors --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set CUT ${ pkgs.coreutils }/bin/cut --set DIFF ${ pkgs.diffutils }/bin/diff --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set OUT $out --set RM ${ pkgs.coreutils }/bin/rm --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set STAT ${ pkgs.coreutils }/bin/stat --set TOUCH ${ pkgs.coreutils }/bin/touch --set WC ${ pkgs.coreutils }/bin/wc &&
                                                                                                                             $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -280,7 +280,6 @@
                                                                                                                                             observed-path = "${ _environment-variable "OUT" }/observed/${ builtins.hashString "sha512" name }" ;
                                                                                                                                             test-path = "${ _environment-variable "OUT" }/test/initial.${ builtins.hashString "sha512" name }" ;
                                                                                                                                             temporary-path = "${ _environment-variable "TEMP" }/mounts/${ builtins.hashString "sha512" name }" ;
-                                                                                                                                            vacuum-path = "/build/vacuum.${ builtins.hashString "sha512" name }" ;
                                                                                                                                         } ;
                                                                                                                                 in builtins.mapAttrs mapper mounts
                                                                                                                         else builtins.throw "the testing mounts (${ builtins.toJSON ( builtins.attrNames mounts ) }) does not have the same sandbox attributes as the primary mounts (${ builtins.toJSON ( builtins.attrNames primary.mounts ) })."
@@ -393,104 +392,10 @@
                                                     pkgs.writeShellScript
                                                         "post-tests"
                                                         ''
-                                                            ${ pkgs.findutils }/bin/find ${ tests_ }/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -name DELAYED -exec ${ pkgs.coreutils }/bin/dirname {} \; | while read DELAYED
-                                                            do
-                                                                export TEMP=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
-                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/expected ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/observed ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "DELAYED" }/test ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/chmod --recursive 0777 ${ _environment-variable "TEMP" } &&
-                                                                    ${ pkgs.coreutils }/bin/mkdir ${ _environment-variable "TEMP" }/mounts &&
-                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/test -mindepth 1 -maxdepth 1 -name "initial.*" ! -name "initial.*.standard-error" ! -name "initial.*.standard-output" ! -name "initial.*.status" | while read FILE
-                                                                    do
-                                                                        HASH=${ _environment-variable "FILE#${ _environment-variable "TEMP" }/test/initial." } &&
-                                                                            ${ pkgs.coreutils }/bin/cp --recursive ${ _environment-variable "FILE" } ${ _environment-variable "TEMP" }/mounts/${ _environment-variable "HASH" }
-                                                                    done &&
-                                                                    if ${ _environment-variable "TEMP" }/test/delay > ${ _environment-variable "TEMP" }/observed/standard-output 2> ${ _environment-variable "TEMP" }/observed/standard-error
-                                                                    then
-                                                                        ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
-                                                                    else
-                                                                        ${ pkgs.coreutils }/bin/echo ${ _environment-variable "?" } > ${ _environment-variable "TEMP" }/observed/status
-                                                                    fi &&
-                                                                    ${ pkgs.findutils }/bin/find ${ _environment-variable "TEMP" }/mounts -mindepth 1 -maxdepth 1 | while read FILE
-                                                                    do
-                                                                        export INPUT=${ _environment-variable "FILE" } &&
-                                                                            export OUTPUT=${ _environment-variable "TEMP" }/observed &&
-                                                                            ${ vacuum.shell-script }
-                                                                    done &&
-                                                                    ${ pkgs.diffutils }/bin/diff --recursive ${ _environment-variable "TEMP" }/expected ${ _environment-variable "TEMP" }/observed > ${ _environment-variable "TEMP" }/diff &&
-                                                                    if [ -z "$( ${ pkgs.coreutils }/bin/cat ${ _environment-variable "TEMP" }/diff )" ]
-                                                                    then
-                                                                        ${ pkgs.coreutils }/bin/touch ${ _environment-variable "TEMP" }/SUCCESS
-                                                                    else
-                                                                        ${ pkgs.coreutils }/bin/touch ${ _environment-variable "TEMP" }/FAILURE
-                                                                    fi
-                                                            done
                                                         '' ;
                                                 tests = tests_ ;
                                             } ;
                             pkgs = builtins.import nixpkgs { system = system ; } ;
-                            vacuum =
-                                lib
-                                    {
-                                        extensions =
-                                            {
-                                                string = name : value : "export ${ name }=${ builtins.toString value }" ;
-                                            } ;
-                                        mounts =
-                                            {
-                                                input =
-                                                    {
-                                                        host-path = _environment-variable "INPUT" ;
-                                                        is-read-only = true ;
-                                                    } ;
-                                                output =
-                                                    {
-                                                        host-path = _environment-variable "OUTPUT" ;
-                                                        is-read-only = false ;
-                                                    } ;
-                                            } ;
-                                        name = "vacuum" ;
-                                        profile =
-                                            { string } :
-                                                [
-                                                    ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
-                                                    ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
-                                                    ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
-                                                    ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
-                                                    ( string "FIND" "${ pkgs.findutils }/bin/find" )
-                                                    ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
-                                                    ( string "SHA512SUM" "${ pkgs.coreutils }/bin/sha512sum" )
-                                                    ( string "STAT" "${ pkgs.coreutils }/bin/stat" )
-                                                    ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
-                                                    ( string "WC" "${ pkgs.coreutils }/bin/wc" )
-                                                ] ;
-                                        script = self + "/vacuum.sh" ;
-                                        tests =
-                                            ignore :
-                                                {
-                                                    mounts =
-                                                        {
-                                                            input =
-                                                                {
-                                                                    expected = self + "/expected/vacuum/mounts/input" ;
-                                                                    initial =
-                                                                        [
-                                                                            "echo 3275d3d7a12620ea996ca571c341cd66258f413f11796a3a596de316fbd4477b34b1251a10a38044b98e1f757343102f4848e77961aae44e916ef0b2b1c2070c > /mount/target"
-                                                                        ] ;
-                                                                } ;
-                                                            output =
-                                                                {
-                                                                    expected = self + "/expected/vacuum/mounts/output" ;
-                                                                    initial =
-                                                                        [
-                                                                            "mkdir /mount/target"
-                                                                        ] ;
-                                                                } ;
-                                                        } ;
-                                                } ;
-                                    } ;
                             in
                                 {
                                     checks =
@@ -678,32 +583,8 @@
                                                         name = "simple" ;
                                                         src = ./. ;
                                                     } ;
-                                            vacuum =
-                                                pkgs.stdenv.mkDerivation
-                                                    {
-                                                        installPhase =
-                                                            ''
-                                                                ${ pkgs.coreutils }/bin/touch $out &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ vacuum.shell-script } &&
-                                                                    ${ pkgs.coreutils }/bin/echo ${ vacuum.tests } &&
-                                                                    if [ -f ${ vacuum.tests }/SUCCESS ]
-                                                                    then
-                                                                        ${ pkgs.coreutils }/bin/echo "There was success in ${ vacuum.tests }."
-                                                                    elif [ -f ${ vacuum.tests }/FAILURE ]
-                                                                    then
-                                                                        ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ vacuum.tests }" >&2 &&
-                                                                            exit 63
-                                                                    else
-                                                                        ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ vacuum.tests }" >&2 &&
-                                                                            exit 62
-                                                                    fi
-                                                            '' ;
-                                                        name = "vacuum" ;
-                                                        src = ./. ;
-                                                    } ;
                                         } ;
                                     lib = lib ;
-                                    vacuum = vacuum ;
                                 } ;
                 in flake-utils.lib.eachDefaultSystem fun ;
 }
