@@ -542,7 +542,15 @@
                                                                                 {
                                                                                     string = name : value : "export ${ name }=${ builtins.toString value }" ;
                                                                                 } ;
-                                                                            name = "over" ;
+                                                                            mounts =
+                                                                                {
+                                                                                    "/singleton" =
+                                                                                        {
+                                                                                            host-path = _environment-variable "SINGLETON" ;
+                                                                                            is-read-only = false ;
+                                                                                        } ;
+                                                                                } ;
+                                                                            name = "a" ;
                                                                             profile =
                                                                                 { string } :
                                                                                     [
@@ -553,6 +561,14 @@
                                                                             tests =
                                                                                 ignore :
                                                                                     {
+                                                                                        mounts =
+                                                                                            {
+                                                                                                "/singleton" =
+                                                                                                    {
+                                                                                                        expected = self + "/expected/over/a/mounts/singleton" ;
+                                                                                                        initial = "touch /mount/target" ;
+                                                                                                    } ;
+                                                                                            } ;
                                                                                         standard-output = "aec91a6ec9a1a25fbf32531988c90c51191afc465d8109e41f386a54c3375cad7271a79e1b4c6e5dedd7fede048a13461f476261c220c47a170de70b82e318b7" ;
                                                                                     } ;
                                                                         } ;
@@ -563,12 +579,15 @@
                                                                                 {
                                                                                     string = name : value : "export ${ name }=${ builtins.toString value }" ;
                                                                                 } ;
-                                                                            name = "over" ;
+                                                                            name = "b" ;
                                                                             profile =
                                                                                 { string } :
                                                                                     [
                                                                                     ] ;
-                                                                            script = a.shell-script ;
+                                                                            script =
+                                                                                ''
+                                                                                    ls ${ a.shell-script }
+                                                                                '' ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
@@ -581,8 +600,7 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ a.tests } &&
                                                                             if [ -e ${ a.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo SUCCESS >&2 &&
-                                                                                    exit 63
+                                                                                ${ pkgs.coreutils }/bin/echo SUCCESS >&2
                                                                             elif [ -e ${ a.tests }/DELAYED ]
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo DELAYED >&2 &&
@@ -595,9 +613,23 @@
                                                                             then
                                                                                 ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
                                                                                     exit 60
-                                                                            else
-                                                                                ${ pkgs.coreutils }/bin/echo OTHER >&2 &&
-                                                                                    exit 59
+                                                                            fi &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ b.tests } &&
+                                                                            if [ -e ${ b.tests }/SUCCESS ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo SUCCESS >&2
+                                                                            elif [ -e ${ b.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo DELAYED >&2 &&
+                                                                                    exit 62
+                                                                            elif [ -e ${ b.tests }/FAILURE ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo FAILURE >&2 &&
+                                                                                    exit 61
+                                                                            elif [ -e ${ b.tests }/ERROR ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo ERROR >&2 &&
+                                                                                    exit 60
                                                                             fi
                                                                     '' ;
                                                         name = "over" ;
