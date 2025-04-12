@@ -25,7 +25,7 @@ fi &&
   elif [ ! -e /mount/target ]
   then
     exit 57
-  elif [ $( ${FIND} /mount -mindepth 1 -maxdepth 1 ! -name status ! -name standard-error ! -name standard-output ! -name target ) == 0 ]
+  elif [ $( ${FIND} /mount -mindepth 1 -maxdepth 1 ! -name status ! -name standard-error ! -name standard-output ! -name target | ${WC} --lines ) != 0 ]
   then
     exit 56
   fi
