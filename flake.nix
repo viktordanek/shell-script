@@ -548,8 +548,15 @@
                                                                                     [
                                                                                     ] ;
                                                                             script =
-                                                                                ''
-                                                                                '' ;
+                                                                                let
+                                                                                    user-environment =
+                                                                                        pkgs.buildFHSUserEnv
+                                                                                            {
+                                                                                                mounts = [ "--bind /build /mount/build" ] ;
+                                                                                                name = "over" ;
+                                                                                                runScript = "ls /mount/over" ;
+                                                                                            } ;
+                                                                                    in "${ user-environment }/bin/over" ;
                                                                             tests =
                                                                                 ignore :
                                                                                     {
