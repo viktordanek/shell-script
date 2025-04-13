@@ -196,6 +196,16 @@
                                                                                                                                         ]
                                                                                                                                     ]
                                                                                                                             ) ;
+                                                                                                                observe =
+                                                                                                                    let
+                                                                                                                        user-environment =
+                                                                                                                            pkgs.buildFHSUserEnv
+                                                                                                                                {
+                                                                                                                                    extraBwrapArgs = [ "--bind /mount" ] ;
+                                                                                                                                    runScript = "${ _environment-variable "OUT" }/bin/observe.wrapped.sh" ;
+                                                                                                                                } ;
+                                                                                                                        in
+
                                                                                                                 in
                                                                                                                     ''
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
