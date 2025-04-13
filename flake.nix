@@ -145,18 +145,21 @@
                                                                                                                                         ]
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial , ... } : "${ _environment-variable "LN" } --symbolic ${ initial } > ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.sh" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "makeWrapper ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.sh ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.wrapped.sh"  ) secondary.mounts ) )
-                                                                                                                                        # (
-                                                                                                                                        #     let
-                                                                                                                                        #         mapper =
-                                                                                                                                        #             name : { ... } :
-                                                                                                                                        #                 pkgs.buildFHSUserEnv
-                                                                                                                                        #                     {
-                                                                                                                                        #                         extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name } /mount "] ;
-                                                                                                                                        #                         name = "initial" ;
-                                                                                                                                        #                         runScript = "${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.wrapped.sh" ;
-                                                                                                                                        #                     } ;
-                                                                                                                                        #         in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                        # )
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper =
+                                                                                                                                                    name : { ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name } /mount "] ;
+                                                                                                                                                                        name = "initial" ;
+                                                                                                                                                                        runScript = "${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.wrapped.sh" ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "${ _environment-variable "LN" } --symbolic ${ user-environment } ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.shelled.sh" ;
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                        )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "${ _environment-variable "MKDIR" } ${ initial-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
