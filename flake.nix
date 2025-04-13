@@ -140,8 +140,11 @@
                                                                                                                                 builtins.concatLists
                                                                                                                                     [
                                                                                                                                         [
+                                                                                                                                            "${ _environment-variable "ECHO" } > ${ _environment-variable "OUT" }/FLAG"
                                                                                                                                             "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                                                                         ]
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial , ... } : "${ _environment-variable "LN" } --symbolic ${ initial } > ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.sh" ) secondary.mounts ) )
+                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "makeWrapper ${ _environment-variable "OUT" }/bin/${ builtins.hashString "sha512" name }.wrapped.sh" ) secondary.mounts ) )
                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "${ _environment-variable "MKDIR" } ${ initial-path }" ) secondary.mounts ) )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
