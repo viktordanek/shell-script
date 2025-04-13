@@ -212,6 +212,7 @@
                                                                                                 let
                                                                                                     identity =
                                                                                                         {
+                                                                                                            delay ? false ,
                                                                                                             mounts ? { } ,
                                                                                                             profile ? null ,
                                                                                                             standard-error ? "" ,
@@ -221,6 +222,9 @@
                                                                                                             test ? "candidate"
                                                                                                         } :
                                                                                                             {
+                                                                                                                delay =
+                                                                                                                    if builtins.typeOf delay == "bool" then delay
+                                                                                                                    else builtins.throw "delay is not bool but ${ builtins.typeOf delay }." ;
                                                                                                                 mounts =
                                                                                                                     if builtins.typeOf mounts == "set" then
                                                                                                                         if builtins.sort ( a : b : a < b ) ( builtins.attrNames primary.mounts ) == builtins.sort ( a : b : a < b ) ( builtins.attrNames mounts )
@@ -445,6 +449,29 @@
                                                                             script = self + "/foobar.sh" ;
                                                                             tests =
                                                                                 {
+                                                                                    delay =
+                                                                                        ignore :
+                                                                                            {
+                                                                                                delay = true ;
+                                                                                                mounts =
+                                                                                                    {
+                                                                                                        "/singleton" =
+                                                                                                            {
+                                                                                                                expected = self + "/expected/foobar/directory/mounts/singleton" ;
+                                                                                                                initial =
+                                                                                                                    [
+                                                                                                                        "mkdir /mount/target"
+                                                                                                                    ] ;
+                                                                                                            } ;
+                                                                                                    } ;
+                                                                                                standard-error = self + "/expected/foobar/directory/standard-error" ;
+                                                                                                standard-output = self + "/expected/foobar/directory/standard-output" ;
+                                                                                                status = 9 ;
+                                                                                                test =
+                                                                                                    [
+                                                                                                        "candidate f30f8072a080c2e76d53e790954f9ac516ee6fdfec424db97021bf267119429247279d2dcdd5a1c18a8c1c8b0282099d1c88ce2471b9d4f00c22663911f1e541"
+                                                                                                    ] ;
+                                                                                            } ;
                                                                                     directory =
                                                                                         ignore :
                                                                                             {
