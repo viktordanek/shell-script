@@ -554,7 +554,19 @@
                                             foobar =
                                                 {
                                                     type = "app" ;
-                                                    program = builtins.toString ( pkgs.writeShellScript "hi" "${ pkgs.coreutils }/bin/echo hi" ) ;
+                                                    program =
+                                                        builtins.toString
+                                                            (
+                                                                pkgs.writeShellScript
+                                                                    "hi"
+                                                                    ''
+                                                                        export WORK=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
+                                                                        export OUT=${ foobar.tests } &&
+                                                                        ${ pkgs.coreutils }/bin/echo WORK=${ _environment-variable "WORK" } &&
+                                                                        ${ pkgs.coreutils }/bin/echo OUT=${ _environment-variable "OUT" } &&
+                                                                        ${ foobar.tests }/bin/observe.shelled.sh
+                                                                    ''
+                                                            ) ;
                                                 } ;
                                         } ;
                                     checks =
