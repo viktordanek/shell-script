@@ -452,6 +452,14 @@
                                     } ;
                             in
                                 {
+                                    apps =
+                                        {
+                                            foobar =
+                                                {
+                                                    type = "app" ;
+                                                    program = builtins.toString ( pkgs.writeShellScript "hi" "${ pkgs.coreutils }/bin/echo hi" ) ;
+                                                } ;
+                                        } ;
                                     checks =
                                         {
                                             foobar =
