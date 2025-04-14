@@ -16,6 +16,12 @@ ${MKDIR} /work/mounts &&
       if [ ! -e /work/mounts/${HASH}.standard-output ]
       then
         ${ECHO} missing standard-output for ${HASH} >> /work/ERROR
+      elif [ ! -L /work/mounts/${HASH}.sh ]
+      then
+        ${ECHO} missing symbolic link for ${HASH} >> /work/error
+      elif [ $( ${READLINK} /work/mounts/${HASH}.sh != ${OUT}/bin/initial.${HASH}.sh ) ]
+      then
+        ${ECHO} symbolic link for ${HASH} does not point to target
       elif [ ! -z "$( ${CAT} /work/mounts/${HASH}.standard-output ) }" ]
       then
         ${ECHO} non-empty standard-output for ${HASH} >> /work/ERROR &&
