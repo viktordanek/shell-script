@@ -250,7 +250,7 @@
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name } /mount "] ;
+                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" }/mounts/${ builtins.hashString "sha512" name } /mount" ] ;
                                                                                                                                                                         name = "initial" ;
                                                                                                                                                                         runScript = "${ _environment-variable "OUT" }/bin/initial.${ builtins.hashString "sha512" name }.wrapped.sh" ;
                                                                                                                                                                     } ;
@@ -560,11 +560,7 @@
                                                                 pkgs.writeShellScript
                                                                     "hi"
                                                                     ''
-                                                                        export WORK=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
-                                                                        export OUT=${ foobar.tests } &&
-                                                                        ${ pkgs.coreutils }/bin/echo WORK=${ _environment-variable "WORK" } &&
-                                                                        ${ pkgs.coreutils }/bin/echo OUT=${ _environment-variable "OUT" } &&
-                                                                        ${ foobar.tests }/bin/observe.shelled.sh
+                                                                        ${ pkgs.coreutils }/bin/echo ${ foobar.tests }
                                                                     ''
                                                             ) ;
                                                 } ;
