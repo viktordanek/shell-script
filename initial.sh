@@ -1,4 +1,4 @@
-${LN} --symbolic ${INITIAL} /initial/script &&
+${LN} --symbolic ${DRAFT} /initial/script &&
   if ${INITIAL} > /initial/standard-output 2> /initial/standard-error
   then
     ${ECHO} ${?} > /initial/status
@@ -29,4 +29,5 @@ ${LN} --symbolic ${INITIAL} /initial/script &&
   elif [ $( ${FIND} /mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
   then
     ${ECHO} over target >> /work/initial/ERROR
-  fi
+  fi &&
+  ${CP} --recursive /work/mount/target /work/initial/target
