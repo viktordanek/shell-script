@@ -16,4 +16,10 @@ fi &&
   elif [ ! -z "$( ${CAT} /record/standard-error )" ]
   then
     ${ECHO} non-empty standard-error >> /record/ERROR
+  elif [ ! -f /record/status ]
+  then
+    ${ECHO} missing status >> /record/ERROR
+  elif [ "$( ${CAT} /record/status )" != 0 ]
+  then
+    ${ECHO} non-zero status >> /record/ERROR
   fi
