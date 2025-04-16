@@ -303,8 +303,6 @@
                                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
                                                                                                                                         [
-                                                                                                                                        ]
-                                                                                                                                        [
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     observe =
@@ -351,54 +349,7 @@
                                                                                                                                             "export WORK=/build/work"
                                                                                                                                             "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
                                                                                                                                             "${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                                                                            "${ _environment-variable "MV" } ${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/work"
-                                                                                                                                        ]
-
-
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "${ _environment-variable "MKDIR" } ${ initial-path }" ) secondary.mounts ) )
-                                                                                                                                        [
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/test"
-                                                                                                                                        ]
-                                                                                                                                        (
-                                                                                                                                            let
-                                                                                                                                                mapper =
-                                                                                                                                                    name : { initial , initial-path , test-path , ... } :
-                                                                                                                                                        let
-                                                                                                                                                            user-environment =
-                                                                                                                                                                pkgs.buildFHSUserEnv
-                                                                                                                                                                    {
-                                                                                                                                                                        extraBwrapArgs = [ "--bind ${ initial-path } /mount" ] ;
-                                                                                                                                                                        name = "initial" ;
-                                                                                                                                                                        runScript = initial ;
-                                                                                                                                                                        targetPkgs = pkgs : [ pkgs.coreutils ] ;
-                                                                                                                                                                    } ;
-                                                                                                                                                            in "if ${ user-environment }/bin/initial > ${ test-path }.standard-output 2> ${ test-path }.standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ test-path }.status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ test-path }.status ; fi" ;
-                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
-                                                                                                                                        )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "if [ ! -e ${ initial-path }/target ] ; then ${ _environment-variable "ECHO" } ${ primary.uninitialized-target-error-message } >&2 && exit ${ primary.uninitialized-target-error-code } ; fi" ) secondary.mounts ) )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , ... } : "if [ $( ${ _environment-variable "FIND" } ${ initial-path } -mindepth 1 -maxdepth 1 | ${ _environment-variable "WC" } --lines ) != 1 ] ; then ${ _environment-variable "FIND" } ${ initial-path } -mindepth 1 -maxdepth 1 && ${ _environment-variable "ECHO" } ${ primary.over-initialized-target-error-message } >&2 && exit ${ primary.over-initialized-target-error-code } ; fi" ) secondary.mounts ) )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , host-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ host-path }" ) secondary.mounts ) )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { initial-path , test-path , ... } : "${ _environment-variable "CP" } --recursive ${ initial-path }/target ${ test-path }" ) secondary.mounts ) )
-                                                                                                                                        [
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "OUT" }/observed"
-                                                                                                                                            (
-                                                                                                                                                let
-                                                                                                                                                    user-environment =
-                                                                                                                                                        pkgs.buildFHSUserEnv
-                                                                                                                                                            {
-                                                                                                                                                                name = "observe" ;
-                                                                                                                                                                runScript = secondary.test ;
-                                                                                                                                                                targetPkgs = pkgs : [ pkgs.coreutils ( shell-script { mounts = secondary.mounts ; name = "candidate" ; profile = secondary.profile ; } ) ] ;
-                                                                                                                                                            } ;
-                                                                                                                                                    in
-                                                                                                                                                        "if ${ user-environment }/bin/observe > ${ _environment-variable "OUT" }/observed/standard-output 2> ${ _environment-variable "OUT" }/observed/standard-error ; then ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; else ${ _environment-variable "ECHO" } ${ _environment-variable "?" } > ${ _environment-variable "OUT" }/observed/status ; fi"
-                                                                                                                                            )
-                                                                                                                                        ]
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { host-path , vacuum-path , ... } : "if [ -e ${ host-path } ] ; then ${ _environment-variable "MKDIR" } ${ vacuum-path } && INPUT=${ host-path } OUTPUT=${ vacuum-path } ${ _environment-variable "VACUUM" } ; fi" ) secondary.mounts ) )
-                                                                                                                                        ( builtins.attrValues ( builtins.mapAttrs ( name : { observed-path , vacuum-path , ... } : "if [ -d ${ vacuum-path } ] ; then ${ _environment-variable "CP" } --recursive ${ vacuum-path } ${ observed-path } ; fi" ) secondary.mounts ) )
-                                                                                                                                        ##FIXME
-                                                                                                                                        [
-                                                                                                                                            "if [ -e ${ _environment-variable "OUT" }/work/SUCCESS ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/FAILURE ; fi"
+                                                                                                                                            "${ _environment-variable "CP" } --recursive ${ _environment-variable "WORK" }/* ${ _environment-variable "OUT" }"
                                                                                                                                         ]
                                                                                                                                     ]
                                                                                                                             ) ;
