@@ -7,7 +7,7 @@ ${FIND} /input | while read FILE
       then
         ${MKDIR} /output/${HASH}
       fi &&
-      ${MKDIR} /output/${HASH}/index
+      ${MKDIR} /output/${HASH}/${INDEX} &&
       ${ECHO} ${KEY} > /output/${HASH}/${INDEX}/key &&
       ${STAT} --format "%a" ${FILE} > /output/${HASH}/${INDEX}/stat &&
       ${CHMOD} 0777 /output/${HASH}/${INDEX}/key /output/${HASH}/${INDEX}/stat &&
