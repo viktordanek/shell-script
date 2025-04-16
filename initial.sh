@@ -1,31 +1,33 @@
-if ${INITIAL} > /record/standard-output 2> /record/standard-error
-then
-  ${ECHO} ${?} > /record/status
-else
-  ${ECHO} ${?} > /record/status
-fi &&
-  if [ ! -f /record/standard-output ]
+${MKDIR} /work/initial &&
+  ${MKDIR} /work/mount &&
+  if ${INITIAL} > /work/initial/standard-output 2> /work/initial/standard-error
   then
-    ${ECHO} missing standard-output >> /record/ERROR
-  elif [ ! -z "$( ${CAT} /record/standard-output )" ]
+    ${ECHO} ${?} > /work/initial/status
+  else
+    ${ECHO} ${?} > /work/initial/status
+  fi &&
+  if [ ! -f /work/initial/standard-output ]
   then
-    ${ECHO} non-empty standard-output >> /record/ERROR
-  elif [ ! -f /record/standard-error ]
+    ${ECHO} missing standard-output >> /work/initial/ERROR
+  elif [ ! -z "$( ${CAT} /work/initial/standard-output )" ]
   then
-    ${ECHO} missing standard-error >> /record/ERROR
-  elif [ ! -z "$( ${CAT} /record/standard-error )" ]
+    ${ECHO} non-empty standard-output >> /work/initial/ERROR
+  elif [ ! -f /work/initial/standard-error ]
   then
-    ${ECHO} non-empty standard-error >> /record/ERROR
-  elif [ ! -f /record/status ]
+    ${ECHO} missing standard-error >> /work/initial/ERROR
+  elif [ ! -z "$( ${CAT} /work/initial/standard-error )" ]
   then
-    ${ECHO} missing status >> /record/ERROR
-  elif [ "$( ${CAT} /record/status )" != 0 ]
+    ${ECHO} non-empty standard-error >> /work/initial/ERROR
+  elif [ ! -f /work/initial/status ]
   then
-    ${ECHO} non-zero status >> /record/ERROR
-  elif [ ! -e /mount/target ]
+    ${ECHO} missing status >> /work/initial/ERROR
+  elif [ "$( ${CAT} /work/initial/status )" != 0 ]
   then
-    ${ECHO} no target >> /record/ERROR
-  elif [ $( ${FIND} /mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
+    ${ECHO} non-zero status >> /work/initial/ERROR
+  elif [ ! -e /work/mount/target ]
   then
-    ${ECHO} over target >> /record/ERROR
+    ${ECHO} no target >> /work/initial/ERROR
+  elif [ $( ${FIND} /work/mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
+  then
+    ${ECHO} over target >> /work/initial/ERROR
   fi
