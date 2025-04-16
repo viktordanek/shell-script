@@ -277,6 +277,23 @@
                                                                                                                                             "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum2.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum.sh"
                                                                                                                                             "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh"
                                                                                                                                         ]
+                                                                                                                                        (
+                                                                                                                                            let
+                                                                                                                                                mapper =
+                                                                                                                                                    name : { ... } :
+                                                                                                                                                        let
+                                                                                                                                                            user-environment =
+                                                                                                                                                                pkgs.buildFHSUserEnv
+                                                                                                                                                                    {
+                                                                                                                                                                        extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name }/target /input" "--bind /work/final/mounts/${ builtins.hashString "sha512" name } /output" ] ;
+                                                                                                                                                                        name = "vacuum" ;
+                                                                                                                                                                        runScript = "${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh" ;
+                                                                                                                                                                    } ;
+                                                                                                                                                            in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/vacuum ${ _environment-variable "OUT" }/bin/vacuum.${ builtins.hashString "sha512" name }.shelled.sh" ;
+                                                                                                                                                in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
+                                                                                                                                        )
+                                                                                                                                        [
+                                                                                                                                        ]
                                                                                                                                         [
                                                                                                                                             (
                                                                                                                                                 let
