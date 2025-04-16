@@ -22,4 +22,7 @@ fi &&
   elif [ "$( ${CAT} /record/status )" != 0 ]
   then
     ${ECHO} non-zero status >> /record/ERROR
+  elif [ ! -e /mount/target ]
+  then
+    ${ECHO} no target >> /record/ERROR
   fi
