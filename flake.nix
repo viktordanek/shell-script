@@ -286,7 +286,6 @@
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" } /work" ] ;
                                                                                                                                                                 name = "observe" ;
-                                                                                                                                                                # profile = "export OUT=${ _environment-variable "OUT" }" ;
                                                                                                                                                                 runScript = "${ _environment-variable "OUT" }/bin/observe.wrapped.sh" ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
@@ -472,6 +471,7 @@
                                                                                             ] ;
                                                                             }
                                                                             tests ;
+                                                                    observed = true ;
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
