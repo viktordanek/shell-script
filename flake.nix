@@ -260,6 +260,7 @@
                                                                                                                                         )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "LN" } --symbolic ${ secondary.test } ${ _environment-variable "OUT" }/bin/test.sh"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/test.sh ${ _environment-variable "OUT" }/bin/test.wrapped.sh"
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             (
