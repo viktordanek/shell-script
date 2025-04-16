@@ -259,6 +259,9 @@
                                                                                                                                                 in builtins.attrValues ( builtins.mapAttrs mapper secondary.mounts )
                                                                                                                                         )
                                                                                                                                         [
+                                                                                                                                            "${ _environment-variable "LN" } --symbolic ${ secondary.test } ${ _environment-variable "OUT" }/bin/test.sh"
+                                                                                                                                        ]
+                                                                                                                                        [
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     observe =
@@ -443,7 +446,7 @@
                                                                                                                     if builtins.typeOf status == "int" then builtins.toString status
                                                                                                                     else builtins.throw "status is not int but ${ builtins.typeOf status }." ;
                                                                                                                 test =
-                                                                                                                    if builtins.typeOf test == "string" then test
+                                                                                                                    if builtins.typeOf test == "string" then pkgs.writeShellScript "tests" test
                                                                                                                     else if builtins.typeOf test == "list" then
                                                                                                                         let
                                                                                                                             mapper = value : if builtins.typeOf value == "string" then value else builtins.throw "test is not string but ${ builtins.typeOf value }." ;
