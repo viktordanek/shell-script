@@ -582,7 +582,7 @@
                                                                         export WORK=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
                                                                             ${ pkgs.coreutils }/bin/echo export WORK=${ _environment-variable "WORK" } &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ foobar.tests }/ &&
-                                                                            ${ foobar.tests }
+                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests }
                                                                     ''
                                                             ) ;
                                                 } ;
