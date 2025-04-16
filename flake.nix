@@ -274,6 +274,10 @@
                                                                                                                                             "makeWrapper ${ pkgs.writeShellScript "test" ( builtins.readFile ( self + "/test.sh" ) ) } ${ _environment-variable "OUT" }/bin/test.guarded.sh --set ECHO ${ _environment-variable "ECHO" } --set TEST ${ _environment-variable "OUT" }/bin/test.wrapped.sh"
                                                                                                                                         ]
                                                                                                                                         [
+                                                                                                                                            "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum2.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum.sh"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh"
+                                                                                                                                        ]
+                                                                                                                                        [
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     observe =

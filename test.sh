@@ -1,4 +1,4 @@
-if ${TEST} > /work/final/standard-output
+if ${TEST} > /work/final/standard-output 2> /work/final/standard-error
 then
   ${ECHO} ${?} > /work/final/status
 else
