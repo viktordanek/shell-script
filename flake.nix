@@ -345,12 +345,19 @@
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
                                                                                                                                             )
                                                                                                                                         ]
-                                                                                                                                        [
-                                                                                                                                            "export WORK=/build/work"
-                                                                                                                                            "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
-                                                                                                                                            "${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                                                                            "${ _environment-variable "CP" } --recursive ${ _environment-variable "WORK" }/* ${ _environment-variable "OUT" }"
-                                                                                                                                        ]
+                                                                                                                                        (
+                                                                                                                                            if secondary.delay then
+                                                                                                                                                [
+                                                                                                                                                    "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/DELAYED"
+                                                                                                                                                ]
+                                                                                                                                            else
+                                                                                                                                                [
+                                                                                                                                                    "export WORK=/build/work"
+                                                                                                                                                    "${ _environment-variable "MKDIR" } ${ _environment-variable "WORK" }"
+                                                                                                                                                    "${ _environment-variable "OUT" }/bin/observe.shelled.sh"
+                                                                                                                                                    "${ _environment-variable "CP" } --recursive ${ _environment-variable "WORK" }/* ${ _environment-variable "OUT" }"
+                                                                                                                                                ]
+                                                                                                                                        )
                                                                                                                                     ]
                                                                                                                             ) ;
                                                                                                                 in
@@ -609,14 +616,18 @@
                                                                             ${ pkgs.coreutils }/bin/echo ${ foobar.tests } &&
                                                                             if [ -f ${ foobar.tests }/SUCCESS ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ foobar.tests }."
+                                                                                ${ pkgs.coreutils }/bin/echo "There was success in ${ foobar.tests }." &&
+                                                                                exit 63
+                                                                            elif [ -f ${ foobar.tests }/DELAYED ]
+                                                                            then
+                                                                                ${ pkgs.coreutils }/bin/echo "There was delay in ${ foobar.tests }."
                                                                             elif [ -f ${ foobar.tests }/FAILURE ]
                                                                             then
-                                                                                ${ pkgs.coreutils }/bin/echo "There was a predicted failure in ${ foobar.tests }" >&2 &&
-                                                                                    exit 63
+                                                                                ${ pkgs.coreutils }/bin/echo "There was failure in ${ foobar.tests }" >&2 &&
+                                                                                    exit 61
                                                                             else
-                                                                                ${ pkgs.coreutils }/bin/echo "There was an unpredicted failure in ${ foobar.tests }" >&2 &&
-                                                                                    exit 62
+                                                                                ${ pkgs.coreutils }/bin/echo "There was error in ${ foobar.tests }" >&2 &&
+                                                                                    exit 60
                                                                             fi
                                                                     '' ;
                                                         name = "foobar" ;
