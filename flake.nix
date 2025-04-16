@@ -286,6 +286,7 @@
                                                                                                                                                             {
                                                                                                                                                                 extraBwrapArgs = [ "--bind ${ _environment-variable "WORK" } /work" ] ;
                                                                                                                                                                 name = "observe" ;
+                                                                                                                                                                profile = "export OUT=${ _environment-variable "OUT" }" ;
                                                                                                                                                                 runScript = "${ _environment-variable "OUT" }/bin/observe.wrapped.sh" ;
                                                                                                                                                             } ;
                                                                                                                                                     in "${ _environment-variable "LN" } --symbolic ${ user-environment }/bin/observe ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
@@ -578,7 +579,10 @@
                                                                 pkgs.writeShellScript
                                                                     "hi"
                                                                     ''
-                                                                        ${ pkgs.coreutils }/bin/echo ${ foobar.tests }
+                                                                        export WORK=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
+                                                                            ${ pkgs.coreutils }/bin/echo export WORK=${ _environment-variable "WORK" } &&
+                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests }/ &&
+                                                                            ${ foobar.tests }
                                                                     ''
                                                             ) ;
                                                 } ;
