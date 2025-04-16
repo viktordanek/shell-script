@@ -30,4 +30,4 @@ ${LN} --symbolic ${DRAFT} /initial/script &&
   then
     ${ECHO} over target >> /work/initial/ERROR
   fi &&
-  ${CP} --recursive /work/mount/target /work/initial/target
+  ${CP} --recursive /mount/target /initial/target
