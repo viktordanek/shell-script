@@ -1,5 +1,3 @@
-ls / &&
-${ECHO} ${LN} --symbolic ${INITIAL} /initial/script &&
 ${LN} --symbolic ${INITIAL} /initial/script &&
   if ${INITIAL} > /initial/standard-output 2> /initial/standard-error
   then
