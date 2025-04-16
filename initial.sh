@@ -25,4 +25,7 @@ fi &&
   elif [ ! -e /mount/target ]
   then
     ${ECHO} no target >> /record/ERROR
+  elif [ $( ${FIND} /mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
+  then
+    ${ECHO} over target >> /record/ERROR
   fi
