@@ -1,5 +1,13 @@
-${MKDIR} /work/initial &&
-  ${MKDIR} /work/mount &&
+if [ ! -d /work/initial ]
+then
+  ${MKDIR} /work/initial
+fi &&
+  ${MKDIR} /work/initial/${HASH} &&
+  if [ ! -d /work/mounts ]
+  then
+    ${MKDIR} /work/mounts
+  fi &&
+  ${MKDIR} /work/mounts/${HASH} &&
   if ${INITIAL} > /work/initial/standard-output 2> /work/initial/standard-error
   then
     ${ECHO} ${?} > /work/initial/status
