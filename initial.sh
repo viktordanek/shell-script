@@ -1,41 +1,34 @@
-if [ ! -d /work/initial ]
-then
-  ${MKDIR} /work/initial
-fi &&
-  ${MKDIR} /work/initial/${HASH} &&
-  if [ ! -d /work/mounts ]
+ls / &&
+${ECHO} ${LN} --symbolic ${INITIAL} /initial/script &&
+${LN} --symbolic ${INITIAL} /initial/script &&
+  if ${INITIAL} > /initial/standard-output 2> /initial/standard-error
   then
-    ${MKDIR} /work/mounts
-  fi &&
-  ${MKDIR} /work/mounts/${HASH} &&
-  if ${INITIAL} > /work/initial/standard-output 2> /work/initial/standard-error
-  then
-    ${ECHO} ${?} > /work/initial/status
+    ${ECHO} ${?} > /initial/status
   else
-    ${ECHO} ${?} > /work/initial/status
+    ${ECHO} ${?} > /initial/status
   fi &&
-  if [ ! -f /work/initial/standard-output ]
+  if [ ! -f /initial/standard-output ]
   then
     ${ECHO} missing standard-output >> /work/initial/ERROR
-  elif [ ! -z "$( ${CAT} /work/initial/standard-output )" ]
+  elif [ ! -z "$( ${CAT} /initial/standard-output )" ]
   then
     ${ECHO} non-empty standard-output >> /work/initial/ERROR
-  elif [ ! -f /work/initial/standard-error ]
+  elif [ ! -f /initial/standard-error ]
   then
     ${ECHO} missing standard-error >> /work/initial/ERROR
-  elif [ ! -z "$( ${CAT} /work/initial/standard-error )" ]
+  elif [ ! -z "$( ${CAT} /initial/standard-error )" ]
   then
     ${ECHO} non-empty standard-error >> /work/initial/ERROR
-  elif [ ! -f /work/initial/status ]
+  elif [ ! -f /initial/status ]
   then
     ${ECHO} missing status >> /work/initial/ERROR
-  elif [ "$( ${CAT} /work/initial/status )" != 0 ]
+  elif [ "$( ${CAT} /initial/status )" != 0 ]
   then
     ${ECHO} non-zero status >> /work/initial/ERROR
-  elif [ ! -e /work/mount/target ]
+  elif [ ! -e /mount/target ]
   then
     ${ECHO} no target >> /work/initial/ERROR
-  elif [ $( ${FIND} /work/mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
+  elif [ $( ${FIND} /mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
   then
     ${ECHO} over target >> /work/initial/ERROR
   fi
