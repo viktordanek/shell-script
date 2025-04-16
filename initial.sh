@@ -1,6 +1,13 @@
-if ${INITIAL} > ${RECORD}/standard-output 2> ${RECORD}/standard-error
+if ${INITIAL} > /record/standard-output 2> /record/standard-error
 then
-  ${ECHO} ${?} > ${RECORD}/status
+  ${ECHO} ${?} > /record/status
 else
-  ${ECHO} ${?} > ${RECORD}/status
-fi
+  ${ECHO} ${?} > /record/status
+fi &&
+  if [ ! -e /record/standard-output ]
+  then
+    ${ECHO} missing standard-output >> /record/ERROR
+  elif [ ! -z "$( ${CAT} /record/standard-output )" ]
+  then
+    ${ECHO} non-empty standard-output >> /record/ERROR
+  fi
