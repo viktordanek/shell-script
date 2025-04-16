@@ -313,6 +313,7 @@
                                                                                                                                                                         [
                                                                                                                                                                             "${ _environment-variable "MKDIR" } /work/final"
                                                                                                                                                                             "${ _environment-variable "OUT" }/bin/test.guarded.sh"
+                                                                                                                                                                            "${ _environment-variable "MKDIR" } /work/final/mounts"
                                                                                                                                                                         ]
                                                                                                                                                                     ]
                                                                                                                                                             ) ;
