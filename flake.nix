@@ -523,12 +523,12 @@
                                             } ;
                                         mounts =
                                             {
-                                                input =
+                                                "/input" =
                                                     {
                                                         host-path = _environment-variable "INPUT" ;
                                                         is-read-only = true ;
                                                     } ;
-                                                output =
+                                                "/output" =
                                                     {
                                                         host-path = _environment-variable "OUTPUT" ;
                                                         is-read-only = false ;
@@ -549,13 +549,13 @@
                                                     ( string "UUID" "706fd7726e3d7fd7fbd98a95c3222049fbe419934cbd41dcf324a6a004b69b561b6304d2b4030df318ee1cbd20cd74a1524d1f74116a2b900979ba66ed4eadc8" )
                                                     ( string "WC" "${ pkgs.coreutils }/bin/wc" )
                                                 ] ;
-                                        script = self + "/vacuum.sh" ;
+                                        script = self + "/vacuum2.sh" ;
                                         tests =
                                             ignore :
                                                 {
                                                     mounts =
                                                         {
-                                                            input =
+                                                            "/input" =
                                                                 {
                                                                     expected = self + "/expected/vacuum/mounts/input" ;
                                                                     initial =
@@ -563,7 +563,7 @@
                                                                             "echo 3275d3d7a12620ea996ca571c341cd66258f413f11796a3a596de316fbd4477b34b1251a10a38044b98e1f757343102f4848e77961aae44e916ef0b2b1c2070c > /mount/target"
                                                                         ] ;
                                                                 } ;
-                                                            output =
+                                                            "/output" =
                                                                 {
                                                                     expected = self + "/expected/vacuum/mounts/output" ;
                                                                     initial =
