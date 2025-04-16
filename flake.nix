@@ -260,7 +260,17 @@
                                                                                                                                         )
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "LN" } --symbolic ${ secondary.test } ${ _environment-variable "OUT" }/bin/test.sh"
-                                                                                                                                            # "makeWrapper ${ _environment-variable "OUT" }/bin/test.sh ${ _environment-variable "OUT" }/bin/test.wrapped.sh --set PATH:${ pkgs.coreutils }/bin:${ shell-script { name = "candidate" ; mounts = builtins.attrValues ( builtins.mapAttrs ( name : { is-read-only , ... } : { host-path = "/work/mounts/${ builtins.hashString "sha512" name }" ; is-read-only = is-read-only ; profile = secondary.profile ; } ) secondary.mounts ) ; } }/bin"
+                                                                                                                                            (
+                                                                                                                                                let
+                                                                                                                                                    candidate =
+                                                                                                                                                        shell-script
+                                                                                                                                                            {
+                                                                                                                                                                mounts = builtins.mapAttrs ( name : { is-read-only , ... } : { host-path = "/work/mounts/${ builtins.hashString "sha512" name }/target" ; is-read-only = is-read-only ; } ) ;
+                                                                                                                                                                name = "candidate" ;
+                                                                                                                                                                profile = secondary.profile ;
+                                                                                                                                                            } ;
+                                                                                                                                                    in "makeWrapper ${ _environment-variable "OUT" }/bin/test.sh ${ _environment-variable "OUT" }/bin/test.wrapped.sh --set PATH:${ pkgs.coreutils }/bin"
+                                                                                                                                            )
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             (
