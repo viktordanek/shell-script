@@ -41,6 +41,29 @@
                                         script = self + "/foobar.sh" ;
                                         tests =
                                             {
+                                                delay =
+                                                    ignore :
+                                                        {
+                                                            delay = true ;
+                                                            mounts =
+                                                                {
+                                                                    "/singleton" =
+                                                                        {
+                                                                            expected = self + "/expected/foobar/file/mounts/singleton" ;
+                                                                            initial =
+                                                                                [
+                                                                                    "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
+                                                                                ] ;
+                                                                        } ;
+                                                                } ;
+                                                            standard-error = self + "/expected/foobar/file/standard-error" ;
+                                                            standard-output = self + "/expected/foobar/file/standard-output" ;
+                                                            status = 168 ;
+                                                            test =
+                                                                [
+                                                                    "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                ] ;
+                                                        } ;
                                                 directory =
                                                     ignore :
                                                         {
@@ -262,7 +285,9 @@
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum2.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum.sh"
-                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
+                                                                                                                                            "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum3.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum3.sh"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum3.sh ${ _environment-variable "OUT" }/bin/vacuum3 --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
                                                                                                                                         ]
                                                                                                                                         (
                                                                                                                                             let
@@ -272,7 +297,7 @@
                                                                                                                                                             user-environment =
                                                                                                                                                                 pkgs.buildFHSUserEnv
                                                                                                                                                                     {
-                                                                                                                                                                        extraBwrapArgs = [ "--bind /work/mounts/${ builtins.hashString "sha512" name }/target /input" "--bind /work/final/mounts/${ builtins.hashString "sha512" name } /output" ] ;
+                                                                                                                                                                        extraBwrapArgs = [ "--ro-bind /work/mounts/${ builtins.hashString "sha512" name }/target /input" "--bind /work/final/mounts/${ builtins.hashString "sha512" name } /output" ] ;
                                                                                                                                                                         name = "vacuum" ;
                                                                                                                                                                         runScript = "${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh" ;
                                                                                                                                                                     } ;
@@ -302,6 +327,7 @@
                                                                                                                                                                         ]
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /work/final/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/vacuum.${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
+                                                                                                                                                                        # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "INPUT=/work/mounts/${ builtins.hashString "sha512" name }/target OUTPUT=/work/final/mounts/${ builtins.hashString "sha512" name } ${ _environment-variable "OUT" }/bin/vacuum3" ) secondary.mounts ) )
                                                                                                                                                                         [
                                                                                                                                                                             "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "WORK" }/final > ${ _environment-variable "WORK" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/FAILURE ; fi"
                                                                                                                                                                         ]

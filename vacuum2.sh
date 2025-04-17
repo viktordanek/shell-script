@@ -13,7 +13,7 @@ ${FIND} /input | while read FILE
       ${CHMOD} 0777 /output/${HASH}/${INDEX}/key /output/${HASH}/${INDEX}/stat &&
       if [ -f ${FILE} ]
       then
-        ${CAT} ${FILE} > /output/${HASH}/${INDEX}/cat &&
+        ${CAT} ${FILE} > /output/${HASH}/${INDEX}/cat
           ${CHMOD} 0777 /output/${HASH}/${INDEX}/cat
       fi
   done
