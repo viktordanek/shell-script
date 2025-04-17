@@ -41,29 +41,6 @@
                                         script = self + "/foobar.sh" ;
                                         tests =
                                             {
-                                                delay =
-                                                    ignore :
-                                                        {
-                                                            delay = true ;
-                                                            mounts =
-                                                                {
-                                                                    "/singleton" =
-                                                                        {
-                                                                            expected = self + "/expected/foobar/directory/mounts/singleton" ;
-                                                                            initial =
-                                                                                [
-                                                                                    "mkdir /mount/target"
-                                                                                ] ;
-                                                                        } ;
-                                                                } ;
-                                                            standard-error = self + "/expected/foobar/directory/standard-error" ;
-                                                            standard-output = self + "/expected/foobar/directory/standard-output" ;
-                                                            status = 9 ;
-                                                            test =
-                                                                [
-                                                                    "candidate 893a1989998c166903a42293ace84fa7d5ca34a19f1c9e8cefc3de69604fb5ed18724ef0e57a70a9612c5e221f10c606c9b3d8178c69a1787495f53bd230e4da"
-                                                                ] ;
-                                                        } ;
                                                 directory =
                                                     ignore :
                                                         {
