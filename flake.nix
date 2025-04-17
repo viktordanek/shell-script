@@ -509,6 +509,7 @@
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 $out/bin/constructors &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "observe.sh" ( builtins.concatStringsSep " &&\n\t" observe ) } $out/bin/observe.sh &&
+                                                                                makeWrapper $out/bin/observe.sh $out/bin/observe --set MKTEMP ${ pkgs.coreutils }/bin/mktemp --set RM ${ pkgs.coreutils }/bin/rm &&
                                                                                 ALL=${ builtins.toString all } &&
                                                                                 if [ ! -d $out/links ]
                                                                                 then
