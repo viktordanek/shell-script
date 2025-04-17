@@ -609,8 +609,7 @@
                                                                 pkgs.writeShellScript
                                                                     "foobar"
                                                                     ''
-                                                                        ${ pkgs.coreutils }/bin/echo ${ foobar.tests }/ &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests }
+                                                                        ${ foobar.tests }/bin/observe
                                                                     ''
                                                             ) ;
                                                 } ;
