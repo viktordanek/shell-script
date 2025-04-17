@@ -49,15 +49,15 @@
                                                                 {
                                                                     "/singleton" =
                                                                         {
-                                                                            expected = self + "/expected/foobar/file/mounts/singleton" ;
+                                                                            expected = self + "/expected/foobar/delay/mounts/singleton" ;
                                                                             initial =
                                                                                 [
-                                                                                    "echo 0d157cd5708ec01d0b865b8fbef69d7b28713423ec011a86a5278cf566bcbd8e79a2daa996d7b1b8224088711b75fda91bdc1d41d0e53dd7118cfbdec8296044 > /mount/target"
+                                                                                    "echo e74fcd9b58590b3f2bc961c40b63741057d4659d630042d0283f32f42c2a1854eb948dd7ea7f65a18d38e2e0c872c4a79dd6b0ba0799b73540407430090b2f0f > /mount/target"
                                                                                 ] ;
                                                                         } ;
                                                                 } ;
-                                                            standard-error = self + "/expected/foobar/file/standard-error" ;
-                                                            standard-output = self + "/expected/foobar/file/standard-output" ;
+                                                            standard-error = self + "/expected/foobar/delay/standard-error" ;
+                                                            standard-output = self + "/expected/foobar/delay/standard-output" ;
                                                             status = 168 ;
                                                             test =
                                                                 [
@@ -497,7 +497,7 @@
                                                                                         [
                                                                                             "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
                                                                                             "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
-                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && export WORK=$( ${ _environment-variable "MKTEMP" } --directory ) && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && if ${ _environment-variable "TEST" } ; then ${ _environment-variable "ECHO" } passed ; else ${ _environment-variable "ECHO" } failed ; fi ; done"
+                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && export WORK=$( ${ _environment-variable "MKTEMP" } --directory ) && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && ${ _environment-variable "TEST" } && if [ -f ${ _environment-variable "WORK" }/SUCCESS ] ; then ${ _environment-variable "ECHO" } SUCCESS ; elif [ -e ${ _environment-variable "WORK" }/FAILURE ] ; then ${ _environment-variable "ECHO" } FAILURE && exit 63 ; else ${ _environment-variable "ECHO" } ERROR && exit 62 ; fi ; done"
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
                                                                             }
