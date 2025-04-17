@@ -486,7 +486,21 @@
                                                                                             ] ;
                                                                             }
                                                                             tests ;
-                                                                    observe = true ;
+                                                                    observe =
+                                                                        _visitor
+                                                                            {
+                                                                                lambda =
+                                                                                    path : value :
+                                                                                        [
+                                                                                            "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
+                                                                                            "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
+                                                                                        ] ;
+                                                                            }
+                                                                            {
+                                                                                list = path : list : builtins.concatLists list ;
+                                                                                set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
+                                                                            }
+                                                                            tests ;
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
@@ -494,6 +508,7 @@
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors.sh" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 $out/bin/constructors &&
+                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "observe.sh" ( builtins.concatStringsSep " &&\n\t" observe ) } $out/bin/observe.sh &&
                                                                                 ALL=${ builtins.toString all } &&
                                                                                 if [ ! -d $out/links ]
                                                                                 then
