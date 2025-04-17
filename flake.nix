@@ -494,13 +494,7 @@
                                                                                         [
                                                                                             "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
                                                                                             "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
-                                                                                            (
-                                                                                                let
-                                                                                                    derivation = "$( ${ _environment-variable "FIND" } ${ parent } -mindepth 1 -maxdepth 1 -type l -exec ${ _environment-variable "BASENAME" } {} \; )" ;
-                                                                                                    parent = builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) ;
-                                                                                                    in
-                                                                                                        "${ builtins.concatStringsSep "/" [ parent derivation "bin" "observe.shelled.sh" ] }"
-                                                                                            )
+                                                                                            "if ${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type d -exec {}/bin/observe.shelled.sh \\; ; then ${ _environment-variable "ECHO" } passed ; fi"
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
                                                                             }
