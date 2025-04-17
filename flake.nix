@@ -61,7 +61,7 @@
                                                             status = 9 ;
                                                             test =
                                                                 [
-                                                                    "candidate f30f8072a080c2e76d53e790954f9ac516ee6fdfec424db97021bf267119429247279d2dcdd5a1c18a8c1c8b0282099d1c88ce2471b9d4f00c22663911f1e541"
+                                                                    "candidate 893a1989998c166903a42293ace84fa7d5ca34a19f1c9e8cefc3de69604fb5ed18724ef0e57a70a9612c5e221f10c606c9b3d8178c69a1787495f53bd230e4da"
                                                                 ] ;
                                                         } ;
                                                 directory =
@@ -494,7 +494,8 @@
                                                                                         [
                                                                                             "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
                                                                                             "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
-                                                                                            "if ${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type d -exec {}/bin/observe.shelled.sh \\; ; then ${ _environment-variable "ECHO" } passed ; fi"
+                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l -exec ${ _environment-variable "ECHO" } {}/bin/observe.shelled.sh \\;"
+                                                                                            "if ${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type d -exec {}/bin/observe.shelled.sh \\; ; then ${ _environment-variable "ECHO" } passed ; else ${ _environment-variable "ECHO" } failed && exit 64 ; fi"
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
                                                                             }
