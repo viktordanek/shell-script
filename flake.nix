@@ -486,7 +486,7 @@
                                                                                             ] ;
                                                                             }
                                                                             tests ;
-                                                                    observed = true ;
+                                                                    observe = true ;
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
@@ -592,11 +592,9 @@
                                                         builtins.toString
                                                             (
                                                                 pkgs.writeShellScript
-                                                                    "hi"
+                                                                    "foobar"
                                                                     ''
-                                                                        export WORK=$( ${ pkgs.coreutils }/bin/mktemp --directory ) &&
-                                                                            ${ pkgs.coreutils }/bin/echo export WORK=${ _environment-variable "WORK" } &&
-                                                                            ${ pkgs.coreutils }/bin/echo ${ foobar.tests }/ &&
+                                                                        ${ pkgs.coreutils }/bin/echo ${ foobar.tests }/ &&
                                                                             ${ pkgs.coreutils }/bin/echo ${ foobar.tests }
                                                                     ''
                                                             ) ;
