@@ -493,6 +493,14 @@
                                                                                     path : value :
                                                                                         [
                                                                                             "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
+                                                                                            "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
+                                                                                            (
+                                                                                                let
+                                                                                                    derivation = "$( ${ _environment-variable "FIND" } ${ parent } -mindepth 1 -maxdepth 1 -type l -exec ${ _environment-variable "BASENAME" } {} \; )" ;
+                                                                                                    parent = builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) ;
+                                                                                                    in
+                                                                                                        "${ builtins.concatStringsSep "/" [ parent derivation "bin" "observe.shelled.sh" ] }"
+                                                                                            )
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
                                                                             }
@@ -509,7 +517,7 @@
                                                                                 makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
                                                                                 $out/bin/constructors &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "observe.sh" ( builtins.concatStringsSep " &&\n\t" observe ) } $out/bin/observe.sh &&
-                                                                                makeWrapper $out/bin/observe.sh $out/bin/observe --set MKTEMP ${ pkgs.coreutils }/bin/mktemp --set RM ${ pkgs.coreutils }/bin/rm &&
+                                                                                makeWrapper $out/bin/observe.sh $out/bin/observe --set BASENAME ${ pkgs.coreutils }/bin/basename --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set MKTEMP ${ pkgs.coreutils }/bin/mktemp --set OUT $out --set READLINK ${ pkgs.coreutils }/bin/readlink --set RM ${ pkgs.coreutils }/bin/rm &&
                                                                                 ALL=${ builtins.toString all } &&
                                                                                 if [ ! -d $out/links ]
                                                                                 then
