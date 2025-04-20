@@ -3,17 +3,18 @@ ${FIND} /input | while read FILE
     KEY=${FILE#/input} &&
       HASH=$( ${ECHO} ${KEY} ${UUID} | ${SHA512SUM} | ${CUT} --bytes -128 ) &&
       INDEX=$( ${FIND} /output -mindepth 2 -maxdepth 2 -type d -name "${HASH}" | ${WC} --lines ) &&
-      if [ ${INDEX} == 0 ]
+      if [ ! -d /output/${INDEX} ]
       then
-        ${MKDIR} /output/${HASH}
+        ${MKDIR} /output/${INDEX} &&
+          ${CHMOD} 0777 /output/${INDEX}
       fi &&
-      ${MKDIR} /output/${HASH}/${INDEX} &&
-      ${ECHO} ${KEY} > /output/${HASH}/${INDEX}/key &&
-      ${STAT} --format "%a" ${FILE} > /output/${HASH}/${INDEX}/stat &&
-      ${CHMOD} 0777 /output/${HASH}/${INDEX}/key /output/${HASH}/${INDEX}/stat &&
+      ${MKDIR} /output/${INDEX}/${HASH}
+      ${ECHO} ${KEY} > /output/${INDEX}/${HASH}/key &&
+      ${STAT} --format "%a" ${FILE} > /output/${INDEX}/${HASH}/stat &&
+      ${CHMOD} 0777 /output/${INDEX}/${HASH} /output/${INDEX}/${HASH}/key /output/${INDEX}/${HASH}/stat &&
       if [ -f ${FILE} ]
       then
-        ${CAT} ${FILE} > /output/${HASH}/${INDEX}/cat
-          ${CHMOD} 0777 /output/${HASH}/${INDEX}/cat
+        ${CAT} ${FILE} > /output/${INDEX}/${HASH}/cat
+          ${CHMOD} 0777 /output/${INDEX}/${HASH}/cat
       fi
   done
