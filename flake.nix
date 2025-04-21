@@ -166,12 +166,13 @@
                                                     else if builtins.typeOf profile == "null" then ""
                                                     else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                 script =
-                                                    if builtins.typeOf script == "string" then
+                                                    if builtins.typeOf script == "set" then builtins.toString script
+                                                    else if builtins.typeOf script == "string" then
                                                         if builtins.match "^/.*" script != null then
                                                             if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
                                                             else builtins.throw "script is an absolute path but there does not exist a path for ${ script }."
                                                         else pkgs.writeShellScript "script" script
-                                                    else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
+                                                    else builtins.throw "script is not set, string but ${ builtins.typeOf script }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
                                                     else if builtins.typeOf tests == "list" then tests
