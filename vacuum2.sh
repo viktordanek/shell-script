@@ -9,6 +9,7 @@ ${FIND} /input | while read FILE
           ${CHMOD} 0777 /output/${INDEX}
       fi &&
       ${MKDIR} /output/${INDEX}/${HASH} &&
+      # ${DATE} +%s%N | ${SHA512SUM} | ${CUT} --bytes -128 > /output/${INDEX}/${HASH}/trace &&
       ${ECHO} ${KEY} > /output/${INDEX}/${HASH}/key &&
       ${STAT} --format "%a" ${FILE} > /output/${INDEX}/${HASH}/stat &&
       ${CHMOD} 0777 /output/${INDEX}/${HASH} /output/${INDEX}/${HASH}/key /output/${INDEX}/${HASH}/stat &&
