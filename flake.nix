@@ -620,6 +620,11 @@
                                                                     ''
                                                             ) ;
                                                 } ;
+                                            vacuum =
+                                                {
+                                                    type = "app" ;
+                                                    program = vacuum ;
+                                                } ;
                                         } ;
                                     checks =
                                         {
