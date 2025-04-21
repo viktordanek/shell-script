@@ -117,6 +117,7 @@
                                     name ,
                                     profile ? null ,
                                     script ,
+                                    sleep ? 0 ,
                                     tests ? null ,
                                     over-initialized-target-error-code ? 66 ,
                                     over-initialized-target-error-message ? "Over Initizialized Target" ,
@@ -173,6 +174,9 @@
                                                             else builtins.throw "script is an absolute path but there does not exist a path for ${ script }."
                                                         else pkgs.writeShellScript "script" script
                                                     else builtins.throw "script is not set, string but ${ builtins.typeOf script }." ;
+                                                sleep =
+                                                    if builtins.typeOf sleep == "int" then builtins.toString sleep
+                                                    else builtins.throw "sleep is not int but ${ builtins.typeOf sleep }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
                                                     else if builtins.typeOf tests == "list" then tests
@@ -333,7 +337,7 @@
                                                                                                                                                                         ]
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /work/final/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
                                                                                                                                                                         [
-                                                                                                                                                                            "${ _environment-variable "SLEEP" } 10s"
+                                                                                                                                                                            "${ _environment-variable "SLEEP" } ${ primary.sleep }s"
                                                                                                                                                                         ]
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/vacuum.${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
                                                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "INPUT=/work/mounts/${ builtins.hashString "sha512" name }/target OUTPUT=/work/final/mounts/${ builtins.hashString "sha512" name } ${ _environment-variable "OUT" }/bin/vacuum3" ) secondary.mounts ) )
