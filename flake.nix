@@ -117,7 +117,9 @@
                                     name ,
                                     profile ? null ,
                                     script ,
+                                    sleep ? 0 ,
                                     tests ? null ,
+                                    trace ? false ,
                                     over-initialized-target-error-code ? 66 ,
                                     over-initialized-target-error-message ? "Over Initizialized Target" ,
                                     uninitialized-target-error-code ? 67 ,
@@ -166,17 +168,24 @@
                                                     else if builtins.typeOf profile == "null" then ""
                                                     else builtins.throw "profile is not lambda, null but ${ builtins.typeOf profile }." ;
                                                 script =
-                                                    if builtins.typeOf script == "string" then
+                                                    if builtins.typeOf script == "set" then builtins.toString script
+                                                    else if builtins.typeOf script == "string" then
                                                         if builtins.match "^/.*" script != null then
                                                             if builtins.pathExists script then pkgs.writeShellScript "script" ( builtins.readFile script )
                                                             else builtins.throw "script is an absolute path but there does not exist a path for ${ script }."
                                                         else pkgs.writeShellScript "script" script
-                                                    else builtins.throw "script is not string but ${ builtins.typeOf script }." ;
+                                                    else builtins.throw "script is not set, string but ${ builtins.typeOf script }." ;
+                                                sleep =
+                                                    if builtins.typeOf sleep == "int" then builtins.toString sleep
+                                                    else builtins.throw "sleep is not int but ${ builtins.typeOf sleep }." ;
                                                 tests =
                                                     if builtins.typeOf tests == "null" then tests
                                                     else if builtins.typeOf tests == "list" then tests
                                                     else if builtins.typeOf tests == "set" then tests
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
+                                                trace =
+                                                    if builtins.typeOf trace == "bool" then trace
+                                                    else builtins.throw "trace is not bool but ${ builtins.typeOf trace }." ;
                                                 over-initialized-target-error-code =
                                                     if builtins.typeOf over-initialized-target-error-code == "int" then builtins.toString over-initialized-target-error-code
                                                     else builtins.throw "over-initialized-target-error-code is not int but ${ builtins.typeOf over-initialized-target-error-code }." ;
@@ -201,6 +210,13 @@
                                                     } ;
                                         in
                                             {
+                                                derivation =
+                                                    pkgs.stdenv.mkDerivation
+                                                        {
+                                                            installPhase = "${ pkgs.coreutils }/bin/ln --symbolic ${ shell-script { } }/bin/${ primary.name } $out" ;
+                                                            name = "derivation" ;
+                                                            src = ./. ;
+                                                        } ;
                                                 shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
@@ -285,9 +301,7 @@
                                                                                                                                         ]
                                                                                                                                         [
                                                                                                                                             "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum2.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum.sh"
-                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
-                                                                                                                                            "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "vacuum" ( builtins.readFile ( self + "/vacuum3.sh" ) ) } ${ _environment-variable "OUT" }/bin/vacuum3.sh"
-                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum3.sh ${ _environment-variable "OUT" }/bin/vacuum3 --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/vacuum.sh ${ _environment-variable "OUT" }/bin/vacuum.wrapped.sh --set CAT ${ _environment-variable "CAT" } --set CHMOD ${ _environment-variable "CHMOD" } --set CUT ${ _environment-variable "CUT" } --set ECHO ${ _environment-variable "ECHO" } --set DATE ${ _environment-variable "DATE" } --set FIND ${ _environment-variable "FIND" } --set SHA512SUM ${ _environment-variable "SHA512SUM" } --set STAT ${ _environment-variable "STAT" } --set WC ${ _environment-variable "WC" }"
                                                                                                                                         ]
                                                                                                                                         (
                                                                                                                                             let
@@ -326,16 +340,19 @@
                                                                                                                                                                             "${ _environment-variable "MKDIR" } /work/final/mounts"
                                                                                                                                                                         ]
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "MKDIR" } /work/final/mounts/${ builtins.hashString "sha512" name }" ) secondary.mounts ) )
+                                                                                                                                                                        [
+                                                                                                                                                                            "${ _environment-variable "SLEEP" } ${ primary.sleep }s"
+                                                                                                                                                                        ]
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/vacuum.${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
                                                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "INPUT=/work/mounts/${ builtins.hashString "sha512" name }/target OUTPUT=/work/final/mounts/${ builtins.hashString "sha512" name } ${ _environment-variable "OUT" }/bin/vacuum3" ) secondary.mounts ) )
                                                                                                                                                                         [
-                                                                                                                                                                            "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "WORK" }/final > ${ _environment-variable "WORK" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/FAILURE ; fi"
+                                                                                                                                                                            "if ${ _environment-variable "DIFF" } --recursive ${ if primary.trace then "" else "--exclude trace" } ${ _environment-variable "OUT" }/expected ${ _environment-variable "WORK" }/final > ${ _environment-variable "WORK" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/FAILURE ; fi"
                                                                                                                                                                         ]
                                                                                                                                                                     ]
                                                                                                                                                             ) ;
                                                                                                                                                         in "${ _environment-variable "LN" } --symbolic ${ pkgs.writeShellScript "observe" observe } ${ _environment-variable "OUT" }/bin/observe.sh"
                                                                                                                                             )
-                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/observe.sh ${ _environment-variable "OUT" }/bin/observe.wrapped.sh --set DIFF ${ _environment-variable "DIFF" } --set MKDIR ${ _environment-variable "MKDIR" } --set OUT $out --set TOUCH ${ _environment-variable "TOUCH" }"
+                                                                                                                                            "makeWrapper ${ _environment-variable "OUT" }/bin/observe.sh ${ _environment-variable "OUT" }/bin/observe.wrapped.sh --set DIFF ${ _environment-variable "DIFF" } --set MKDIR ${ _environment-variable "MKDIR" } --set OUT $out --set SLEEP ${ _environment-variable "SLEEP" } --set TOUCH ${ _environment-variable "TOUCH" }"
                                                                                                                                             (
                                                                                                                                                 let
                                                                                                                                                     user-environment =
@@ -368,7 +385,7 @@
                                                                                                                         ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                                                             ${ pkgs.coreutils }/bin/mkdir $out/bin &&
                                                                                                                             ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors" constructors } $out/bin/constructors.sh &&
-                                                                                                                            makeWrapper $out/bin/constructors.sh $out/bin/constructors --set BASENAME ${ pkgs.coreutils }/bin/basename --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set CUT ${ pkgs.coreutils }/bin/cut --set DIFF ${ pkgs.diffutils }/bin/diff --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set SORT ${ pkgs.coreutils }/bin/sort --set STAT ${ pkgs.coreutils }/bin/stat --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum.shell-script } --set WC ${ pkgs.coreutils }/bin/wc &&
+                                                                                                                            makeWrapper $out/bin/constructors.sh $out/bin/constructors --set BASENAME ${ pkgs.coreutils }/bin/basename --set CAT ${ pkgs.coreutils }/bin/cat --set CHMOD ${ pkgs.coreutils }/bin/chmod --set CP ${ pkgs.coreutils }/bin/cp --set CUT ${ pkgs.coreutils }/bin/cut --set DIFF ${ pkgs.diffutils }/bin/diff --set DATE ${ pkgs.coreutils }/bin/date --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MV ${ pkgs.coreutils }/bin/mv --set OUT $out --set SHA512SUM ${ pkgs.coreutils }/bin/sha512sum --set SLEEP ${ pkgs.coreutils }/bin/sleep --set SORT ${ pkgs.coreutils }/bin/sort --set STAT ${ pkgs.coreutils }/bin/stat --set TOUCH ${ pkgs.coreutils }/bin/touch --set VACUUM ${ vacuum.shell-script } --set WC ${ pkgs.coreutils }/bin/wc &&
                                                                                                                             $out/bin/constructors
                                                                                                                     '' ;
                                                                                                         name = "test" ;
@@ -497,7 +514,7 @@
                                                                                         [
                                                                                             "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
                                                                                             "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
-                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && export WORK=$( ${ _environment-variable "MKTEMP" } --directory ) && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && ${ _environment-variable "TEST" } && if [ -f ${ _environment-variable "WORK" }/SUCCESS ] ; then ${ _environment-variable "ECHO" } SUCCESS ; elif [ -e ${ _environment-variable "WORK" }/FAILURE ] ; then ${ _environment-variable "ECHO" } FAILURE && exit 63 ; else ${ _environment-variable "ECHO" } ERROR && exit 62 ; fi ; done"
+                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && ${ _environment-variable "TEST" } && if [ -f ${ _environment-variable "WORK" }/SUCCESS ] ; then ${ _environment-variable "ECHO" } SUCCESS ; elif [ -e ${ _environment-variable "WORK" }/FAILURE ] ; then ${ _environment-variable "ECHO" } FAILURE && exit 63 ; else ${ _environment-variable "ECHO" } ERROR && exit 62 ; fi ; done"
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
                                                                             }
@@ -569,6 +586,7 @@
                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
                                                     ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
                                                     ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                    ( string "DATE" "${ pkgs.coreutils }/bin/date" )
                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
                                                     ( string "FIND" "${ pkgs.findutils }/bin/find" )
                                                     ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
@@ -618,6 +636,11 @@
                                                                         ${ foobar.tests }/bin/observe
                                                                     ''
                                                             ) ;
+                                                } ;
+                                            vacuum =
+                                                {
+                                                    type = "app" ;
+                                                    program = vacuum.shell-script ;
                                                 } ;
                                         } ;
                                     checks =
