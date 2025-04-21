@@ -623,7 +623,7 @@
                                             vacuum =
                                                 {
                                                     type = "app" ;
-                                                    program = vacuum ;
+                                                    program = vacuum.shell-script ;
                                                 } ;
                                         } ;
                                     checks =
