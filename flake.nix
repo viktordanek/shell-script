@@ -119,6 +119,7 @@
                                     script ,
                                     sleep ? 0 ,
                                     tests ? null ,
+                                    trace ? false ,
                                     over-initialized-target-error-code ? 66 ,
                                     over-initialized-target-error-message ? "Over Initizialized Target" ,
                                     uninitialized-target-error-code ? 67 ,
@@ -182,6 +183,9 @@
                                                     else if builtins.typeOf tests == "list" then tests
                                                     else if builtins.typeOf tests == "set" then tests
                                                     else builtins.throw "tests is not null, list, set but ${ builtins.typeOf tests }." ;
+                                                trace =
+                                                    if builtins.typeOf trace == "bool" then trace
+                                                    else builtins.throw "trace is not bool but ${ builtins.typeOf trace }." ;
                                                 over-initialized-target-error-code =
                                                     if builtins.typeOf over-initialized-target-error-code == "int" then builtins.toString over-initialized-target-error-code
                                                     else builtins.throw "over-initialized-target-error-code is not int but ${ builtins.typeOf over-initialized-target-error-code }." ;
@@ -342,7 +346,7 @@
                                                                                                                                                                         ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "${ _environment-variable "OUT" }/bin/vacuum.${ builtins.hashString "sha512" name }.shelled.sh" ) secondary.mounts ) )
                                                                                                                                                                         # ( builtins.attrValues ( builtins.mapAttrs ( name : { ... } : "INPUT=/work/mounts/${ builtins.hashString "sha512" name }/target OUTPUT=/work/final/mounts/${ builtins.hashString "sha512" name } ${ _environment-variable "OUT" }/bin/vacuum3" ) secondary.mounts ) )
                                                                                                                                                                         [
-                                                                                                                                                                            "if ${ _environment-variable "DIFF" } --recursive ${ _environment-variable "OUT" }/expected ${ _environment-variable "WORK" }/final > ${ _environment-variable "WORK" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/FAILURE ; fi"
+                                                                                                                                                                            "if ${ _environment-variable "DIFF" } --recursive ${ if primary.trace then "" else "--exclude trace" } ${ _environment-variable "OUT" }/expected ${ _environment-variable "WORK" }/final > ${ _environment-variable "WORK" }/diff ; then ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/SUCCESS ; else ${ _environment-variable "TOUCH" } ${ _environment-variable "WORK" }/FAILURE ; fi"
                                                                                                                                                                         ]
                                                                                                                                                                     ]
                                                                                                                                                             ) ;
@@ -582,6 +586,7 @@
                                                     ( string "CAT" "${ pkgs.coreutils }/bin/cat" )
                                                     ( string "CHMOD" "${ pkgs.coreutils }/bin/chmod" )
                                                     ( string "CUT" "${ pkgs.coreutils }/bin/cut" )
+                                                    ( string "DATE" "${ pkgs.coreutils }/bin/date" )
                                                     ( string "ECHO" "${ pkgs.coreutils }/bin/echo" )
                                                     ( string "FIND" "${ pkgs.findutils }/bin/find" )
                                                     ( string "MKDIR" "${ pkgs.coreutils }/bin/mkdir" )
