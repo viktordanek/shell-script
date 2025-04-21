@@ -78,3 +78,8 @@ This means that you are free to **use, modify, and distribute** this software, p
 
 For more details, see the full license text in the [LICENSE](./LICENSE) file or visit:  
 🔗 [GNU AGPL v3 License](https://www.gnu.org/licenses/agpl-3.0.html).
+
+
+nix flake check && nix run .#foobar
+
+
