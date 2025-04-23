@@ -224,6 +224,7 @@
                                                                                 lambda =
                                                                                     path : value :
                                                                                         let
+                                                                                            delayed = if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then true else false ;
                                                                                             derivation =
                                                                                                 pkgs.stdenv.mkDerivation
                                                                                                     {
@@ -461,20 +462,27 @@
                                                                                                                     else builtins.throw "test is not string but ${ builtins.typeOf test }." ;
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
-                                                                                                no = [ ] ;
-                                                                                                yes = [ { path = path ; value = derivation ; } ] ;
+                                                                                            failure = if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/SUCCESS" ) then true else false ;
+                                                                                            no = [ ] ;
+                                                                                            success = if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/FAILURE" ) then true else false ;
+                                                                                            yes = [ { path = path ; value = derivation ; } ] ;
                                                                                             in
                                                                                                 {
                                                                                                     all = yes ;
-                                                                                                    delayed = if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then yes else no ;
-                                                                                                    failure = if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/SUCCESS" ) then yes else no ;
-                                                                                                    success = if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/FAILURE" ) then yes else no ;
+                                                                                                    delayed = if delayed then yes else no ;
+                                                                                                    error =
+                                                                                                        if builtins.pathExists "${ derivation }/ERROR" then yes
+                                                                                                        else if ! ( delayed || failure || success ) then yes
+                                                                                                        else no ;
+                                                                                                    failure = if failure then yes else no ;
+                                                                                                    success = if success then yes else no ;
                                                                                                 } ;
                                                                                 list =
                                                                                     path : list :
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.map ( l : l.all ) list ) ;
                                                                                             delayed = builtins.concatLists ( builtins.map ( l : l.delayed ) list ) ;
+                                                                                            error = builtins.concatLists ( builtins.map ( l : l.error ) list ) ;
                                                                                             failure = builtins.concatLists ( builtins.map ( l : l.failure ) list ) ;
                                                                                             success = builtins.concatLists ( builtins.map ( l : l.success ) list ) ;
                                                                                         } ;
@@ -483,6 +491,7 @@
                                                                                         {
                                                                                             all = [ ] ;
                                                                                             delayed = [ ] ;
+                                                                                            error = [ ] ;
                                                                                             failure = [ ] ;
                                                                                             succes = [ ] ;
                                                                                         } ;
@@ -491,6 +500,7 @@
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.all ) set ) ) ;
                                                                                             delayed = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.delayed ) set ) ) ;
+                                                                                            error = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.error ) set ) ) ;
                                                                                             failure = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.failure ) set ) ) ;
                                                                                             success = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.success ) set ) ) ;
                                                                                         } ;
