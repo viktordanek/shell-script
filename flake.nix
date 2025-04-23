@@ -224,7 +224,6 @@
                                                                                             else "ERROR" ;
                                                                                         in
                                                                                             [
-                                                                                                "${ _environment-variable "JQ" } ${ builtins.toJSON metrics } "." > ${ _environment-variable "OUT" }/metrics.json"
                                                                                             ]
                                                                                 ) ;
                                                                     metrics =
@@ -536,7 +535,10 @@
                                                                             tests ;
                                                                     in
                                                                         ''
-                                                                            ${ pkgs.coreutils }/bin/mkdir $out
+                                                                            ${ pkgs.coreutils }/bin/mkdir $out &&
+                                                                            ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructor.sh" constructor } $out/constructor.sh &&
+                                                                            makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set JQ ${ pkgs.jq }/bin/jq --set OUT $out &&
+                                                                            $out/constructor.wrapped.sh
                                                                         '' ;
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
