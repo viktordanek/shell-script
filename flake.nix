@@ -212,16 +212,22 @@
                                                             installPhase =
                                                                 let
                                                                     _visitor = builtins.getAttr system visitor.lib ;
-                                                                    all =
-                                                                        _visitor
-                                                                            {
-                                                                                lambda = path : value : 1 ;
-                                                                                list = path : list : builtins.foldl' ( previous : current : previous + current ) 0 list ;
-                                                                                null = path : value : 0 ;
-                                                                                set = path : set : builtins.foldl' ( previous : current : previous + current ) 0 ( builtins.attrValues set ) ;
-                                                                            }
-                                                                            tests ;
-                                                                    constructors =
+                                                                    constructor =
+                                                                        builtins.concatStringsSep
+                                                                            " &&\n\t"
+                                                                                (
+                                                                                    let
+                                                                                        status =
+                                                                                            if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
+                                                                                            else if builtins.length metrics.all == builtins.length metrics.success + builtins.length metrics.delayed && builtins.length metrics.delayed > 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
+                                                                                            else if builtins.length metrics.all == builtins.length metrics.success + builtins.length metrics.delayed + builtins.length metrics.failure && builtins.length metrics.error == 0 then "FAILURE"
+                                                                                            else "ERROR" ;
+                                                                                        in
+                                                                                            [
+                                                                                                "${ _environment-variable "JQ" } ${ builtins.toJSON metrics } "." > ${ _environment-variable "OUT" }/metrics.json"
+                                                                                            ]
+                                                                                ) ;
+                                                                    metrics =
                                                                         _visitor
                                                                             {
                                                                                 lambda =
@@ -465,29 +471,52 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
-                                                                                                [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                    "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
-                                                                                                ] ;
+                                                                                                {
+                                                                                                    all = [ { path = path ; value = derivation ; } ] ;
+                                                                                                    delayed =
+                                                                                                        if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                        else [ ] ;
+                                                                                                    error =
+                                                                                                        if builtins.pathExists "${ derivation }/ERROR" then [ { path = path ; value = derivation ; } ]
+                                                                                                        else if builtins.pathExists "${ derivation }/DELAYED" && ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
+                                                                                                        else if builtins.pathExists "${ derivation }/FAILURE" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
+                                                                                                        else if builtins.pathExists "${ derivation }/SUCCESS" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path; value = derivation ; } ]
+                                                                                                        else if ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                        else [ ] ;
+                                                                                                    failure =
+                                                                                                        if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                        else [ ] ;
+                                                                                                    success =
+                                                                                                        if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                        else [ ] ;
+                                                                                                } ;
                                                                                 list =
                                                                                     path : list :
-                                                                                        builtins.concatLists
-                                                                                            [
-                                                                                                [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                ]
-                                                                                                ( builtins.concatLists list )
-                                                                                            ] ;
-                                                                                null = path : value : [ ] ;
+                                                                                        {
+                                                                                            all = builtins.concatLists ( builtins.map ( l : l.all ) list ) ;
+                                                                                            delayed = builtins.concatLists ( builtins.map ( l : l.delayed ) list ) ;
+                                                                                            error = builtins.concatLists ( builtins.map ( l : l.error ) list ) ;
+                                                                                            failure = builtins.concatLists ( builtins.map ( l : l.failure ) list ) ;
+                                                                                            success = builtins.concatLists ( builtins.map ( l : l.success ) list ) ;
+                                                                                        } ;
+                                                                                null =
+                                                                                    path : value :
+                                                                                        {
+                                                                                            all = [ ] ;
+                                                                                            delayed = [ ] ;
+                                                                                            error = [ ] ;
+                                                                                            failure = [ ] ;
+                                                                                            success = [ ] ;
+                                                                                        } ;
                                                                                 set =
                                                                                     path : set :
-                                                                                        builtins.concatLists
-                                                                                            [
-                                                                                                [
-                                                                                                    "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
-                                                                                                ]
-                                                                                                ( builtins.concatLists ( builtins.attrValues set ) )
-                                                                                            ] ;
+                                                                                        {
+                                                                                            all = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.all ) set ) ) ;
+                                                                                            delayed = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.delayed ) set ) ) ;
+                                                                                            error = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.error ) set ) ) ;
+                                                                                            failure = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.failure ) set ) ) ;
+                                                                                            success = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.success ) set ) ) ;
+                                                                                        } ;
                                                                             }
                                                                             tests ;
                                                                     observe =
@@ -507,34 +536,8 @@
                                                                             tests ;
                                                                     in
                                                                         ''
-                                                                            ${ pkgs.coreutils }/bin/mkdir $out &&
-                                                                                ${ pkgs.coreutils }/bin/mkdir $out/bin &&
-                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructors.sh" ( builtins.concatStringsSep " &&\n\t" constructors ) } $out/bin/constructors.sh &&
-                                                                                makeWrapper $out/bin/constructors.sh $out/bin/constructors --set LN ${ pkgs.coreutils }/bin/ln --set MKDIR ${ pkgs.coreutils }/bin/mkdir --set OUT $out &&
-                                                                                $out/bin/constructors &&
-                                                                                ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "observe.sh" ( builtins.concatStringsSep " &&\n\t" observe ) } $out/bin/observe.sh &&
-                                                                                makeWrapper $out/bin/observe.sh $out/bin/observe --set BASENAME ${ pkgs.coreutils }/bin/basename --set ECHO ${ pkgs.coreutils }/bin/echo --set FIND ${ pkgs.findutils }/bin/find --set MKTEMP ${ pkgs.coreutils }/bin/mktemp --set OUT $out --set READLINK ${ pkgs.coreutils }/bin/readlink --set RM ${ pkgs.coreutils }/bin/rm &&
-                                                                                ALL=${ builtins.toString all } &&
-                                                                                if [ ! -d $out/links ]
-                                                                                then
-                                                                                    ${ pkgs.coreutils }/bin/mkdir $out/links
-                                                                                fi &&
-                                                                                SUCCESS=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name SUCCESS | ${ pkgs.coreutils }/bin/wc --lines ) &&
-                                                                                DELAYED=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name DELAYED | ${ pkgs.coreutils }/bin/wc --lines ) &&
-                                                                                FAILURE=$( ${ pkgs.findutils }/bin/find $out/links -mindepth 1 -type l -exec ${ pkgs.coreutils }/bin/readlink {} \; | ${ pkgs.findutils }/bin/find $( ${ pkgs.coreutils }/bin/tee ) -mindepth 1 -maxdepth 1 -type f -name FAILURE | ${ pkgs.coreutils }/bin/wc --lines ) &&
-                                                                                if [ ${ _environment-variable "ALL" } == ${ _environment-variable "SUCCESS" } ] && [ ${ _environment-variable "DELAYED" } == 0 ] && [ ${ _environment-variable "FAILURE" } == 0 ]
-                                                                                then
-                                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "SUCCESS" } > $out/SUCCESS
-                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } )) ] && [ ${ _environment-variable "FAILURE" } == 0 ]
-                                                                                then
-                                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "DELAYED" } > $out/DELAYED
-                                                                                elif [ ${ _environment-variable "ALL" } == $(( ${ _environment-variable "SUCCESS" } + ${ _environment-variable "DELAYED" } + ${ _environment-variable "FAILURE" } )) ]
-                                                                                then
-                                                                                    ${ pkgs.coreutils }/bin/echo ${ _environment-variable "FAILURE" } > $out/FAILURE
-                                                                                else
-                                                                                    ${ pkgs.coreutils }/bin/echo "{ ALL : ${ _environment-variable "ALL" } , SUCCESS : ${ _environment-variable "SUCCESS" } , DELAYED : ${ _environment-variable "DELAYED" } } , FAILURE : ${ _environment-variable "FAILURE" } }" > $out/ERROR
-                                                                                fi
-                                                                        '';
+                                                                            ${ pkgs.coreutils }/bin/mkdir $out
+                                                                        '' ;
                                                             name = "tests" ;
                                                             nativeBuildInputs = [ pkgs.makeWrapper ] ;
                                                             src = ./. ;
