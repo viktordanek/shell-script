@@ -217,6 +217,7 @@
                                                                             " &&\n\t"
                                                                             [
                                                                                 "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
+                                                                                "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
                                                                             ] ;
                                                                     metrics =
                                                                         _visitor
@@ -521,11 +522,16 @@
                                                                                 set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
                                                                             }
                                                                             tests ;
+                                                                    status =
+                                                                        if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
+                                                                        else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
+                                                                        else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) + ( builtins.length metrics.failure ) && builtins.length metrics.error == 0 then "FAILURE"
+                                                                        else "ERROR" ;
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructor.sh" constructor } $out/constructor.sh &&
-                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set ECHO ${ pkgs.coreutils }/bin/echo --set OUT $out --set YQ ${ pkgs.yq }/bin/yq &&
+                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set ECHO ${ pkgs.coreutils }/bin/echo --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set YQ ${ pkgs.yq }/bin/yq &&
                                                                                 $out/constructor.wrapped.sh
                                                                         '';
                                                             name = "tests" ;
