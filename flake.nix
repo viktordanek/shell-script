@@ -4,7 +4,7 @@
             environment-variable.url = "github:viktordanek/environment-variable" ;
             flake-utils.url = "github:numtide/flake-utils" ;
             nixpkgs.url = "github:NixOs/nixpkgs" ;
-            visitor.url = "github:viktordanek/visitor" ;
+            visitor.url = "github:viktordanek/visitor/scratch/1bd1c881-b72b-43d7-a819-f6072a9dfdf7" ;
         } ;
     outputs =
         { environment-variable , flake-utils , nixpkgs , self , visitor } :
@@ -228,10 +228,8 @@
                                                                         _visitor
                                                                             {
                                                                                 lambda = path : value : 1 ;
-                                                                                null = path : value : 0 ;
-                                                                            }
-                                                                            {
                                                                                 list = path : list : builtins.foldl' ( previous : current : previous + current ) 0 list ;
+                                                                                null = path : value : 0 ;
                                                                                 set = path : set : builtins.foldl' ( previous : current : previous + current ) 0 ( builtins.attrValues set ) ;
                                                                             }
                                                                             tests ;
@@ -483,9 +481,6 @@
                                                                                                     "${ _environment-variable "MKDIR" } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) ] ) }"
                                                                                                     "${ _environment-variable "LN" } --symbolic ${ derivation } ${ builtins.concatStringsSep "/" ( builtins.concatLists [ [ ( _environment-variable "OUT" ) "links" ] ( builtins.map builtins.toJSON path ) [ "${ builtins.baseNameOf derivation }" ] ] ) }"
                                                                                                 ] ;
-                                                                                null = path : value : [ ] ;
-                                                                            }
-                                                                            {
                                                                                 list =
                                                                                     path : list :
                                                                                         builtins.concatLists
@@ -495,6 +490,7 @@
                                                                                                 ]
                                                                                                 ( builtins.concatLists list )
                                                                                             ] ;
+                                                                                null = path : value : [ ] ;
                                                                                 set =
                                                                                     path : set :
                                                                                         builtins.concatLists
@@ -517,8 +513,6 @@
                                                                                             "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && ${ _environment-variable "TEST" } && if [ -f ${ _environment-variable "WORK" }/SUCCESS ] ; then ${ _environment-variable "ECHO" } SUCCESS ; elif [ -e ${ _environment-variable "WORK" }/FAILURE ] ; then ${ _environment-variable "ECHO" } FAILURE && exit 63 ; else ${ _environment-variable "ECHO" } ERROR && exit 62 ; fi ; done"
                                                                                             "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                         ] ;
-                                                                            }
-                                                                            {
                                                                                 list = path : list : builtins.concatLists list ;
                                                                                 set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
                                                                             }
