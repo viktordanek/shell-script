@@ -219,7 +219,7 @@
                                                                                 "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
                                                                                 "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
+                                                                                "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set ECHO ${ _environment-variable "ECHO" } --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
                                                                             ] ;
                                                                     metrics =
                                                                         _visitor
@@ -518,7 +518,7 @@
                                                                                         "export OUT=${ value.value }"
                                                                                         "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
                                                                                         "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                        "${ _environment-variable "RM" } ${ _environment-variable "WORK" }"
+                                                                                        "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                     ] ;
                                                                             in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
                                                                     status =
