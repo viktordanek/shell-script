@@ -190,13 +190,13 @@
                                             } ;
                                         shell-script =
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
-                                                builtins.trace "AAAAB name=${ name } runScript=${ primary.script }" ( pkgs.buildFHSUserEnv
+                                                pkgs.buildFHSUserEnv
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
                                                         profile = profile ;
                                                         runScript = primary.script ;
-                                                    } ) ;
+                                                    } ;
                                         in
                                             {
                                                 derivation =
