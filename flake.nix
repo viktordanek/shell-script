@@ -121,9 +121,7 @@
                                     tests ? null ,
                                     trace ? false ,
                                     over-initialized-target-error-code ? 66 ,
-                                    over-initialized-target-error-message ? "Over Initizialized Target" ,
-                                    uninitialized-target-error-code ? 67 ,
-                                    uninitialized-target-error-message ? "Uninitizialized Target"
+                                    uninitialized-target-error-code ? 67
                                 } :
                                     let
                                         primary =
@@ -189,15 +187,9 @@
                                                 over-initialized-target-error-code =
                                                     if builtins.typeOf over-initialized-target-error-code == "int" then builtins.toString over-initialized-target-error-code
                                                     else builtins.throw "over-initialized-target-error-code is not int but ${ builtins.typeOf over-initialized-target-error-code }." ;
-                                                over-initialized-target-error-message =
-                                                    if builtins.typeOf over-initialized-target-error-message == "string" then over-initialized-target-error-message
-                                                    else builtins.throw "over-initialized-target-error-message is not string but ${ builtins.typeOf over-initialized-target-error-message }." ;
                                                 uninitialized-target-error-code =
                                                     if builtins.typeOf uninitialized-target-error-code == "int" then builtins.toString uninitialized-target-error-code
                                                     else builtins.throw "uninitialized-target-error-code is not init but ${ builtins.typeOf uninitialized-target-error-code }." ;
-                                                uninitialized-target-error-message =
-                                                    if builtins.typeOf uninitialized-target-error-message == "string" then uninitialized-target-error-message
-                                                    else builtins.throw "uninitialized-target-error-message is not string but ${ builtins.typeOf uninitialized-target-error-message }." ;
                                             } ;
                                         shell-script =
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
