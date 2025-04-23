@@ -224,6 +224,7 @@
                                                                                             else "ERROR" ;
                                                                                         in
                                                                                             [
+                                                                                                "${ _environment-variable "JQ" } ${ builtins.toJSON metrics } "." > ${ _environment-variable "OUT" }/metrics.json"
                                                                                             ]
                                                                                 ) ;
                                                                     metrics =
@@ -470,24 +471,28 @@
                                                                                                             } ;
                                                                                                 in identity ( value null ) ;
                                                                                             in
+                                                                                                let
+                                                                                                    all = [ ] ;
+                                                                                                    in
                                                                                                 {
-                                                                                                    all = [ { path = path ; value = derivation ; } ] ;
-                                                                                                    delayed =
-                                                                                                        if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
-                                                                                                        else [ ] ;
-                                                                                                    error =
-                                                                                                        if builtins.pathExists "${ derivation }/ERROR" then [ { path = path ; value = derivation ; } ]
-                                                                                                        else if builtins.pathExists "${ derivation }/DELAYED" && ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
-                                                                                                        else if builtins.pathExists "${ derivation }/FAILURE" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
-                                                                                                        else if builtins.pathExists "${ derivation }/SUCCESS" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path; value = derivation ; } ]
-                                                                                                        else if ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
-                                                                                                        else [ ] ;
-                                                                                                    failure =
-                                                                                                        if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
-                                                                                                        else [ ] ;
-                                                                                                    success =
-                                                                                                        if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path ; value = derivation ; } ]
-                                                                                                        else [ ] ;
+                                                                                                    all = all ; delayed = [ ] ; error = [ ] ; failure = [ ] ; success = all ;
+                                                                                                #     all = [ { path = path ; value = derivation ; } ] ;
+                                                                                                #    delayed =
+                                                                                                #        if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                #        else [ ] ;
+                                                                                                #    error =
+                                                                                                #        if builtins.pathExists "${ derivation }/ERROR" then [ { path = path ; value = derivation ; } ]
+                                                                                                #        else if builtins.pathExists "${ derivation }/DELAYED" && ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
+                                                                                                #        else if builtins.pathExists "${ derivation }/FAILURE" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path; value = derivation ; } ]
+                                                                                                #        else if builtins.pathExists "${ derivation }/SUCCESS" && ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path; value = derivation ; } ]
+                                                                                                #        else if ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                #        else [ ] ;
+                                                                                                #    failure =
+                                                                                                #        if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/SUCCESS" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                #        else [ ] ;
+                                                                                                #    success =
+                                                                                                #        if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation}/DELAYED" && builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" ) then [ { path = path ; value = derivation ; } ]
+                                                                                                #        else [ ] ;
                                                                                                 } ;
                                                                                 list =
                                                                                     path : list :
