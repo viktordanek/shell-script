@@ -519,8 +519,8 @@
                                                                                         "export OUT=${ value.value }"
                                                                                         "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
                                                                                         "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                        "${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                        # "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
+                                                                                        "if ${ _environment-variable "OUT" }/bin/observe.shelled.sh ; then ${ _environment-variable "ECHO" } SUCCESS ; else ${ _environment-variable "ECHO" } FAILURE && exit 64 ; fi"
+                                                                                        "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                     ] ;
                                                                             in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
                                                                     status =
