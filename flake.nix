@@ -61,8 +61,8 @@
                                                             status = 182 ;
                                                             test =
                                                                 [
-                                                                    "echo hi"
-                                                                    # "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
+                                                                    # "${ pkgs.which }/bin/which candidate" ## FIXME
+                                                                    "candidate 2a6273b589f1a8b3ee9e5ad7fc51941863a0b5a8ed1eebe444937292110823579f4b9eb6c72d096012d4cf393335d7e8780ec7ec5d02579aabe050f22ebe2201"
                                                                 ] ;
                                                         } ;
                                                 directory =
@@ -190,13 +190,13 @@
                                             } ;
                                         shell-script =
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
-                                                pkgs.buildFHSUserEnv
+                                                builtins.trace "AAAAB name=${ name } runScript=${ primary.script }" ( pkgs.buildFHSUserEnv
                                                     {
                                                         extraBwrapArgs = builtins.attrValues ( builtins.mapAttrs ( name : { host-path , is-read-only , ... } : "${ if is-read-only then "--ro-bind" else "--bind" } ${ host-path } ${ name }" ) mounts ) ;
                                                         name = name ;
                                                         profile = profile ;
                                                         runScript = primary.script ;
-                                                    } ;
+                                                    } ) ;
                                         in
                                             {
                                                 derivation =
@@ -283,7 +283,7 @@
                                                                                                                                                                 name = "candidate" ;
                                                                                                                                                                 profile = secondary.profile ;
                                                                                                                                                             } ;
-                                                                                                                                                    in "makeWrapper ${ _environment-variable "OUT" }/bin/test.sh ${ _environment-variable "OUT" }/bin/test.wrapped.sh --set PATH ${ pkgs.coreutils }/bin:${ candidate }/bin"
+                                                                                                                                                    in builtins.trace "AAAAA" "makeWrapper ${ _environment-variable "OUT" }/bin/test.sh ${ _environment-variable "OUT" }/bin/test.wrapped.sh --set PATH ${ pkgs.coreutils }/bin:${ candidate }/bin"
                                                                                                                                             )
                                                                                                                                             "makeWrapper ${ pkgs.writeShellScript "test" ( builtins.readFile ( self + "/test.sh" ) ) } ${ _environment-variable "OUT" }/bin/test.guarded.sh --set ECHO ${ _environment-variable "ECHO" } --set TEST ${ _environment-variable "OUT" }/bin/test.wrapped.sh"
                                                                                                                                         ]
@@ -520,7 +520,7 @@
                                                                                         "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
                                                                                         "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
                                                                                         "${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                        "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
+                                                                                        # "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                     ] ;
                                                                             in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
                                                                     status =
