@@ -199,13 +199,6 @@
                                                     } ;
                                         in
                                             {
-                                                derivation =
-                                                    pkgs.stdenv.mkDerivation
-                                                        {
-                                                            installPhase = "${ pkgs.coreutils }/bin/ln --symbolic ${ shell-script { } }/bin/${ primary.name } $out" ;
-                                                            name = "derivation" ;
-                                                            src = ./. ;
-                                                        } ;
                                                 shell-script = "${ shell-script { } }/bin/${ primary.name }" ;
                                                 tests =
                                                     pkgs.stdenv.mkDerivation
