@@ -467,24 +467,32 @@
                                                                                                 {
                                                                                                     all = yes ;
                                                                                                     delayed = if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then yes else no ;
+                                                                                                    failure = if builtins.pathExists "${ derivation }/FAILURE" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/SUCCESS" ) then yes else no ;
+                                                                                                    success = if builtins.pathExists "${ derivation }/SUCCESS" && ! ( builtins.pathExists "${ derivation }/DELAYED" || builtins.pathExists "${ derivation }/FAILURE" ) then yes else no ;
                                                                                                 } ;
                                                                                 list =
                                                                                     path : list :
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.map ( l : l.all ) list ) ;
                                                                                             delayed = builtins.concatLists ( builtins.map ( l : l.delayed ) list ) ;
+                                                                                            failure = builtins.concatLists ( builtins.map ( l : l.failure ) list ) ;
+                                                                                            success = builtins.concatLists ( builtins.map ( l : l.success ) list ) ;
                                                                                         } ;
                                                                                 null =
                                                                                     path : value :
                                                                                         {
                                                                                             all = [ ] ;
                                                                                             delayed = [ ] ;
+                                                                                            failure = [ ] ;
+                                                                                            succes = [ ] ;
                                                                                         } ;
                                                                                 set =
                                                                                     path : set :
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.all ) set ) ) ;
                                                                                             delayed = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.delayed ) set ) ) ;
+                                                                                            failure = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.failure ) set ) ) ;
+                                                                                            success = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.success ) set ) ) ;
                                                                                         } ;
                                                                             }
                                                                             tests ;
