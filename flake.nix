@@ -465,22 +465,26 @@
                                                                                                 yes = [ { path = path ; value = derivation ; } ] ;
                                                                                             in
                                                                                                 {
-                                                                                                    all = [ { path = path ; value = derivation ; } ] ;
+                                                                                                    all = yes ;
+                                                                                                    delayed = if builtins.pathExists "${ derivation }/DELAYED" && ! ( builtins.pathExists "${ derivation }/ERROR" || builtins.pathExists "${ derivation }/FAILURE" || builtins.pathExists "${ derivation }/SUCCESS" ) then yes else no ;
                                                                                                 } ;
                                                                                 list =
                                                                                     path : list :
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.map ( l : l.all ) list ) ;
+                                                                                            delayed = builtins.concatLists ( builtins.map ( l : l.delayed ) list ) ;
                                                                                         } ;
                                                                                 null =
                                                                                     path : value :
                                                                                         {
                                                                                             all = [ ] ;
+                                                                                            delayed = [ ] ;
                                                                                         } ;
                                                                                 set =
                                                                                     path : set :
                                                                                         {
                                                                                             all = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.all ) set ) ) ;
+                                                                                            delayed = builtins.concatLists ( builtins.attrValues ( builtins.mapAttrs ( name : value : value.delayed ) set ) ) ;
                                                                                         } ;
                                                                             }
                                                                             tests ;
