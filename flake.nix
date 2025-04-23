@@ -211,7 +211,15 @@
                                                                             " &&\n\t"
                                                                             [
                                                                                 "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
-                                                                                "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
+                                                                                (
+                                                                                    let
+                                                                                        status =
+                                                                                            if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
+                                                                                            else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
+                                                                                            else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) + ( builtins.length metrics.failure ) && builtins.length metrics.error == 0 then "FAILURE"
+                                                                                            else "ERROR" ;
+                                                                                        in "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
+                                                                                )
                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
                                                                                 (
                                                                                     let
@@ -520,11 +528,6 @@
                                                                                         } ;
                                                                             }
                                                                             tests ;
-                                                                    status =
-                                                                        if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
-                                                                        else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
-                                                                        else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) + ( builtins.length metrics.failure ) && builtins.length metrics.error == 0 then "FAILURE"
-                                                                        else "ERROR" ;
                                                                     in
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
