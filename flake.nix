@@ -213,7 +213,24 @@
                                                                                 "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
                                                                                 "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
                                                                                 "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
-                                                                                "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set ECHO ${ _environment-variable "ECHO" } --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
+                                                                                (
+                                                                                    let
+                                                                                        observe =
+                                                                                            let
+                                                                                                mapper =
+                                                                                                    value :
+                                                                                                        [
+                                                                                                            "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
+                                                                                                            "export OUT=${ value.value }"
+                                                                                                            "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
+                                                                                                            "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
+                                                                                                            "if ${ _environment-variable "OUT" }/bin/observe.shelled.sh ; then ${ _environment-variable "ECHO" } SUCCESS ; else ${ _environment-variable "ECHO" } FAILURE && exit 64 ; fi"
+                                                                                                            "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
+                                                                                                        ] ;
+                                                                                                in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
+                                                                                        in
+                                                                                        "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set ECHO ${ _environment-variable "ECHO" } --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
+                                                                                )
                                                                             ] ;
                                                                     metrics =
                                                                         _visitor
@@ -503,19 +520,6 @@
                                                                                         } ;
                                                                             }
                                                                             tests ;
-                                                                    observe =
-                                                                        let
-                                                                            mapper =
-                                                                                value :
-                                                                                    [
-                                                                                        "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
-                                                                                        "export OUT=${ value.value }"
-                                                                                        "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
-                                                                                        "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
-                                                                                        "if ${ _environment-variable "OUT" }/bin/observe.shelled.sh ; then ${ _environment-variable "ECHO" } SUCCESS ; else ${ _environment-variable "ECHO" } FAILURE && exit 64 ; fi"
-                                                                                        "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
-                                                                                    ] ;
-                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
                                                                     status =
                                                                         if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
                                                                         else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
