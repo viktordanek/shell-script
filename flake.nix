@@ -216,6 +216,7 @@
                                                                         builtins.concatStringsSep
                                                                             " &&\n\t"
                                                                             [
+                                                                                "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
                                                                             ] ;
                                                                     metrics =
                                                                         _visitor
@@ -502,7 +503,7 @@
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructor.sh" constructor } $out/constructor.sh &&
-                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh &&
+                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set ECHO ${ pkgs.coreutils }/bin/echo --set OUT $out --set YQ ${ pkgs.yq }/bin/yq &&
                                                                                 $out/constructor.wrapped.sh
                                                                         '';
                                                             name = "tests" ;
