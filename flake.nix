@@ -218,6 +218,8 @@
                                                                             [
                                                                                 "${ _environment-variable "ECHO" } '${ builtins.toJSON metrics }' | ${ _environment-variable "YQ" } --yaml-output > ${ _environment-variable "OUT" }/metrics.yaml"
                                                                                 "${ _environment-variable "TOUCH" } ${ _environment-variable "OUT" }/${ status }"
+                                                                                "source ${ _environment-variable "MAKE_WRAPPER" }/nix-support/setup-hook"
+                                                                                "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
                                                                             ] ;
                                                                     metrics =
                                                                         _visitor
@@ -508,20 +510,17 @@
                                                                             }
                                                                             tests ;
                                                                     observe =
-                                                                        _visitor
-                                                                            {
-                                                                                lambda =
-                                                                                    path : value :
-                                                                                        [
-                                                                                            "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
-                                                                                            "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON path ) } WORK=${ _environment-variable "WORK" }"
-                                                                                            "${ _environment-variable "FIND" } ${ _environment-variable "OUT" }/links/${ builtins.concatStringsSep "/" ( builtins.map builtins.toJSON path ) } -mindepth 1 -maxdepth 1 -type l | while read LINK ; do export OUT=$( ${ _environment-variable "READLINK" } ${ _environment-variable "LINK" } ) && export TEST=${ _environment-variable "OUT" }/bin/observe.shelled.sh && ${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "TEST" } && ${ _environment-variable "TEST" } && if [ -f ${ _environment-variable "WORK" }/SUCCESS ] ; then ${ _environment-variable "ECHO" } SUCCESS ; elif [ -e ${ _environment-variable "WORK" }/FAILURE ] ; then ${ _environment-variable "ECHO" } FAILURE && exit 63 ; else ${ _environment-variable "ECHO" } ERROR && exit 62 ; fi ; done"
-                                                                                            "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
-                                                                                        ] ;
-                                                                                list = path : list : builtins.concatLists list ;
-                                                                                set = path : set : builtins.concatLists ( builtins.attrValues set ) ;
-                                                                            }
-                                                                            tests ;
+                                                                        let
+                                                                            mapper =
+                                                                                value :
+                                                                                    [
+                                                                                        "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
+                                                                                        "export OUT=${ value.value }"
+                                                                                        "${ _environment-variable "ECHO" } TESTING ${ builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) }"
+                                                                                        "${ _environment-variable "ECHO" } OUT=${ _environment-variable "OUT" } WORK=${ _environment-variable "WORK" } ${ _environment-variable "OUT" }/bin/observe.shelled.sh"
+                                                                                        "${ _environment-variable "RM" } ${ _environment-variable "WORK" }"
+                                                                                    ] ;
+                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
                                                                     status =
                                                                         if builtins.length metrics.all == builtins.length metrics.success && builtins.length metrics.delayed == 0 && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "SUCCESS"
                                                                         else if builtins.length metrics.all == ( builtins.length metrics.success ) + ( builtins.length metrics.delayed ) && builtins.length metrics.error == 0 && builtins.length metrics.failure == 0 then "DELAYED"
@@ -531,7 +530,7 @@
                                                                         ''
                                                                             ${ pkgs.coreutils }/bin/mkdir $out &&
                                                                                 ${ pkgs.coreutils }/bin/ln --symbolic ${ pkgs.writeShellScript "constructor.sh" constructor } $out/constructor.sh &&
-                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set ECHO ${ pkgs.coreutils }/bin/echo --set OUT $out --set TOUCH ${ pkgs.coreutils }/bin/touch --set YQ ${ pkgs.yq }/bin/yq &&
+                                                                                makeWrapper $out/constructor.sh $out/constructor.wrapped.sh --set ECHO ${ pkgs.coreutils }/bin/echo --set MAKE_WRAPPER ${ pkgs.makeWrapper } --set MKTEMP ${ pkgs.coreutils }/bin/mktemp --set OUT $out --set RM ${ pkgs.coreutils }/bin/rm --set TOUCH ${ pkgs.coreutils }/bin/touch --set YQ ${ pkgs.yq }/bin/yq &&
                                                                                 $out/constructor.wrapped.sh
                                                                         '';
                                                             name = "tests" ;
@@ -614,7 +613,7 @@
                                                                 pkgs.writeShellScript
                                                                     "foobar"
                                                                     ''
-                                                                        ${ foobar.tests }/bin/observe
+                                                                        echo ${ foobar.tests }/observe.wrapped.sh
                                                                     ''
                                                             ) ;
                                                 } ;
