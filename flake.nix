@@ -120,8 +120,7 @@
                                     sleep ? 0 ,
                                     tests ? null ,
                                     trace ? false ,
-                                    over-initialized-target-error-code ? 66 ,
-                                    uninitialized-target-error-code ? 67
+                                    over-initialized-target-error-code ? 66
                                 } :
                                     let
                                         primary =
@@ -187,9 +186,6 @@
                                                 over-initialized-target-error-code =
                                                     if builtins.typeOf over-initialized-target-error-code == "int" then builtins.toString over-initialized-target-error-code
                                                     else builtins.throw "over-initialized-target-error-code is not int but ${ builtins.typeOf over-initialized-target-error-code }." ;
-                                                uninitialized-target-error-code =
-                                                    if builtins.typeOf uninitialized-target-error-code == "int" then builtins.toString uninitialized-target-error-code
-                                                    else builtins.throw "uninitialized-target-error-code is not init but ${ builtins.typeOf uninitialized-target-error-code }." ;
                                             } ;
                                         shell-script =
                                             { name ? primary.name , mounts ? primary.mounts , profile ? primary.profile } :
