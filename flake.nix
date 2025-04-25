@@ -113,7 +113,7 @@
                                     } ;
                             lib =
                                 {
-                                    extensions ? [ ] ,
+                                    extensions ? { } ,
                                     mounts ? { } ,
                                     name ,
                                     profile ? null ,
