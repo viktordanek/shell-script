@@ -537,8 +537,7 @@
                                                                                                                                 "export OUT=${ value.value }"
                                                                                                                                 ''${ _environment-variable "ECHO" } "  out: ${ _environment-variable "OUT" }"''
                                                                                                                                 ''${ _environment-variable "ECHO" } "  status: ERROR"''
-                                                                                                                                "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
-                                                                                                                                "exit 64"
+                                                                                                                                 "exit 64"
                                                                                                                             ] ;
                                                                                                                     in builtins.concatLists ( builtins.map mapper metrics.error ) ;
                                                                                                             failure =
@@ -550,11 +549,21 @@
                                                                                                                                 "export OUT=${ value.value }"
                                                                                                                                 ''${ _environment-variable "ECHO" } "  out: ${ _environment-variable "OUT" }"''
                                                                                                                                 ''${ _environment-variable "ECHO" } "  status: ERROR"''
-                                                                                                                                "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
                                                                                                                                 "exit 64"
                                                                                                                             ] ;
                                                                                                                     in builtins.concatLists ( builtins.map mapper metrics.failure ) ;
-                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ error failure delayed ] ) ;
+                                                                                                            success =
+                                                                                                                let
+                                                                                                                    mapper =
+                                                                                                                        value :
+                                                                                                                            [
+                                                                                                                                ''${ _environment-variable "ECHO" } "- path: ${ builtins.replaceStrings [ "\"" ] [ "\\\"" ] ( builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) ) }"''
+                                                                                                                                "export OUT=${ value.value }"
+                                                                                                                                ''${ _environment-variable "ECHO" } "  out: ${ _environment-variable "OUT" }"''
+                                                                                                                                ''${ _environment-variable "ECHO" } "  status: SUCCESS"''
+                                                                                                                            ] ;
+                                                                                                                    in builtins.concatLists ( builtins.map mapper metrics.success ) ;
+                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ error failure delayed success ] ) ;
                                                                                                     in
                                                                                                     "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set ECHO ${ _environment-variable "ECHO" } --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
                                                                                             )
