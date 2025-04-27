@@ -26,8 +26,9 @@ ${LN} --symbolic ${DRAFT} /initial/script &&
   elif [ ! -e /mount/target ]
   then
     ${ECHO} no target >> /work/initial/ERROR
-  elif [ $( ${FIND} /mount -mindepth 1 ! -name target | ${WC} --lines ) != 0 ]
+  elif [ $( ${FIND} /mount -mindepth 1 -maxdepth 1 ! -name target | ${WC} --lines ) != 0 ]
   then
-    ${ECHO} over target >> /work/initial/ERROR
+    ${ECHO} over target >> /work/initial/ERROR &&
+      ${FIND} /mount -mindepth 1 -maxdepth 1 ! -name target >> /work/initial/ERROR
   fi &&
   ${CP} --recursive /mount/target /initial/target
