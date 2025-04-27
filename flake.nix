@@ -514,18 +514,21 @@
                                                                                                 let
                                                                                                     observe =
                                                                                                         let
-                                                                                                            mapper =
-                                                                                                                value :
-                                                                                                                    [
-                                                                                                                        "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
-                                                                                                                        "export OUT=${ value.value }"
-                                                                                                                        ''${ _environment-variable "ECHO" } "- path: ${ builtins.replaceStrings [ "\"" ] [ "\\\"" ] ( builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) ) }"''
-                                                                                                                        ''${ _environment-variable "ECHO" } "  out: ${ _environment-variable "OUT" }"''
-                                                                                                                        ''${ _environment-variable "ECHO" } "  work: ${ _environment-variable "WORK" }"''
-                                                                                                                        ''if ${ _environment-variable "OUT" }/bin/observe.shelled.sh ; then ${ _environment-variable "ECHO" } "  status:  SUCCESS" ; else ${ _environment-variable "ECHO" } "  status: FAILURE" && exit 64 ; fi''
-                                                                                                                        "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
-                                                                                                                    ] ;
-                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists ( builtins.map mapper metrics.delayed ) ) ;
+                                                                                                            delayed =
+                                                                                                                let
+                                                                                                                    mapper =
+                                                                                                                        value :
+                                                                                                                            [
+                                                                                                                                "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
+                                                                                                                                "export OUT=${ value.value }"
+                                                                                                                                ''${ _environment-variable "ECHO" } "- path: ${ builtins.replaceStrings [ "\"" ] [ "\\\"" ] ( builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) ) }"''
+                                                                                                                                ''${ _environment-variable "ECHO" } "  out: ${ _environment-variable "OUT" }"''
+                                                                                                                                ''${ _environment-variable "ECHO" } "  work: ${ _environment-variable "WORK" }"''
+                                                                                                                                ''if ${ _environment-variable "OUT" }/bin/observe.shelled.sh ; then ${ _environment-variable "ECHO" } "  status:  SUCCESS" ; else ${ _environment-variable "ECHO" } "  status: FAILURE" && exit 64 ; fi''
+                                                                                                                                "${ _environment-variable "RM" } --recursive --force ${ _environment-variable "WORK" }"
+                                                                                                                            ] ;
+                                                                                                                    in builtins.concatLists ( builtins.map mapper metrics.delayed ) ;
+                                                                                                            in builtins.concatStringsSep " &&\n\t" ( builtins.concatLists [ delayed ] ) ;
                                                                                                     in
                                                                                                     "makeWrapper ${ pkgs.writeShellScript "observe.sh" observe } ${ _environment-variable "OUT" }/observe.wrapped.sh --set ECHO ${ _environment-variable "ECHO" } --set MKTEMP ${ _environment-variable "MKTEMP" } --set RM ${ _environment-variable "RM" }"
                                                                                             )
