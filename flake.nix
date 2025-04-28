@@ -521,7 +521,6 @@
                                                                                                                             [
                                                                                                                                 "export WORK=$( ${ _environment-variable "MKTEMP" } --directory )"
                                                                                                                                 "export OUT=${ value.value }"
-                                                                                                                                ''${ _environment-variable "ECHO" } "  observe:"''
                                                                                                                                 ''${ _environment-variable "ECHO" } "  - path: ${ builtins.replaceStrings [ "\"" ] [ "\\\"" ] ( builtins.concatStringsSep " / " ( builtins.map builtins.toJSON value.path ) ) }"''
                                                                                                                                 ''${ _environment-variable "ECHO" } "    out: ${ _environment-variable "OUT" }"''
                                                                                                                                 ''${ _environment-variable "ECHO" } "    work: ${ _environment-variable "WORK" }"''
